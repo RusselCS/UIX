@@ -1,0 +1,56 @@
+OptionMenu "UIXOptions"
+{
+	// Title "UI Extensions"
+	// StaticText " "
+	// StaticText  "Notification Option", 1
+	// Option "Options notification", "trill_pb_notification", "OnOff"
+	// StaticText " "
+	// StaticText  "Ping Controls", 1
+	// Control "Notify Ping", "trill_ping"
+	// Option "Doubletap to Alert", "trill_pb_doubletap", "OnOff"
+	// StaticText " "
+	// Control "Alert Ping", "trill_alertping"
+	// Control "Heal Ping", "trill_healping"
+	// Control "Missing Ping", "trill_missingping"
+	// StaticText " "
+	// Control "Locate Allies", "trill_locateping"
+	// StaticText " "
+	// StaticText  "Ping Options", 1
+	// Option "Show pings", "trill_pb_show", "OnOff"
+	// Option "Show death pings", "trill_pb_showdeath", "OnOff"
+	// StaticText " "
+	// Slider "Ping duration", "trill_pb_duration", 0, 10, 1, 0
+	// Slider "Ping scale", "trill_pb_pingscale", 0.0, 10.0, .1
+	// Slider "Distance scalar", "trill_pb_distancescalefactor", 0.0, 1.0, 0.05, 2
+	// Slider "Ping stickiness", "trill_pb_pinginterpolation", 0.0, 0.95, 0.05, 2
+	// Slider "Ping opacity", "trill_pb_pingopacity", 0.0, 1.0, 0.05, 2
+	// StaticText " "
+	// Option "Show distance", "trill_pb_newshowdistance", "OffMetersMapUnits"
+	// Option "Show names", "trill_pb_shownames", "OnOff"
+	// Option "Show location", "trill_pb_showlocations", "OnOff"
+	// StaticText " "
+	// StaticText  "Sound Options", 1
+	// Option "Play sound", "trill_pb_sound", "OnOff"
+	// Slider "Self ping volume", "trill_pb_new_selfvolume", 0.0, 1.0, .1
+	// Slider "Global ping volume", "trill_pb_new_volume", 0.0, 1.0, .1
+	// StaticText " "
+	// StaticText  "Color Options", 1
+	// TextField "Location ping color",			"trill_pb_pingcolor"
+	// TextField "Alert ping color",			"trill_pb_enemycolor"
+	// TextField "Heal ping color",			"trill_pb_healcolor"
+	// TextField "Missing ping color",			"trill_pb_missingcolor"
+	// TextField "Death ping color",			"trill_pb_deathcolor"
+	// StaticText " "
+	// TextField "Ally text color",			"trill_pb_textcolor"
+	// TextField "Light Team text color",			"trill_pb_textcolor0"
+	// TextField "Wily Team text color",			"trill_pb_textcolor1"
+	// TextField "Cossack Team text color",			"trill_pb_textcolor2"
+	// TextField "King Team text color",			"trill_pb_textcolor3"
+
+    StaticText " "
+	StaticText  "Notification Option", 1
+    Slider "Weapon Bar X", "UIX_CL_WEAPBAROFFSX", -640, 640, 10
+    Slider "Weapon Bar Y", "UIX_CL_WEAPBAROFFSY", -640, 640, 10
+    Slider "Weapon Bar Scale", "UIX_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
+
+}

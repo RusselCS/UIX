@@ -1,0 +1,45 @@
+#library "UITKS.acs"
+
+#include "zcommon.acs"
+
+#include "DTADD.acs"
+#include "BARLIB.acs"
+
+#include "SHRTFUNC.acs"
+
+script "UITweaks_Register" OPEN CLIENTSIDE
+{
+    DefineAssistDisplay("UITweaks_Runner");
+
+    //if(IsMultiplayer()) {
+    //    Log(s:"Duping weapon table...");
+    //   CallACS0("core_ammos");
+    //}
+}
+
+script "UITweaks_Register_Server" OPEN
+{
+    // AddSpawnFunc("UIX_WeapBar_Register", DTADD_SFT_WEP);
+}
+
+#define UIT_MAX 2
+str UI_Scripts[UIT_MAX][2] = {
+    {"UITweaks_TeamInfo", "UIT_CL_EnableTeamInfo"},
+    {"UIX_WeapBar", "UIT_CL_EnableWeaponBar"},
+};
+
+script "UITweaks_Runner" (int cam) CLIENTSIDE
+{
+    int cpn = ConsolePlayerNumber();
+    if(!GetUserCvar(cpn, "UIT_CL_Enable"))
+        terminate;
+
+    for(int i = 0; i < UIT_MAX; i++) {
+        int cv = GetUserCvar(cpn, UI_Scripts[i][1]);
+
+        if(cv != 0)
+            CallACS3(UI_Scripts[i][0], cam, cpn, cv);
+    }
+}
+
+

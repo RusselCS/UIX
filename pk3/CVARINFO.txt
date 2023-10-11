@@ -1,0 +1,9 @@
+
+// UITweaks CVars
+user bool UIT_CL_Enable = true;
+user bool UIT_CL_EnableTeamInfo = true;
+user bool UIT_CL_EnableWeaponBar = true;
+
+user int UIX_CL_WEAPBAROFFSX = 500;
+user int UIX_CL_WEAPBAROFFSY = -500;
+user float UIX_CL_WEAPBARSCALE = 2.5;

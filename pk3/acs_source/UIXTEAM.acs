@@ -1,0 +1,77 @@
+#library "UIXTEAM"
+
+#include "zcommon.acs"
+#include "SHRTFUNC.acs"
+
+#import "8BDT.acs"
+
+#define TEAMINFO_ID_OFFS    1000
+#define TEAMINFO_ID_NAME    100
+#define TEAMINFO_ID_HP1     200
+#define TEAMINFO_ID_HP2     300
+#define TEAMINFO_ID_HP3     400
+#define TEAMINFO_ID_WEI     500
+#define TEAMINFO_ID_WE1     600
+#define TEAMINFO_ID_WE2     700
+#define TEAMINFO_ID_LOC     800
+
+script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
+{
+    SetActivator(cam);
+    int team = GetPlayerInfo(cpn, PLAYERINFO_TEAM);
+    int bx = -600;
+    int by = 300;
+
+    int curPlay = 0;
+
+    int yOffs = -48;
+
+    int msgId = BASE_ID + TEAMINFO_ID_OFFS;
+
+
+    if(team == 255) { // Spectator
+
+    } else {
+        for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
+            if(i == cpn)
+                continue;
+
+            if(!PlayerInGame(i))
+                continue;
+            
+            if(GetPlayerInfo(i, PLAYERINFO_TEAM) != team)
+                continue;
+
+            int curId = msgId + TEAMINFO_ID_OFFS + curPlay;
+            int plrTid = i + PLN_TID_SHRT;
+            
+            str loc = GetActorSectorLocation(i+PLN_TID_SHRT, false);
+            int dist = (dist3D(0, i+PLN_TID_SHRT)) / 32;
+
+            SetFont("SMALLFONT");
+            displayMessageL(StrParam(n:i+1, s:" (", i:dist, s:"m - ", s:loc, s:")"), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
+            int barX = bx;
+            int barY = by + (curPlay * yOffs) + 16;
+
+            int chp = GetActorProperty(plrTid, AProp_Health);
+            int mhp = GetActorProperty(plrTid, AProp_SpawnHealth);
+            if(mhp == 0)
+                mhp = 100;
+
+            displayBar(STR_AST_H, "UIXHPFH", "UIXHPBH", chp, mhp, curId+TEAMINFO_ID_HP1, curId+TEAMINFO_ID_HP2, barX, barY, 2.0, 2.0, 1.0);
+
+            int wep = findWeaponByActor(getPlayerWeapon(i));
+
+            // if(wep != -1) {
+            //     int ammo = getWeaponAmmoType(wep);
+            //     int mwe = getPlayerAmmoCapacity(i, ammo);
+            //     int cwe = checkActorInventory(i+PLN_TID_SHRT, ammo);
+            //     // PrintBold(i:mwe);
+            //     displayIcon(getWeaponIcon(wep), curId+TEAMINFO_ID_WEI, barX+16, barY+32, 1.0, 1.0, 1.0);
+            //     displayHBar("UIXWEFH", "UIXHPBH", cwe, mwe, curId+TEAMINFO_ID_WE1, curId+TEAMINFO_ID_WE2, barX+16, barY+16, 1.0, 1.0, 1.0);
+            // }
+
+            curPlay++;
+        }
+    }
+}

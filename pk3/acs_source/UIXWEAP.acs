@@ -1,0 +1,98 @@
+#library "UIXWEAP"
+
+#include "zcommon.acs"
+
+#include "SHRTFUNC.acs"
+
+#import "8BDT.acs"
+
+/*
+DATA NEEDED:
+- Wep Actor
+- Wep Ammo1
+- Wep Ammo2?
+- Icon
+- Slot
+*/
+
+#define WEPBAR_ID_OFFS       20000
+#define WEPBAR_ID_ICON       0001
+#define WEPBAR_ID_ICONFADE   0002
+#define WEPBAR_ID_BAR1TOP    0003
+#define WEPBAR_ID_BAR1BOT    0004
+#define WEPBAR_ID_BAR2TOP    0005
+#define WEPBAR_ID_BAR2BOT    0006
+#define WEPBAR_ID_SLOTKEY    0007 // i don't *need* this many ids for this...
+
+script "UIX_WeapBar" (int cam, int cpn, int cv)
+{
+    SetActivator(cam);
+    str curWeap = GetWeapon();
+
+    int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;
+    int scaleY = scaleX;
+
+    int slotCounts[10];
+    int slotDrawn[10];
+
+    int xStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX"); // 500;
+    int yStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY"); // -500;
+
+    int xoffs = FixedMul(16, scaleX);
+    int yoffs = FixedMul(24, scaleY);
+
+    int barX, barY, icWep, alpha;
+
+    for(int i = 0; i < MAX_WEAPONS_GLOBAL; i++) {
+        icWep = getWeaponActor(i);
+        if(CheckActorInventory(cam, icWep)) {
+
+                int slot = getWeaponSlot(i);
+                str slotKey = -1;
+                int count = slotCounts[slot];
+                
+                int idStart = BASE_ID + WEPBAR_ID_OFFS + (i*10);
+                int slotId = BASE_ID + WEPBAR_ID_OFFS + WEPBAR_ID_SLOTKEY + (slot*10);
+
+                if(StrMatches(curWeap, icWep)) {
+                    barX = xStart - 1*xOffs - xOffs/2;
+                    barY = yStart + yoffs*slot;
+                    alpha = 1.0;
+
+                    // hard override, even if the slot is drawn, it needs to be redrawn
+                    slotDrawn[slot] = true;
+                    slotKey = StrParam(s:"\cf", k:StrParam(s:"slot ", i:slot));
+                    SetFont("SMALLFONT");
+                    displayMessage(slotKey, slotId, xStart - 2*xOffs - FixedMul(16, scaleX), barY - FixedMul(16, scaleY), scaleX, scaleY, 1.0);
+                } else {
+                    barX = xStart + xoffs*count;
+                    barY = yStart + yoffs*slot + FixedMul(slotCounts[slot], scaleY);
+                    alpha = 0.5;
+                    slotCounts[slot]++;
+                }
+
+                if(!slotDrawn[slot]) {
+                    slotDrawn[slot] = true;
+                    slotKey = StrParam(k:StrParam(s:"slot ", i:slot));
+                    SetFont("SMALLFONT");
+                    displayMessage(slotKey, slotId, xStart - 2*xOffs - FixedMul(16, scaleX), barY - FixedMul(16, scaleY), scaleX, scaleY, 1.0);
+                }
+
+                // Using this for vertical pos stuff, since slot 0 is all the way on the right. Painful.
+                if(slot == 0) {
+                    slot = 9;
+                } else {
+                    slot--;
+                }
+
+                str ico = getWeaponIcon(i);
+                str amo = getWeaponAmmoType(i);
+                int amt = CheckActorInventory(cam, amo);
+                int amx = getPlayerAmmoCapacity(cpn, amo);
+
+                displayIcon(getWeaponIcon(i), idStart + WEPBAR_ID_ICON, barX, barY, scaleX, scaleY, alpha);
+                displayIcon("UXICA0", idStart + WEPBAR_ID_ICONFADE, barX, barY, scaleX, scaleY, 1.0);
+                displayBar(STR_WEP_V, "WEPBARV1", "UIXWVEMP", amt, amx, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+        }
+    }
+}

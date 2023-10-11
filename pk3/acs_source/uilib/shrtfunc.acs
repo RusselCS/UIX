@@ -1,0 +1,187 @@
+// "Shortcut" functions
+
+#define ALIGN_RIGHT 0.1
+#define ALIGN_LEFT 0.2
+
+#define ALIGN_BOTTOM 0.1
+#define ALIGN_TOP 0.2
+
+#define BASE_RES_X 1280
+#define BASE_RES_Y 960
+
+#define BASE_ID 45931
+
+#define PLN_TID_SHRT 1000
+#define MAX_PLAYERS_SHRT 64
+
+#define STR_AST_H "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+#define STR_AST_V "A\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA"
+
+#define STR_WEP_H "ABABABABABABABAB"
+#define STR_WEP_V "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"
+
+function void displayBar(str baseStr, str fillPiece, str empPiece, int cur, int max, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int len;
+	if(max == 0) {
+		len = StrLen(baseStr);
+	} else {
+		len = cur * StrLen(baseStr) / max;
+	}
+
+	displayBar_(StrLeft(baseStr, len), fillPiece, empPiece, id1, id2, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+function void displayBar_(str msg, str fillPiece, str empPiece, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	SetFont(fillPiece);
+	displayMessageL(msg, id1, offsX, offsY, scaleX, scaleY, alpha);
+	displayIconL(empPiece, id2, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+function void displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+    SetFont(icon);
+    displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+function void displayIconL(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+    SetFont(icon);
+    displayMessageL("A", id, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+int lastmsgX;
+int lastmsgY;
+
+function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	lastmsgX = 1.0*(resX/2)+1.0*offsX;
+	lastmsgY = 1.0*(resY/2)+1.0*offsY;
+	SetHudSize(resX, resY, 0);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, 0.0, alpha);
+}
+
+function void displayMessageL(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	lastmsgX = 1.0*(resX/2)+1.0*offsX + ALIGN_RIGHT;
+	lastmsgY = 1.0*(resY/2)+1.0*offsY + ALIGN_BOTTOM;
+	SetHudSize(resX, resY, 0);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, 0.0, alpha);
+}
+
+function void removeMessage(int id)
+{
+    HudMessage(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, 0.1);
+}
+
+function void displayIconBold(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+    SetFont(icon);
+    displayMessageBold("A", id, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+int lastmsgXBold;
+int lastmsgYBold;
+
+function void displayMessageBold(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	lastmsgXBold = 1.0*(resX/2)+1.0*offsX;
+	lastmsgYBold = 1.0*(resY/2)+1.0*offsY;
+	SetHudSize(resX, resY, 0);
+	HudMessageBold(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgXBold, lastmsgYBold, 0.0, alpha);
+}
+
+function void removeMessageBold(int id)
+{
+    HudMessageBold(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, 0.1);
+}
+
+
+function void BasicTextDisplay(str font, str text, int id, int x, int y)
+{
+BasicTextDisplay2(font, text, id, x, y, 0.1, 1.0);
+}
+
+function void BasicTextDisplay2(str font, str text, int id, int x, int y, int holdtime, int alpha)
+{
+SetFont(font);
+HudMessageBold(s:text;HUDMSG_PLAIN,id,CR_UNTRANSLATED,x,y,holdtime,alpha);
+}
+
+// Script wrappers
+function int CallACS0(str scr) { return CallACS4(scr, 0, 0, 0, 0); }
+function int CallACS1(str scr, int a1) { return CallACS4(scr, a1, 0, 0, 0); }
+function int CallACS2(str scr, int a1, int a2) { return CallACS4(scr, a1, a2, 0, 0); }
+function int CallACS3(str scr, int a1, int a2, int a3) { return CallACS4(scr, a1, a2, a3, 0); }
+function int CallACS4(str scr, int a1, int a2, int a3, int a4) { return ACS_NamedExecuteWithResult(scr, a1, a2, a3, a4); }
+
+// Player number functions
+function bool isPlayerPln(int id) { return id > -1 && id < MAX_PLAYERS_SHRT; }
+function bool isPlayerTID(int id) { return id >= PLN_TID_SHRT && id < PLN_TID_SHRT+MAX_PLAYERS_SHRT; }
+
+function bool StrEqual(str str1, str str2) { return StrCmp(str1, str2) == 0; }
+function bool StrMatches(str str1, str str2) { return StrICmp(str1, str2) == 0; }
+
+function int clamp(int n, int x, int y) {
+    if(n < x)
+        n = x;
+    if(n > y)
+        n = y;
+    return n;
+}
+
+function int intToBool(int n) {
+	if(n > 0)
+		return false;
+	return true;
+}
+
+script "shrt_getplrweapon" (int who) {
+	SetActivatorToPlayer(who);
+	SetResultValue(GetWeapon());
+}
+
+function str getPlayerWeapon(int who) { return callAcs1("shrt_getplrweapon", who); }
+
+script "shrt_getplrammocapacity" (int who, int amo) {
+	SetActivatorToPlayer(who);
+	SetResultValue(GetAmmoCapacity(amo));
+}
+
+function str getPlayerAmmoCapacity(int who, str amo) { return callAcs2("shrt_getplrammocapacity", who, amo); }
+
+function int dist3D (int tid1, int tid2)
+{
+	int x, y, z, d;
+	x = GetActorX(tid1) - GetActorX(tid2);
+	y = GetActorY(tid1) - GetActorY(tid2);
+	z = GetActorZ(tid1) - GetActorZ(tid2);
+	d = VectorLength(VectorLength(x, y), z) >> 16;
+	return d;
+}
+
+function int actorExists(str which) {
+	int u = UniqueTID();
+	int sp = SpawnForced(which, 0, 0, 0, u, 0);
+	if(sp)
+		thing_Remove(u);
+
+	return sp;
+}
+
+function int GetActorArg(int tid, int argNum) {
+	return CallACS2("core_GetActorArg", tid, argNum);
+}
