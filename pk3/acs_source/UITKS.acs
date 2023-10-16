@@ -10,11 +10,6 @@
 script "UITweaks_Register" OPEN CLIENTSIDE
 {
     DefineAssistDisplay("UITweaks_Runner");
-
-    //if(IsMultiplayer()) {
-    //    Log(s:"Duping weapon table...");
-    //   CallACS0("core_ammos");
-    //}
 }
 
 script "UITweaks_Register_Server" OPEN

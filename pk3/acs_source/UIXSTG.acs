@@ -1,0 +1,42 @@
+#library "UIXSTG"
+
+#include "zcommon.acs"
+
+#include "SHRTFUNC.acs"
+
+// Modders were not told their data may be used in clientside.
+// Unfortunate, but it is what it is.
+// This file re-stages the data tables and performs any extra cleanup.
+// If your mod doesn't work for this, message me.
+// 
+
+// Client mod redef table
+// 0 - Actor to check for
+// 1 - Ammo script
+// 2 - Buster script
+#define MAX_MODS 10
+str modTables[MAX_MODS][3] = {
+    {"MegaBuster", "core_ammos", "core_busters"},
+    {"", "", ""},
+};
+
+script "UIX_DataStaging" OPEN CLIENTSIDE
+{
+    // Data staging isn't needed offline.
+    if(IsNetworkGame()) {
+        for(int i = 0; i < MAX_MODS; i++) {
+            str act = modTables[i][0];
+            str wep = modTables[i][1];
+            str bus = modTables[i][2];
+            if(StrLen(act) == 0)
+                terminate;
+            
+            if(ActorExists(act)) {
+                if(StrLen(wep) == 0) CallACS0(wep);
+                if(StrLen(bus) == 0) CallACS0(bus);
+            }
+        }
+    }
+}
+
+
