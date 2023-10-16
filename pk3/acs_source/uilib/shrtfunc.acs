@@ -19,9 +19,13 @@
 
 #define STR_WEP_H "ABABABABABABABAB"
 #define STR_WEP_V "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"
+#define STR_BAR_BLANK " \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n"
+
+#define MSG_TIME 0.2
 
 function void displayBar(str baseStr, str fillPiece, str empPiece, int cur, int max, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
+	bool vertical = GetChar(baseStr, 1) == '\n';
 	int len;
 	if(max == 0) {
 		len = StrLen(baseStr);
@@ -29,7 +33,10 @@ function void displayBar(str baseStr, str fillPiece, str empPiece, int cur, int 
 		len = cur * StrLen(baseStr) / max;
 	}
 
-	displayBar_(StrLeft(baseStr, len), fillPiece, empPiece, id1, id2, offsX, offsY, scaleX, scaleY, alpha);
+	if(vertical)
+		displayBar_(StrParam(s:StrLeft(STR_BAR_BLANK, StrLen(baseStr)-len), s:StrRight(baseStr, len)), fillPiece, empPiece, id1, id2, offsX, offsY, scaleX, scaleY, alpha);
+	else
+		displayBar_(StrLeft(baseStr, len), fillPiece, empPiece, id1, id2, offsX, offsY, scaleX, scaleY, alpha);
 }
 
 function void displayBar_(str msg, str fillPiece, str empPiece, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
@@ -63,7 +70,7 @@ function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, 
 	lastmsgX = 1.0*(resX/2)+1.0*offsX;
 	lastmsgY = 1.0*(resY/2)+1.0*offsY;
 	SetHudSize(resX, resY, 0);
-	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, 0.0, alpha);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
 }
 
 function void displayMessageL(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
@@ -75,12 +82,12 @@ function void displayMessageL(str msg, int id, int offsX, int offsY, int scaleX,
 	lastmsgX = 1.0*(resX/2)+1.0*offsX + ALIGN_RIGHT;
 	lastmsgY = 1.0*(resY/2)+1.0*offsY + ALIGN_BOTTOM;
 	SetHudSize(resX, resY, 0);
-	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, 0.0, alpha);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
 }
 
 function void removeMessage(int id)
 {
-    HudMessage(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, 0.1);
+    HudMessage(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, MSG_TIME);
 }
 
 function void displayIconBold(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
@@ -101,24 +108,12 @@ function void displayMessageBold(str msg, int id, int offsX, int offsY, int scal
 	lastmsgXBold = 1.0*(resX/2)+1.0*offsX;
 	lastmsgYBold = 1.0*(resY/2)+1.0*offsY;
 	SetHudSize(resX, resY, 0);
-	HudMessageBold(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgXBold, lastmsgYBold, 0.0, alpha);
+	HudMessageBold(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgXBold, lastmsgYBold, MSG_TIME, alpha);
 }
 
 function void removeMessageBold(int id)
 {
-    HudMessageBold(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, 0.1);
-}
-
-
-function void BasicTextDisplay(str font, str text, int id, int x, int y)
-{
-BasicTextDisplay2(font, text, id, x, y, 0.1, 1.0);
-}
-
-function void BasicTextDisplay2(str font, str text, int id, int x, int y, int holdtime, int alpha)
-{
-SetFont(font);
-HudMessageBold(s:text;HUDMSG_PLAIN,id,CR_UNTRANSLATED,x,y,holdtime,alpha);
+    HudMessageBold(s:""; HUDMSG_PLAIN, id, CR_UNTRANSLATED, 0, 0, MSG_TIME);
 }
 
 // Script wrappers
