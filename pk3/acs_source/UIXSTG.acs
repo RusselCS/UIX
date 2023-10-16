@@ -32,8 +32,8 @@ script "UIX_DataStaging" OPEN CLIENTSIDE
                 terminate;
             
             if(ActorExists(act)) {
-                if(StrLen(wep) == 0) CallACS0(wep);
-                if(StrLen(bus) == 0) CallACS0(bus);
+                if(StrLen(wep) != 0) CallACS0(wep);
+                if(StrLen(bus) != 0) CallACS0(bus);
             }
         }
     }
