@@ -19,10 +19,29 @@ DATA NEEDED:
 #define WEPBAR_ID_ICON       0001
 #define WEPBAR_ID_ICONFADE   0002
 #define WEPBAR_ID_BAR1TOP    0003
-#define WEPBAR_ID_BAR1BOT    0004
-#define WEPBAR_ID_BAR2TOP    0005
-#define WEPBAR_ID_BAR2BOT    0006
-#define WEPBAR_ID_SLOTKEY    0007 // i don't *need* this many ids for this...
+#define WEPBAR_ID_BAR1MID    0004
+#define WEPBAR_ID_BAR1BOT    0005
+#define WEPBAR_ID_BAR2TOP    0006
+#define WEPBAR_ID_BAR2MID    0007
+#define WEPBAR_ID_BAR2BOT    0008
+#define WEPBAR_ID_SLOTKEY    0009 // i don't *need* this many ids for this...
+
+#define BARDATA_FIELDS 9
+
+#define BARDATA_CHECKED 0
+#define BARDATA_SELECTED 1
+#define BARDATA_CYAN1 2
+#define BARDATA_BLUE1 3
+#define BARDATA_CYAN2 4
+#define BARDATA_BLUE2 5
+#define BARDATA_AMMOTYPE1 6
+#define BARDATA_AMMOTYPE2 7
+#define BARDATA_SLOT 8
+
+int wepBarData[MAX_WEAPONS_GLOBAL_LIMIT][BARDATA_FIELDS];
+int bustBarData[MAX_BUSTER_LIMIT][BARDATA_FIELDS];
+str drawBusters[MAX_BUSTER_LIMIT];
+int buster_count = 0;
 
 script "UIX_WeapBar" (int cam, int cpn, int cv)
 {
@@ -43,16 +62,79 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
     int barX, barY, icWep, alpha;
 
-    for(int i = 0; i < MAX_WEAPONS_GLOBAL; i++) {
-        icWep = getWeaponActor(i);
+    str barStr;
+    str barTop;
+    str barBot;
+
+    // if(getUserCvar(cpn, );
+
+    for(int fakeId = 0; fakeId < MAX_BUSTERUPGRADES + MAX_WEAPONS_GLOBAL; fakeId++) {
+        
+        int i;
+        bool isBuster;
+        if(fakeId < MAX_BUSTERUPGRADES) {
+            i = fakeId;
+            isBuster = true;
+        } else {
+            i = fakeId - MAX_BUSTERUPGRADES;
+            isBuster = false;
+        }
+
+        if(isBuster)
+            icWep = getBusterActor(i);
+        else
+            icWep = getWeaponActor(i);
+        
         if(CheckActorInventory(cam, icWep)) {
 
-                int slot = getWeaponSlot(i);
+                str ico, amo1, amo2, amo1blue, amo1cyan, amo2blue, amo2cyan;
+                int amt1, amt2, amx1, amx2, slot;
+
+                stageWeaponData(i, icWep, isBuster);
+
+                if(isBuster) {
+                    ico = getBusterIcon(i);
+                    amo1 = bustBarData[i][BARDATA_AMMOTYPE1];
+                    amo2 = bustBarData[i][BARDATA_AMMOTYPE2];
+                    slot = bustBarData[i][BARDATA_SLOT];
+                    amo1cyan = bustBarData[i][BARDATA_CYAN1];
+                    amo1blue = bustBarData[i][BARDATA_BLUE1];
+                    amo2cyan = bustBarData[i][BARDATA_CYAN2];
+                    amo2blue = bustBarData[i][BARDATA_BLUE2];
+                } else {
+                    ico = getWeaponIcon(i);
+                    amo1 = wepBarData[i][BARDATA_AMMOTYPE1];
+                    amo2 = wepBarData[i][BARDATA_AMMOTYPE2];
+                    slot = wepBarData[i][BARDATA_SLOT];
+                    amo1cyan = wepBarData[i][BARDATA_CYAN1];
+                    amo1blue = wepBarData[i][BARDATA_BLUE1];
+                    amo2cyan = wepBarData[i][BARDATA_CYAN2];
+                    amo2blue = wepBarData[i][BARDATA_BLUE2];
+                }
+
+                if(StrLen(amo1) > 0) {
+                    amt1 = CheckActorInventory(cam, amo1);
+                    amx1 = getPlayerAmmoCapacity(cpn, amo1);
+                } else {
+                    amt1 = 0;
+                    amx1 = 0;
+                }
+
+                if(StrLen(amo2) > 0) {
+                    amt2 = CheckActorInventory(cam, amo2);
+                    amx2 = getPlayerAmmoCapacity(cpn, amo2);
+                } else {
+                    amt2 = 0;
+                    amx2 = 0;
+                }
+
                 str slotKey = -1;
                 int count = slotCounts[slot];
                 
-                int idStart = BASE_ID + WEPBAR_ID_OFFS + (i*10);
+                int idStart = BASE_ID + WEPBAR_ID_OFFS + (fakeId*10);
                 int slotId = BASE_ID + WEPBAR_ID_OFFS + WEPBAR_ID_SLOTKEY + (slot*10);
+
+                str slotCol = "\cq";
 
                 if(StrMatches(curWeap, icWep)) {
                     barX = xStart - 1*xOffs - xOffs/2;
@@ -60,10 +142,8 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     alpha = 1.0;
 
                     // hard override, even if the slot is drawn, it needs to be redrawn
-                    slotDrawn[slot] = true;
-                    slotKey = StrParam(s:"\cf", k:StrParam(s:"slot ", i:slot));
-                    SetFont("SMALLFONT");
-                    displayMessage(slotKey, slotId, xStart - 2*xOffs - FixedMul(16, scaleX), barY - FixedMul(16, scaleY), scaleX, scaleY, 1.0);
+                    slotDrawn[slot] = false;
+                    slotCol = "\cf";
                 } else {
                     barX = xStart + xoffs*count;
                     barY = yStart + yoffs*slot + FixedMul(slotCounts[slot], scaleY);
@@ -73,7 +153,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
                 if(!slotDrawn[slot]) {
                     slotDrawn[slot] = true;
-                    slotKey = StrParam(k:StrParam(s:"slot ", i:slot));
+                    slotKey = StrParam(s:slotCol, k:StrParam(s:"slot ", i:slot));
                     SetFont("SMALLFONT");
                     displayMessage(slotKey, slotId, xStart - 2*xOffs - FixedMul(16, scaleX), barY - FixedMul(16, scaleY), scaleX, scaleY, 1.0);
                 }
@@ -85,14 +165,130 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     slot--;
                 }
 
-                str ico = getWeaponIcon(i);
-                str amo = getWeaponAmmoType(i);
-                int amt = CheckActorInventory(cam, amo);
-                int amx = getPlayerAmmoCapacity(cpn, amo);
-
-                displayIcon(getWeaponIcon(i), idStart + WEPBAR_ID_ICON, barX, barY, scaleX, scaleY, alpha);
+                displayIcon(ico, idStart + WEPBAR_ID_ICON, barX, barY, scaleX, scaleY, alpha);
                 displayIcon("UXICA0", idStart + WEPBAR_ID_ICONFADE, barX, barY, scaleX, scaleY, 1.0);
-                displayBar(STR_WEP_V, "WEPBARV1", "UIXWVEMP", amt, amx, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+
+                // format: UXWFT#XX
+
+                if(amx1) {
+                    displayBar(STR_WEP_V2, StrParam(s:"UXWFTV", s:amo1cyan), "TNT1A0", amt1, amx1, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+                    displayBar(STR_WEP_V, StrParam(s:"UXWFTV", s:amo1blue), "UIXWVEMP", amt1, amx1, idStart + WEPBAR_ID_BAR1MID, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+                }
+
+                if(amx2) {
+                    displayBar(STR_WEP_V2, StrParam(s:"UXWFTV", s:amo2cyan), "TNT1A0", amt2, amx2, idStart + WEPBAR_ID_BAR2TOP, idStart + WEPBAR_ID_BAR2BOT, barX+FixedMul(4, ScaleX), barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+                    displayBar(STR_WEP_V, StrParam(s:"UXWFTV", s:amo2blue), "UIXWVEMP", amt2, amx2, idStart + WEPBAR_ID_BAR2MID, idStart + WEPBAR_ID_BAR2BOT, barX+FixedMul(4, ScaleX), barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+                }
+                //if(amx2) displayBar(STR_WEP_V, "WEPBARV1", "UIXWVEMP", amt, amx, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
+                // displayBar(STR_WEP_V, "WEPBARV1", "UIXWVEMP", amt, amx, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, barX, barY-FixedMul(24, scaleY), scaleX, scaleY, 1.0);
         }
     }
+}
+
+function void stageWeaponData(int idx, str weap, int isBuster) {
+    int blue1, cyan1, blue2, cyan2, obj, weapIdx;
+
+    if(isBuster) {
+        if(bustBarData[idx][BARDATA_CHECKED])
+            return;
+        
+        bustBarData[idx][BARDATA_CHECKED] = true;
+
+        obj = new(StrParam(s:weap, s:"_NormalBar"));
+        if(obj) {
+            cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+            blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+            destroy(obj);
+        } else { // ScriptBar attempted contingencies
+            obj = new(StrParam(s:weap, s:"_MugshotColor"));
+
+            if(obj) {
+                cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+                blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+            } else {
+                cyan1 = Dec2Hex(192, 2);
+                blue1 = Dec2Hex(198, 2);
+            }
+            destroy(obj);
+        }
+
+        obj = new(StrParam(s:weap, s:"_SecondBar"));
+
+        if(obj) {
+            cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
+            blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
+            destroy(obj);
+        } else { // use the base color for secondbar if secondbar doesn't exist
+            cyan2 = cyan1;
+            blue2 = blue1;
+        }
+        
+        bustBarData[idx][BARDATA_CYAN1] = cyan1;
+        bustBarData[idx][BARDATA_BLUE1] = blue1;
+        bustBarData[idx][BARDATA_CYAN2] = cyan2;
+        bustBarData[idx][BARDATA_BLUE2] = blue2;
+        
+        weapIdx = findWeaponByActor(weap);
+        if(weapIdx != -1) {
+            bustBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(weapIdx);
+            bustBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(weapIdx);
+            bustBarData[idx][BARDATA_SLOT] = getWeaponSlot(weapIdx);
+        } else {
+            bustBarData[idx][BARDATA_AMMOTYPE1] = "";
+            bustBarData[idx][BARDATA_AMMOTYPE2] = "";
+            bustBarData[idx][BARDATA_SLOT] = 1; // buster array doesn't store weapon slot..........
+        }
+
+        drawBusters[buster_count++] = weap;
+    } else {
+        if(wepBarData[idx][BARDATA_CHECKED])
+            return;
+        
+        wepBarData[idx][BARDATA_CHECKED] = true;
+
+        obj = new(StrParam(s:weap, s:"_NormalBar"));
+        if(obj) {
+            cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+            blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+            destroy(obj);
+        } else { // ScriptBar attempted contingencies
+            obj = new(StrParam(s:weap, s:"_MugshotColor"));
+
+            if(obj) {
+                cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+                blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+            } else {
+                cyan1 = Dec2Hex(192, 2);
+                blue1 = Dec2Hex(198, 2);
+            }
+            destroy(obj);
+        }
+
+        obj = new(StrParam(s:weap, s:"_SecondBar"));
+
+        if(obj) {
+            cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
+            blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
+            destroy(obj);
+        } else { // use the base color for secondbar if secondbar doesn't exist
+            cyan2 = cyan1;
+            blue2 = blue1;
+        }
+        
+        wepBarData[idx][BARDATA_CYAN1] = cyan1;
+        wepBarData[idx][BARDATA_BLUE1] = blue1;
+        wepBarData[idx][BARDATA_CYAN2] = cyan2;
+        wepBarData[idx][BARDATA_BLUE2] = blue2;
+        wepBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(idx);
+        wepBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(idx);
+        wepBarData[idx][BARDATA_SLOT] = getWeaponSlot(idx);
+    }
+}
+
+function bool isBusterDrawn(str which) {
+    for(int i = 0; i < buster_count; i++) {
+        if(StrMatches(which, drawBusters[i]))
+            return true;
+    }
+    return false;
 }

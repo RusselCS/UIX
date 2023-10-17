@@ -2,6 +2,7 @@
 
 #include "zcommon.acs"
 
+#include "DTADD.acs"
 #include "SHRTFUNC.acs"
 
 // Modders were not told their data may be used in clientside.
@@ -17,6 +18,7 @@
 #define MAX_MODS 10
 str modTables[MAX_MODS][3] = {
     {"MegaBuster", "core_ammos", "core_busters"},
+    {"EnergyBusterWep", "UIX_UKI", ""},
     {"", "", ""},
 };
 
@@ -24,6 +26,8 @@ script "UIX_DataStaging" OPEN CLIENTSIDE
 {
     // Data staging isn't needed offline.
     if(IsNetworkGame()) {
+        CallACS0("UIX_CoreExtras");
+
         for(int i = 0; i < MAX_MODS; i++) {
             str act = modTables[i][0];
             str wep = modTables[i][1];
@@ -39,4 +43,14 @@ script "UIX_DataStaging" OPEN CLIENTSIDE
     }
 }
 
+script "UIX_CoreExtras" OPEN
+{
+    DefineBusterUpgrade("TAG_MEGABUSTER", "MegaBuster", "", "", "WEAPX0", false, false, false);
+}
 
+script "UIX_UKI" (void)
+{
+    CallACS0("uki_ammos");
+    CallACS0("unreal_ammos");
+    CallACS0("unreal_initialammos");
+}
