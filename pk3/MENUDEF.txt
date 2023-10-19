@@ -48,9 +48,18 @@ OptionMenu "UIXOptions"
 	// TextField "King Team text color",			"trill_pb_textcolor3"
 
     StaticText " "
-	StaticText  "Notification Option", 1
+	StaticText  "Weapon Bar", 1
+	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
     Slider "Weapon Bar X", "UIX_CL_WEAPBAROFFSX", -640, 640, 10
     Slider "Weapon Bar Y", "UIX_CL_WEAPBAROFFSY", -640, 640, 10
     Slider "Weapon Bar Scale", "UIX_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Weapon Bar Alpha", "UIX_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
+	Option "Mirror Bar", "UIX_CL_WEAPBARMIRROR", "OnOff"
+	Option "Bar Orientation", "UIX_CL_WEAPBARDIR", "WeapOrientation"
+}
 
+OptionValue "WeapOrientation"
+{
+	0, "Vertical"
+	1, "Horizontal"
 }

@@ -1,3 +1,5 @@
+texture UIXWHEMP, 16, 4 { patch UIXWVEMP, 0, 0 {rotate 90}}
+
 texture UXWPHA00, 1, 4 {patch UXWBBASA, 0, 0 {Translation "198:198=0:0"}}
 texture UXWPHA01, 1, 4 {patch UXWBBASA, 0, 0 {Translation "198:198=1:1"}}
 texture UXWPHA02, 1, 4 {patch UXWBBASA, 0, 0 {Translation "198:198=2:2"}}

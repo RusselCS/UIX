@@ -18,6 +18,7 @@
 #define STR_AST_V "A\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA"
 
 #define STR_WEP_H "ABABABABABABABAB"
+#define STR_WEP_H2 "CDCDCDCDCDCDCDCD"
 #define STR_WEP_V "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"
 #define STR_WEP_V2 "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD"
 #define STR_BAR_BLANK " \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n"
