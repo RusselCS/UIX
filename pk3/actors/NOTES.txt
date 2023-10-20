@@ -1,0 +1,1 @@
+This folder contains replaced files from vanilla. Original actors will be under a folder called "decorate" to prevent even potential overlap with other projects.
