@@ -50,6 +50,25 @@ int buster_count = 0;
 #define WEPBAR_BAR_WIDTH 4
 #define WEPBAR_ICON_WIDTH 16
 
+script "UIXPickupTest" (void)
+{
+    int offs = 48;
+    int baseX = GetActorX(0);
+    int baseY = GetActorY(0);
+    int baseZ = GetActorZ(0);
+    int yaw = GetActorAngle(0);
+    int utid = UniqueTID();
+
+    for(int i = 0; i < MAX_ITEMS_GLOBAL; i++) {
+        int x = baseX + cos(yaw)*(i+1)*offs;
+        int y = baseY + sin(yaw)*(i+1)*offs;
+
+        SpawnForced(getAssistItemActor(i), x, y, baseZ, utid, 0);
+        GiveActorInventory(utid, "ChangeFlagDropped0", 1);
+        Thing_ChangeTID(utid, 0);
+    }
+}
+
 script "UIX_WeapBar" (int cam, int cpn, int cv)
 {
     if(!GetUserCvar(cpn, "UIX_CL_WEAPBAR") || GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
@@ -113,7 +132,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
                 int icox, icoy, bar1x, bar1y, bar2x, bar2y, slotx, sloty;
 
-                stageWeaponData(i, icWep, isBuster);
+                stageWeaponData(i, icWep, isBuster, cam);
 
                 if(isBuster) {
                     ico = getBusterIcon(i);
@@ -270,96 +289,92 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     }
 }
 
-function void stageWeaponData(int idx, str weap, int isBuster) {
+function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
     int blue1, cyan1, blue2, cyan2, obj, weapIdx;
+
 
     if(isBuster) {
         if(bustBarData[idx][BARDATA_CHECKED])
             return;
-        
         bustBarData[idx][BARDATA_CHECKED] = true;
-
-        obj = new(StrParam(s:weap, s:"_NormalBar"));
-        if(obj) {
-            cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
-            blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
-            destroy(obj);
-        } else { // ScriptBar attempted contingencies
-            obj = new(StrParam(s:weap, s:"_MugshotColor"));
-
-            if(obj) {
-                cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
-                blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
-            } else {
-                cyan1 = Dec2Hex(192, 2);
-                blue1 = Dec2Hex(198, 2);
-            }
-            destroy(obj);
-        }
-
-        obj = new(StrParam(s:weap, s:"_SecondBar"));
-
-        if(obj) {
-            cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
-            blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
-            destroy(obj);
-        } else { // use the base color for secondbar if secondbar doesn't exist
-            cyan2 = cyan1;
-            blue2 = blue1;
-        }
-        
-        bustBarData[idx][BARDATA_CYAN1] = cyan1;
-        bustBarData[idx][BARDATA_BLUE1] = blue1;
-        bustBarData[idx][BARDATA_CYAN2] = cyan2;
-        bustBarData[idx][BARDATA_BLUE2] = blue2;
-        
-        weapIdx = findWeaponByActor(weap);
-        if(weapIdx != -1) {
-            bustBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(weapIdx);
-            bustBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(weapIdx);
-            bustBarData[idx][BARDATA_SLOT] = getWeaponSlot(weapIdx);
-        } else {
-            bustBarData[idx][BARDATA_AMMOTYPE1] = "";
-            bustBarData[idx][BARDATA_AMMOTYPE2] = "";
-            bustBarData[idx][BARDATA_SLOT] = 1; // buster array doesn't store weapon slot..........
-        }
-
         drawBusters[buster_count++] = weap;
     } else {
         if(wepBarData[idx][BARDATA_CHECKED])
             return;
-        
         wepBarData[idx][BARDATA_CHECKED] = true;
+    }
 
-        obj = new(StrParam(s:weap, s:"_NormalBar"));
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(obj) {
+        cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+        blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+        destroy(obj);
+    } else { // ScriptBar attempted contingencies
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
+
         if(obj) {
             cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
             blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
-            destroy(obj);
-        } else { // ScriptBar attempted contingencies
-            obj = new(StrParam(s:weap, s:"_MugshotColor"));
+        } else { // ScriptBar final contingency
+            obj = new(StrParam(s:weap, s:"_ScriptBar"));
 
             if(obj) {
-                cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
-                blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+                // this feels like danger tbh
+                SetActivator(cam);
+                CallACS0(StrParam(s:"DrawBar_", s:weap));
+                bool success = false;
+                if(!success) {
+                    cyan1 = CheckInventory("SBARCyan")-1;
+                    blue1 = CheckInventory("SBARBlue")-1;
+                    success = (cyan1 != -1 && blue1 != -1);
+                }
+
+                if(!success) {
+                    cyan1 = CheckInventory("SBARMugshotCyan")-1;
+                    blue1 = CheckInventory("SBARMugshotBlue")-1;
+                    success = (cyan1 != -1 && blue1 != -1);
+                }
+
+                if(!success) { // :RussOof:
+                    cyan1 = Dec2Hex(192, 2);
+                    blue1 = Dec2Hex(198, 2);
+                } else {
+                    cyan1 = Dec2Hex(cyan1, 2);
+                    blue1 = Dec2Hex(blue1, 2);
+                }
+
+                SetActivator(-1);
+                CallACS1("core_DrawBar_Clear", cam);
+                destroy(obj);
             } else {
                 cyan1 = Dec2Hex(192, 2);
                 blue1 = Dec2Hex(198, 2);
             }
             destroy(obj);
         }
+        destroy(obj);
+    }
 
-        obj = new(StrParam(s:weap, s:"_SecondBar"));
+    obj = new(StrParam(s:weap, s:"_SecondBar"));
 
-        if(obj) {
-            cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
-            blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
-            destroy(obj);
-        } else { // use the base color for secondbar if secondbar doesn't exist
-            cyan2 = cyan1;
-            blue2 = blue1;
-        }
+    if(obj) {
+        cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
+        blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
+        destroy(obj);
+    } else { // use the base color for secondbar if secondbar doesn't exist
+        cyan2 = cyan1;
+        blue2 = blue1;
+    }
         
+    if(isBuster) {
+        bustBarData[idx][BARDATA_CYAN1] = cyan1;
+        bustBarData[idx][BARDATA_BLUE1] = blue1;
+        bustBarData[idx][BARDATA_CYAN2] = cyan2;
+        bustBarData[idx][BARDATA_BLUE2] = blue2;
+        bustBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(weapIdx);
+        bustBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(weapIdx);
+        bustBarData[idx][BARDATA_SLOT] = getWeaponSlot(weapIdx);
+    } else {
         wepBarData[idx][BARDATA_CYAN1] = cyan1;
         wepBarData[idx][BARDATA_BLUE1] = blue1;
         wepBarData[idx][BARDATA_CYAN2] = cyan2;
