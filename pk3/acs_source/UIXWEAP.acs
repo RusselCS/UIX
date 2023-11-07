@@ -292,12 +292,30 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
     int blue1, cyan1, blue2, cyan2, obj, weapIdx;
 
-
     if(isBuster) {
+        weapIdx = findWeaponByActor(weap);
         if(bustBarData[idx][BARDATA_CHECKED])
             return;
         bustBarData[idx][BARDATA_CHECKED] = true;
         drawBusters[buster_count++] = weap;
+
+        bool escape = false;
+
+        if(!escape)
+            escape = (weapIdx == -1);
+        if(!escape)
+            escape = (StrCmp("", getWeaponAmmoType(weapIdx)) == 0);
+
+        if(escape) { // early escape if there's no ammo here
+            bustBarData[idx][BARDATA_CYAN1] = "";
+            bustBarData[idx][BARDATA_BLUE1] = "";
+            bustBarData[idx][BARDATA_CYAN2] = "";
+            bustBarData[idx][BARDATA_BLUE2] = "";
+            bustBarData[idx][BARDATA_AMMOTYPE1] = "";
+            bustBarData[idx][BARDATA_AMMOTYPE2] = "";
+            bustBarData[idx][BARDATA_SLOT] = 1;
+            return;
+        }
     } else {
         if(wepBarData[idx][BARDATA_CHECKED])
             return;
