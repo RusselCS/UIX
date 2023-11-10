@@ -1,0 +1,154 @@
+#library "UIXSR"
+
+#include "zcommon.acs"
+
+#include "shrtfunc.acs"
+#include "BARLIB.acs"
+
+// [Russ] Sets `turnspeeds` to 0 if the user has SR50 enabled.
+// Just because some users use SR50 doesn't mean we should universally
+// disable keyboard turning.
+//
+script "UIXSR_SRINIT" OPEN CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    if(!GetUserCvar(cln, "UIX_TempStore_SR50Checked")) {
+        SetUserCvar(cln, "UIX_TempStore_SR50Checked", true);
+
+        if(GetUserCvar(cln, "UIX_CL_UsingSR50")) {
+            ConsoleCommand("turnspeeds 0");
+        }
+    }
+}
+
+// [Russ] Drives the SR50 "tailwind" effect
+// 
+script "UIXSR_ENTER" ENTER
+{
+    if(!GetCvar("UIX_SV_SR50Visual"))
+        terminate;
+
+    int pln = PlayerNumber();
+    bool srOn = false;
+
+    until(ActivatorTID() != 0)
+        delay(1);
+
+    int otid = ActivatorTID();
+    int u = UniqueTID();
+
+    SpawnSpotForced("UIXSRWatcher", otid, u, 0);
+    SetActivator(u);
+    Thing_ChangeTID(u, 0);
+    SetPointer(AAPTR_TARGET, otid);
+
+    while(GetActorProperty(otid, APROP_Health) > 0) {
+
+        if(checkSR(GetPlayerInput(pln, INPUT_BUTTONS))) {
+            if(!srOn) {
+                SetActorState(0, "SpawnSR");
+                srOn = true;
+            }
+        } else {
+            if(srOn) {
+                SetActorState(0, "SpawnWait");
+                srOn = false;
+            }
+        }
+        delay(1);
+    }
+    Thing_Remove(0);
+}
+
+script "UIXSR_RESPAWN" RESPAWN { CallACS0("UIXSR_ENTER"); }
+
+function int checkSR(int buttons)
+{
+    if(
+        (buttons & BT_STRAFE)
+        &&
+        (
+            ((buttons & BT_MOVELEFT) && (buttons & BT_LEFT)) ||
+            ((buttons & BT_MOVERIGHT) && (buttons & BT_RIGHT))
+        )
+        &&
+        (
+            (buttons & BT_FORWARD) ||
+            (buttons & BT_BACK)
+        )
+    )
+        return true;
+    return false;
+}
+
+
+// [Russ] Handles yaw of the tailwind particles.
+//
+script "UIXSR_MOMVEC" (void)
+{ 
+    SetResultValue(FixedMul(360, VectorAngle(GetActorVelX(0),GetActorVelY(0))));
+}
+
+function bool kindaCloseTo(int n, int x, int range) {
+    int res = n-x;
+    if(res < 0) res = -res;
+    return res <= range;
+}
+
+// [Russ] Removes the tailwind particles under the following circumstances:
+// - If the SR50 visual is disabled.
+// - If the client is the user *and* is running Software to prevent vision blocking.
+//
+script "UIXSR_SRParticles" (void) CLIENTSIDE
+{
+    if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50Visual")) {
+        Thing_Remove(0);
+        terminate;
+    }
+    if(CallACS0("UIXSR_RemoveForUser")) {
+        Thing_Remove(0);
+        terminate;
+    }
+}
+
+script "UIXSR_RemoveForUser" (void) CLIENTSIDE
+{
+    if(GetCvar("vid_renderer") == 0) {
+        int cam = CheckPlayerCamera(ConsolePlayerNumber());
+        if(CallACS1("UIXSR_CompareTIDs", cam)) {
+            SetResultValue(true);
+        }
+    }
+    SetResultValue(false);
+}
+
+script "UIXSR_CompareTIDs" (int who)
+{
+    SetActivatorToTarget(0);
+    SetResultValue(who == ActivatorTID());
+}
+
+// [Russ] Sets the tailwind particle's offsets
+// 
+#define UIXSR_HORZ 48
+#define UIXSR_VERT 96
+
+script "UIXSR_RelOffsets" (void) CLIENTSIDE
+{
+    int x, y, z;
+    int tid = CallACS1("core_getptrtid", AAPTR_TARGET);
+
+    if(tid != 0) {
+        x = (GetActorX(0) - GetActorX(tid)) >> 16;
+        y = (GetActorY(0) - GetActorY(tid)) >> 16;
+        z = (GetActorZ(0) - GetActorZ(tid)) >> 16;
+    } else {
+        x = random(-UIXSR_HORZ, UIXSR_HORZ);
+        y = random(-UIXSR_HORZ, UIXSR_HORZ);
+        z = random(0, UIXSR_VERT);
+    }
+
+    SetUserVariable(0, "user_x", x);
+    SetUserVariable(0, "user_y", y);
+    SetUserVariable(0, "user_z", z);
+}

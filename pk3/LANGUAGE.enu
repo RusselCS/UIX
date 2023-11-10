@@ -1,0 +1,4 @@
+[enu default]
+
+UIX_MNU_SR50_1 = "\cq(also disables turn keys; restart required)";
+UIX_MNU_SR50_2 = "\cqReplace your strafe keys:";

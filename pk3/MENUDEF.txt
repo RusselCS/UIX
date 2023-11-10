@@ -47,6 +47,15 @@ OptionMenu "UIXOptions"
 	// TextField "Cossack Team text color",			"trill_pb_textcolor2"
 	// TextField "King Team text color",			"trill_pb_textcolor3"
 
+	StaticText " "
+	StaticText "Lockstep (SR50)", 1
+	StaticText "$UIX_MNU_SR50_1", 1
+	Option "Enable Lockstep", "UIX_CL_UsingSR50", "OnOff"
+	StaticText "$UIX_MNU_SR50_2", 1
+	Control "Strafe Left (LS)", "+left2"
+	Control "Strafe Right (LS)", "+right2"
+	Control "Activate Lockstep", "+sr"
+
     StaticText " "
 	StaticText  "Weapon Bar", 1
 	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"

@@ -4,6 +4,11 @@ user bool UIT_CL_Enable = true;
 user bool UIT_CL_EnableTeamInfo = true;
 user bool UIT_CL_EnableWeaponBar = true;
 
+user bool UIX_CL_UsingSR50 = false;
+user noarchive bool UIX_TempStore_SR50Checked = false;
+user bool UIX_CL_SR50Visual = true;
+server noarchive bool UIX_SV_SR50Visual = true;
+
 user bool UIX_CL_WEAPBAR = true;
 user int UIX_CL_WEAPBAROFFSX = 500;
 user int UIX_CL_WEAPBAROFFSY = 500;
