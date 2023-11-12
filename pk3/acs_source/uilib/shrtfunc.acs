@@ -45,7 +45,30 @@ function void displayBar_(str msg, str fillPiece, str empPiece, int id1, int id2
 {
 	SetFont(fillPiece);
 	displayMessageL(msg, id1, offsX, offsY, scaleX, scaleY, alpha);
-	displayIconL(empPiece, id2, offsX, offsY, scaleX, scaleY, alpha);
+	if(StrLen(empPiece) > 0)
+		displayIconL(empPiece, id2, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int max, int id1, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	bool vertical = GetChar(fillMsg, 1) == '\n';
+	int len;
+	int maxLen = StrLen(fillMsg);
+	if(max == 0) {
+		len = maxLen;
+	} else {
+		len = cur * maxLen / max;
+	}
+
+	str res;
+
+	if(vertical) {
+		res = StrParam(s:StrLeft(empMsg, maxLen-len), s:StrRight(fillMsg, len));
+	} else {
+		res = StrParam(s:StrLeft(fillMsg, len), s:StrRight(empMsg, maxLen-len));
+	}
+
+	displayBar_(res, fillPiece, "", id1, 0, offsX, offsY, scaleX, scaleY, alpha);
 }
 
 function void displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
@@ -228,4 +251,13 @@ function int countHexDigits(int n) {
 		n = n >> 4;
 	}
 	return count;
+}
+
+// stolen from cbm library since i don't want to populate this myself
+global int 31: cbmBeef;
+function bool cbmx10(void) {
+	if(cbmBeef == 0) {
+		cbmBeef = SpawnForced("Beef_CBMModderSupport_H", 0, 0, 0, 0, 0) + 1;
+	}
+	return cbmBeef - 1;
 }

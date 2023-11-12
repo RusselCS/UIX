@@ -1,0 +1,17 @@
+UIXArrowBright {
+        #f8b800 #f8b800 0 256
+    Console:
+        #f8b800 #f8b800 0 256
+}
+
+UIXArrowMid {
+    #887000 #887000 0 256
+Console:
+    #887000 #887000 0 256
+}
+
+UIXArrowDark {
+    #784000 #784000 0 256
+Console:
+    #784000 #784000 0 256
+}

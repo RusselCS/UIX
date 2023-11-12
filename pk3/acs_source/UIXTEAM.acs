@@ -5,29 +5,60 @@
 
 #import "8BDT.acs"
 
-#define TEAMINFO_ID_OFFS    1000
-#define TEAMINFO_ID_NAME    100
-#define TEAMINFO_ID_HP1     200
-#define TEAMINFO_ID_HP2     300
-#define TEAMINFO_ID_HP3     400
-#define TEAMINFO_ID_WEI     500
-#define TEAMINFO_ID_WE1     600
-#define TEAMINFO_ID_WE2     700
-#define TEAMINFO_ID_LOC     800
+#define TEAMINFO_ID_OFFS    10000
+#define TEAMINFO_ID_NAME    0100
+#define TEAMINFO_ID_HP1     0200
+#define TEAMINFO_ID_HP2     0300
+#define TEAMINFO_ID_HP3     0400
+#define TEAMINFO_ID_WEI     0500
+#define TEAMINFO_ID_WE1     0600
+#define TEAMINFO_ID_WE2     0700
+#define TEAMINFO_ID_LOC     0800
+#define TEAMINFO_ID_ARR1    0900
+#define TEAMINFO_ID_ARR2    1000
+#define TEAMINFO_ID_ARR3    1100
+#define TEAMINFO_ID_ARR4    1200
+#define TEAMINFO_ID_ARR5    1300
+#define TEAMINFO_ID_ARR6    1400
+#define TEAMINFO_ID_MUG     1500
+
+#define TEAMINFO_BAR_FONT 0
+#define TEAMINFO_BAR_START 2
+#define TEAMINFO_BAR_MAX 5
+
+#define TEAMINFO_BARMAX 100
+
+str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][2] = {
+    // Fonts
+    {"UXHPHORZ", "UXHPVERT"},
+    // Empty
+    {"________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_"},
+    // 000-100
+    {"ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"},
+    // 100-200
+    {"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD"},
+    // 200-300
+    {"EFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEF", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF"},
+    // 300-400
+    {"GHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGH", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH"},
+    // 400-500
+    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
+    // copy the last one here to buffer the "max health"
+    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
+};
 
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
     SetActivator(cam);
-    int team = GetPlayerInfo(cpn, PLAYERINFO_TEAM);
+    int team = GetPlayerInfo(PlayerNumber(), PLAYERINFO_TEAM);
     int bx = -600;
     int by = 300;
 
     int curPlay = 0;
 
-    int yOffs = -48;
+    int yOffs = -64;
 
     int msgId = BASE_ID + TEAMINFO_ID_OFFS;
-
 
     if(team == 255) { // Spectator
 
@@ -42,25 +73,60 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             if(GetPlayerInfo(i, PLAYERINFO_TEAM) != team)
                 continue;
 
-            int curId = msgId + TEAMINFO_ID_OFFS + curPlay;
+            int curId = msgId + curPlay;
             int plrTid = i + PLN_TID_SHRT;
             
-            str loc = GetActorSectorLocation(i+PLN_TID_SHRT, false);
             int dist = (dist3D(0, i+PLN_TID_SHRT)) / 32;
+            str loc = GetActorSectorLocation(i+PLN_TID_SHRT, false);
 
             SetFont("SMALLFONT");
-            displayMessageL(StrParam(n:i+1, s:" (", i:dist, s:"m - ", s:loc, s:")"), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
+            if(StrLen(loc) > 0) {
+                displayMessageL(StrParam(n:i+1, s:" \cf(", s:loc, s:")"), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
+            } else {
+                displayMessageL(StrParam(n:i+1), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
+            }
+
             int barX = bx;
             int barY = by + (curPlay * yOffs) + 16;
 
             int chp = GetActorProperty(plrTid, AProp_Health);
-            int mhp = GetActorProperty(plrTid, AProp_SpawnHealth);
-            if(mhp == 0)
-                mhp = 100;
+            
+            int font = 0;
 
-            displayBar(STR_AST_H, "UIXHPFH", "UIXHPBH", chp, mhp, curId+TEAMINFO_ID_HP1, curId+TEAMINFO_ID_HP2, barX, barY, 2.0, 2.0, 1.0);
+            if(cbmx10())
+                chp /= 10;
 
-            int wep = findWeaponByActor(getPlayerWeapon(i));
+            if(chp > 500)
+                chp = 500;
+
+            int tier, rem;
+
+            if(chp <= 0) {
+                tier = 0;
+                rem = 0;
+            } else {
+                tier = chp/TEAMINFO_BARMAX;
+                rem = chp%TEAMINFO_BARMAX;
+            }
+
+            displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][font], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][font], TeamBarsStrings[TEAMINFO_BAR_FONT][font], rem, TEAMINFO_BARMAX, curId+TEAMINFO_ID_HP1, barX, barY, 3.0, 3.0, 1.0);
+            
+            int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
+            int size = 20;
+            int arrOffs = 24;
+            int baseScale = 2.6;
+            int scaleDiff = 0.6;
+            SetFont("SMALLFONT");
+            displayMessage(StrParam(s:"\ca", i:dist, s:"m"), curId+TEAMINFO_ID_ARR1, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
+            displayMessage("\c[UIXArrowBright]+", curId+TEAMINFO_ID_ARR2, -4+bx-arrOffs+FixedMul(cos(baseYaw),       size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw),       size), baseScale, baseScale, 1.0);
+            displayMessage("\c[UIXArrowMid]+", curId+TEAMINFO_ID_ARR3, -4+bx-arrOffs+FixedMul(cos(baseYaw+0.1), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw+0.1), size), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
+            displayMessage("\c[UIXArrowMid]+", curId+TEAMINFO_ID_ARR4, -4+bx-arrOffs+FixedMul(cos(baseYaw-0.1), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw-0.1), size), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
+            displayMessage("\c[UIXArrowDark]+", curId+TEAMINFO_ID_ARR5, -4+bx-arrOffs+FixedMul(cos(baseYaw+0.18), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw+0.18), size), baseScale-2*scaleDiff, baseScale-2*scaleDiff, 1.0);
+            displayMessage("\c[UIXArrowDark]+", curId+TEAMINFO_ID_ARR6, -4+bx-arrOffs+FixedMul(cos(baseYaw-0.18), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw-0.18), size), baseScale-2*scaleDiff, baseScale-2*scaleDiff, 1.0);
+            
+            str face = getMugshotGraphicFromTID(plrTid);
+            if(StrLen(face))
+                displayIcon(face, curId+TEAMINFO_ID_MUG, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), 6.0, 6.0, 1.0);
 
             // if(wep != -1) {
             //     int ammo = getWeaponAmmoType(wep);
@@ -74,4 +140,17 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             curPlay++;
         }
     }
+}
+
+// from pingbutton
+function str getMugshotGraphicFromTID(int tid) {
+	str class = GetActorClass(tid);
+
+	int u = UniqueTID();
+	if(!SpawnForced(StrParam(s:"PBMug_", s:class), 0, 0, 0, u, 0)) {
+		return "";
+	}
+	Thing_Remove(u);
+
+	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
