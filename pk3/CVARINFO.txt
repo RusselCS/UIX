@@ -17,6 +17,9 @@ user bool UIX_CL_WEAPBARMIRROR = false;
 user bool UIX_CL_WEAPBARDIR = false; // false = vertical, true = horizontal
 user float UIX_CL_WEAPBARALPHA = 1.0;
 
+user float UIX_CL_TEAMINFOSCALE = 2.0;
+user float UIX_CL_TEAMINFOALPHA = 1.0;
+
 // name storage (pain)
 local noarchive string temp_uix_namestore_horz_0 = "";
 local noarchive string temp_uix_namestore_vert_0 = "";

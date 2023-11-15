@@ -47,18 +47,42 @@ str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][2] = {
     {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
 };
 
+#define TEAMINFO_NAMEHEIGHT 8
+
+#define TEAMINFO_BARHEIGHT 8
+#define TEAMINFO_BARWIDTH 64
+
+#define TEAMINFO_COMPASS 32
+
+#define TEAMINFO_MUGSHOT 28
+
+#define TEAMINFO_BUFFER 1
+
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
+    bool drawTeam = true;
+    if(!drawTeam)
+        terminate;
+
     SetActivator(cam);
     int team = GetPlayerInfo(PlayerNumber(), PLAYERINFO_TEAM);
-    int bx = -600;
-    int by = 300;
+    int startX = -600;
+    int startY = 300;
+
+    int barSep = -96;
 
     int curPlay = 0;
 
-    int yOffs = -96;
-
     int msgId = BASE_ID + TEAMINFO_ID_OFFS;
+
+    bool drawName = true;
+    bool drawHealth = true;
+    bool drawLocation = true;
+    bool drawCompass = false; // this keeps looking fugly and if locations exist anyway i can just go with it
+    bool drawMugshot = true;
+
+    int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
 
     if(team == 255) { // Spectator
 
@@ -75,59 +99,85 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             int curId = msgId + curPlay;
             int plrTid = i + PLN_TID_SHRT;
-            
-            int dist = (dist3D(0, i+PLN_TID_SHRT)) / 32;
-            str loc = GetActorSectorLocation(i+PLN_TID_SHRT, false);
 
-            SetFont("SMALLFONT");
-            if(StrLen(loc) > 0) {
-                displayMessageL(StrParam(n:i+1, s:" \cf(", s:loc, s:")"), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
-            } else {
-                displayMessageL(StrParam(n:i+1), curId+TEAMINFO_ID_NAME, bx, by + (curPlay * yOffs), 2.0, 2.0, 1.0);
+            int yOffs = FixedMul(baseScale, curPlay * (TEAMINFO_COMPASS + TEAMINFO_BUFFER));
+
+            int baseX = startX;
+            int baseY = startY - yOffs;
+
+            int nameX = baseX;
+            int nameY = baseY;
+
+            int barX = baseX;
+            int barY = baseY + FixedMul(baseScale, TEAMINFO_NAMEHEIGHT);
+
+            int compassX = baseX-FixedMul(baseScale, TEAMINFO_COMPASS);
+            int compassY = baseY+FixedMul(baseScale, TEAMINFO_COMPASS);
+
+            int mugX = baseX-FixedMul(baseScale, (TEAMINFO_MUGSHOT/2+1));
+            int mugY = baseY+FixedMul(baseScale, (TEAMINFO_MUGSHOT/2-4));
+
+            if(drawName) {
+                SetFont("SMALLFONT");
+                str loc = 0;
+                if(drawLocation)
+                    loc = rotateLocation(i+PLN_TID_SHRT, false);
+
+                if(loc != 0) {
+                    displayMessageL(StrParam(n:i+1, s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                } else {
+                    displayMessageL(StrParam(n:i+1), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                }
             }
 
-            int barX = bx;
-            int barY = by + (curPlay * yOffs) + 16;
+            if(drawHealth) {
+                int chp = GetActorProperty(plrTid, AProp_Health);
+                int vertical = 0;
 
-            int chp = GetActorProperty(plrTid, AProp_Health);
-            
-            int font = 0;
+                if(cbmx10())
+                    chp /= 10;
 
-            if(cbmx10())
-                chp /= 10;
+                if(chp > 500)
+                    chp = 500;
 
-            if(chp > 500)
-                chp = 500;
+                int tier, rem;
 
-            int tier, rem;
+                if(chp <= 0) {
+                    tier = 0;
+                    rem = 0;
+                } else {
+                    tier = chp/TEAMINFO_BARMAX;
+                    rem = chp%TEAMINFO_BARMAX;
+                }
 
-            if(chp <= 0) {
-                tier = 0;
-                rem = 0;
-            } else {
-                tier = chp/TEAMINFO_BARMAX;
-                rem = chp%TEAMINFO_BARMAX;
+                int barScale = FixedMul(baseScale, 1.5);
+                displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][vertical], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][vertical], TeamBarsStrings[TEAMINFO_BAR_FONT][vertical], rem, TEAMINFO_BARMAX, curId+TEAMINFO_ID_HP1, barX, barY, barScale, barScale, baseAlpha);
             }
 
-            displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][font], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][font], TeamBarsStrings[TEAMINFO_BAR_FONT][font], rem, TEAMINFO_BARMAX, curId+TEAMINFO_ID_HP1, barX, barY, 3.0, 3.0, 1.0);
-            
-            int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
-            int size = 32;
-            int arrOffs = 24;
-            int baseScale = 2.6;
-            int scaleDiff = 0.6;
-            SetFont("SMALLFONT");
-            displayMessage(StrParam(s:"\ca", i:dist, s:"m"), curId+TEAMINFO_ID_ARR1, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
-            displayMessage("\c[UIXArrowBright]+", curId+TEAMINFO_ID_ARR2, -4+bx-arrOffs+FixedMul(cos(baseYaw),       size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw),       size), baseScale, baseScale, 1.0);
-            displayMessage("\c[UIXArrowMid]+", curId+TEAMINFO_ID_ARR3, -4+bx-arrOffs+FixedMul(cos(baseYaw+0.1), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw+0.1), size), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
-            displayMessage("\c[UIXArrowMid]+", curId+TEAMINFO_ID_ARR4, -4+bx-arrOffs+FixedMul(cos(baseYaw-0.1), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw-0.1), size), baseScale-scaleDiff, baseScale-scaleDiff, 1.0);
-            displayMessage("\c[UIXArrowDark]+", curId+TEAMINFO_ID_ARR5, -4+bx-arrOffs+FixedMul(cos(baseYaw+0.18), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw+0.18), size), baseScale-2*scaleDiff, baseScale-2*scaleDiff, 1.0);
-            displayMessage("\c[UIXArrowDark]+", curId+TEAMINFO_ID_ARR6, -4+bx-arrOffs+FixedMul(cos(baseYaw-0.18), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw-0.18), size), baseScale-2*scaleDiff, baseScale-2*scaleDiff, 1.0);
-            
-            str face = getMugshotGraphicFromTID(plrTid);
-            if(face != 0)
-                if(StrLen(face) > 0)
-                    displayIcon(face, curId+TEAMINFO_ID_MUG, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), 6.0, 6.0, 1.0);
+            if(drawCompass) {
+                int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
+                int size = TEAMINFO_COMPASS/2;
+                int compassScale = FixedMul(baseScale, 1.3);
+                int compassScaleDiff = FixedMul(baseScale, 0.3);
+
+                int dist = (dist3D(0, i+PLN_TID_SHRT)) / 32;
+
+                SetFont("SMALLFONT");
+                displayMessage(StrParam(s:"\ca", i:dist, s:"m"), curId+TEAMINFO_ID_ARR1, compassX, compassY, compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
+                displayMessage("\c[UIXArrowBright]+", curId+TEAMINFO_ID_ARR2, compassX+FixedMul(cos(baseYaw),      size), compassY+FixedMul(sin(baseYaw),      size), compassScale, compassScale, baseAlpha);
+                displayMessage("\c[UIXArrowMid]+",    curId+TEAMINFO_ID_ARR3, compassX+FixedMul(cos(baseYaw+0.1),  size), compassY+FixedMul(sin(baseYaw+0.1),  size), compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
+                displayMessage("\c[UIXArrowMid]+",    curId+TEAMINFO_ID_ARR4, compassX+FixedMul(cos(baseYaw-0.1),  size), compassY+FixedMul(sin(baseYaw-0.1),  size), compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
+                displayMessage("\c[UIXArrowDark]+",   curId+TEAMINFO_ID_ARR5, compassX+FixedMul(cos(baseYaw+0.18), size), compassY+FixedMul(sin(baseYaw+0.18), size), compassScale-2*compassScaleDiff, compassScale-2*compassScaleDiff, baseAlpha);
+                displayMessage("\c[UIXArrowDark]+",   curId+TEAMINFO_ID_ARR6, compassX+FixedMul(cos(baseYaw-0.18), size), compassY+FixedMul(sin(baseYaw-0.18), size), compassScale-2*compassScaleDiff, compassScale-2*compassScaleDiff, baseAlpha);
+            }
+
+            if(drawMugshot) {
+                str face = getMugshotGraphicFromTID(plrTid);
+                int faceScale = FixedMul(baseScale, 3.0);
+                if(face != 0)
+                    if(StrLen(face) > 0)
+                        displayIcon(face, curId+TEAMINFO_ID_MUG, mugX, mugY, faceScale, faceScale, baseAlpha);
+            }
 
             // if(wep != -1) {
             //     int ammo = getWeaponAmmoType(wep);
@@ -277,4 +327,41 @@ function str rebuildName(str name) {
     }
 
     return outName;
+}
+
+#define LOC_SIZE_LIMIT 1000
+int LOC_SIZE = 0;
+
+str locs[LOC_SIZE_LIMIT][2];
+
+function str rotateLocation(int tid, int vert)
+{
+    str loc = GetActorSectorLocation(tid, false);
+
+    if(StrLen(loc) == 0)
+        return 0;
+
+    loc = StrParam(s:"\cf(", s:loc, s:"\cf)");
+
+    if(!vert)
+        return loc;
+    
+    int idx = findLoc(loc);
+
+    if(idx == -1) {
+        locs[LOC_SIZE][0] = loc;
+        locs[LOC_SIZE][1] = rebuildName(loc);
+        idx = LOC_SIZE++;
+    }
+
+    return locs[idx][1];
+}
+
+function int findLoc(str loc) {
+    for(int i = 0; i < LOC_SIZE; i++) {
+        if(StrCmp(loc, locs[i][0])==0) {
+            return i;
+        }
+    }
+    return -1;
 }
