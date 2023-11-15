@@ -1,3 +1,9 @@
+// rotated name font for teaminfo (cursed)
+ROTAFONT
+{
+    Template STRFN%03d
+}
+
 // HP bars (blessed)
 UXHPHORZ {
 	A UXTEMHPA

@@ -56,7 +56,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
     int curPlay = 0;
 
-    int yOffs = -64;
+    int yOffs = -96;
 
     int msgId = BASE_ID + TEAMINFO_ID_OFFS;
 
@@ -112,7 +112,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][font], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][font], TeamBarsStrings[TEAMINFO_BAR_FONT][font], rem, TEAMINFO_BARMAX, curId+TEAMINFO_ID_HP1, barX, barY, 3.0, 3.0, 1.0);
             
             int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
-            int size = 20;
+            int size = 32;
             int arrOffs = 24;
             int baseScale = 2.6;
             int scaleDiff = 0.6;
@@ -125,8 +125,9 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             displayMessage("\c[UIXArrowDark]+", curId+TEAMINFO_ID_ARR6, -4+bx-arrOffs+FixedMul(cos(baseYaw-0.18), size), by+arrOffs+(curPlay * yOffs)+FixedMul(sin(baseYaw-0.18), size), baseScale-2*scaleDiff, baseScale-2*scaleDiff, 1.0);
             
             str face = getMugshotGraphicFromTID(plrTid);
-            if(StrLen(face))
-                displayIcon(face, curId+TEAMINFO_ID_MUG, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), 6.0, 6.0, 1.0);
+            if(face != 0)
+                if(StrLen(face) > 0)
+                    displayIcon(face, curId+TEAMINFO_ID_MUG, -4+bx-arrOffs, by+arrOffs+(curPlay * yOffs), 6.0, 6.0, 1.0);
 
             // if(wep != -1) {
             //     int ammo = getWeaponAmmoType(wep);
@@ -153,4 +154,127 @@ function str getMugshotGraphicFromTID(int tid) {
 	Thing_Remove(u);
 
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
+}
+
+function str getPlayerName(int plr, int vert)
+{
+    str name = StrParam(n:1+plr);
+
+    if(!vert)
+        return name;
+
+    bool update = false;
+
+    str cvhorz = StrParam(s:"temp_uix_namestore_horz_", i:plr);
+    str cvvert = StrParam(s:"temp_uix_namestore_vert_", i:plr);
+
+    if(StrICmp(GetCvarString(cvhorz), name) != 0)
+        update = true;
+
+    if(update) {
+        str vertName;
+
+        vertName = rebuildName(name);
+
+        SetCvarString(cvhorz, name);
+        SetCvarString(cvvert, vertName);
+        return vertName;
+    }
+    return GetCvarString(cvvert);
+}
+
+#define NAME_MAX 96
+#define CHAR_COLOR 28
+
+int nameSize;
+int nameBuilder[NAME_MAX];
+
+int nameColorless[NAME_MAX];
+str colorSlots[NAME_MAX]; // no idea what size this should be tbh
+int colorPos[NAME_MAX];
+
+function str rebuildName(str name) {
+    strCpy(a:nameBuilder, name);
+    nameSize = StrLen(name);
+
+    str outName = "";
+
+    // for(int i = 0; i < nameSize; i++) {
+    //     if(isAlphanumeric(nameBuilder[i])) {
+    //         outName = StrParam(s:outName, c:nameBuilder[i]);
+    //     } else {
+    //         outName = StrParam(s:outName, s:"[", i:nameBuilder[i], s:"]");
+    //     }
+    // }
+
+    // Log(s:outName);
+
+    int inColor = 0;
+    int colorStart;
+
+    int colorLessSize = 0;
+    int colorSize = 0;
+
+    int i;
+
+    for(i = 0; i < nameSize; i++) {
+        switch(inColor) {
+            case 0:
+                if(nameBuilder[i] == CHAR_COLOR) {
+                    colorPos[colorSize] = colorLessSize;
+                    inColor = 1;
+                } else {
+                    nameColorless[colorLessSize++] = nameBuilder[i];
+                }
+                break;
+            case 1: // check next char
+                if(nameBuilder[i] == '[') {
+                    colorStart = i;
+                    inColor = 2;
+                } else {
+                    colorSlots[colorSize++] = StrParam(c:nameBuilder[i]);
+                    inColor = 0;
+                }
+                break;
+            case 2: // in big string
+                if(nameBuilder[i] == ']') {
+                    colorSlots[colorSize++] = StrMid(name, colorStart, i-colorStart+1);
+                    // Log(s:"Ending color tag: ", s:colorSlots[colorSize-1], s:" - ", i:StrLen(colorSlots[colorSize-1]));
+                    inColor = 0;
+                }
+                break;
+        }
+    }
+
+    // for(i = 0; i < colorSize; i++) {
+    //     Log(s:"Slot ", i:i, s:" - @", i:colorPos[i], s:": ", s:colorSlots[i]);
+    // }
+
+    // for(i = 0; i < colorLessSize; i++) {
+    //     Log(c:nameColorless[i]);
+    // }
+
+    colorSize--;
+    str ccblbsc = "-"; // currentColorBecauseLineBreaksStopColor - because acc won't let me compile with this long a var
+
+    for(i = colorLessSize; i >= 0; i--) {
+
+        if(nameColorless[i] != 0) {
+            if(nameColorless[i] == ' ') {
+                outName = StrParam(s:outName, c:'\n');
+            } else {
+                outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
+            }
+        }
+        nameColorless[i] = 0;
+
+        if(colorSize > 0) {
+            if(i == colorPos[colorSize]) {
+                ccblbsc = colorSlots[colorSize-1];
+                colorSize--;
+            }
+        }
+    }
+
+    return outName;
 }
