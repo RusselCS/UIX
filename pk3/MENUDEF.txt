@@ -1,6 +1,5 @@
 OptionMenu "UIXOptions"
 {
-	// Title "UI Extensions"
 	// StaticText " "
 	// StaticText  "Notification Option", 1
 	// Option "Options notification", "trill_pb_notification", "OnOff"
@@ -46,6 +45,8 @@ OptionMenu "UIXOptions"
 	// TextField "Wily Team text color",			"trill_pb_textcolor1"
 	// TextField "Cossack Team text color",			"trill_pb_textcolor2"
 	// TextField "King Team text color",			"trill_pb_textcolor3"
+
+	Title "UI Extensions"
 
 	StaticText " "
 	StaticText "Scuttlerun (SR50)", 1

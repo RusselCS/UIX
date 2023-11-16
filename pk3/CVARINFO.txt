@@ -1,6 +1,6 @@
 
-// UITweaks CVars
-user bool UIT_CL_Enable = true;
+// UIExtensions CVars
+user bool UIX_CL_Enable = true;
 
 user bool UIX_CL_UsingSR50 = true;
 user noarchive bool UIX_TempStore_SR50Checked = false;
