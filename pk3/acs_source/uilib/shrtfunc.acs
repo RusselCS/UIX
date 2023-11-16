@@ -1,7 +1,7 @@
 // "Shortcut" functions
 
-#define ALIGN_RIGHT 0.1
-#define ALIGN_LEFT 0.2
+#define ALIGN_RIGHT 0.24
+#define ALIGN_LEFT 0.1
 
 #define ALIGN_BOTTOM 0.1
 #define ALIGN_TOP 0.2
@@ -49,7 +49,7 @@ function void displayBar_(str msg, str fillPiece, str empPiece, int id1, int id2
 		displayIconL(empPiece, id2, offsX, offsY, scaleX, scaleY, alpha);
 }
 
-function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int max, int id1, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int max, int mirrored, int id1, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
 	bool vertical = GetChar(fillMsg, 1) == '\n';
 	int len;
@@ -62,7 +62,7 @@ function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int 
 
 	str res;
 
-	if(vertical) {
+	if(vertical || mirrored) {
 		res = StrParam(s:StrLeft(empMsg, maxLen-len), s:StrRight(fillMsg, len));
 	} else {
 		res = StrParam(s:StrLeft(fillMsg, len), s:StrRight(empMsg, maxLen-len));
@@ -104,8 +104,32 @@ function void displayMessageL(str msg, int id, int offsX, int offsY, int scaleX,
 	int resY = FixedDiv(BASE_RES_Y, scaleY);
 	offsX = FixedDiv(offsX, scaleX);
 	offsY = FixedDiv(offsY, scaleY);
+	lastmsgX = 1.0*(resX/2)+1.0*offsX + ALIGN_LEFT;
+	lastmsgY = 1.0*(resY/2)+1.0*offsY + ALIGN_BOTTOM;
+	SetHudSize(resX, resY, 0);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
+}
+
+function void displayMessageR(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
 	lastmsgX = 1.0*(resX/2)+1.0*offsX + ALIGN_RIGHT;
 	lastmsgY = 1.0*(resY/2)+1.0*offsY + ALIGN_BOTTOM;
+	SetHudSize(resX, resY, 0);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
+}
+
+function void displayMessageU(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	lastmsgX = 1.0*(resX/2)+1.0*offsX;
+	lastmsgY = 1.0*(resY/2)+1.0*offsY + 0.18;
 	SetHudSize(resX, resY, 0);
 	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
 }

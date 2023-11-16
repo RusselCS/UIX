@@ -5,6 +5,8 @@
 
 #import "8BDT.acs"
 
+global int 4: ServerMAX;
+
 #define TEAMINFO_ID_OFFS    10000
 #define TEAMINFO_ID_NAME    0100
 #define TEAMINFO_ID_HP1     0200
@@ -28,111 +30,216 @@
 
 #define TEAMINFO_BARMAX 100
 
-str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][2] = {
+#define horizontal 0
+#define vertical 1
+
+#define straight 0
+#define flipped 2
+
+str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][4] = {
     // Fonts
-    {"UXHPHORZ", "UXHPVERT"},
+    {"UXHPHORZ", "UXHPVERT", "UXHPHORZ", "UXHPVERT"},
     // Empty
-    {"________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_"},
+    {"________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_", "________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_"},
     // 000-100
-    {"ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"},
+    {"ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB", "BABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABA", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"},
     // 100-200
-    {"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD"},
+    {"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD", "DCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDC", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD"},
     // 200-300
-    {"EFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEF", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF"},
+    {"EFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEF", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF", "FEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFE", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF"},
     // 300-400
-    {"GHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGH", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH"},
+    {"GHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGH", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH", "HGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHG", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH"},
     // 400-500
-    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
+    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ", "JIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJI", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
     // copy the last one here to buffer the "max health"
-    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
+    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ", "JIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJI", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
 };
-
-#define TEAMINFO_NAMEHEIGHT 8
-
-#define TEAMINFO_BARHEIGHT 8
-#define TEAMINFO_BARWIDTH 64
-
-#define TEAMINFO_COMPASS 32
-
-#define TEAMINFO_MUGSHOT 28
-
-#define TEAMINFO_BUFFER 1
 
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
-    bool drawTeam = true;
-    if(!drawTeam)
+    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
+
+    int stackOffs = 33;
+
+    if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK"))
+        stackOffs *= -1;
+
+    if(baseAlpha == 0.0)
         terminate;
 
     SetActivator(cam);
-    int team = GetPlayerInfo(PlayerNumber(), PLAYERINFO_TEAM);
-    int startX = -600;
-    int startY = 300;
+    int pln = PlayerNumber();
+    SetActivator(-1);
 
-    int barSep = -96;
+    if(pln == -1)
+        terminate;
+
+    int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
+    // Log(i:team, s:" cam: ", i:cam);
+
+    int startX = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
+    int startY = -GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
+    int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+
+    SetFont("SMALLFONT");
 
     int curPlay = 0;
 
     int msgId = BASE_ID + TEAMINFO_ID_OFFS;
 
-    bool drawName = true;
-    bool drawHealth = true;
-    bool drawLocation = true;
-    bool drawCompass = false; // this keeps looking fugly and if locations exist anyway i can just go with it
-    bool drawMugshot = true;
-
-    int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
-    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
+    bool drawName = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
+    bool drawHealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
+    bool drawLocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
+    bool drawCompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
+    bool drawMugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
 
     if(team == 255) { // Spectator
 
     } else {
-        for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
-            if(i == cpn)
+        for(int i = 0; i < ServerMAX; i++) {
+            // Log(i:i, s:" == ", i:pln);
+            if(i == pln)
                 continue;
 
+            // Log(i:i, s:"in game? ", i:PlayerInGame(i));
             if(!PlayerInGame(i))
                 continue;
             
+            // Log(i:i, s:" team: ", i:GetPlayerInfo(i, PLAYERINFO_TEAM), s:" == ", i:team);
             if(GetPlayerInfo(i, PLAYERINFO_TEAM) != team)
                 continue;
+
+            // Log(s:"Made it into main for player ", i:i, s:" while viewing player ", i:pln);
+
+            // many variables
+            int xOffs, yOffs, baseX, baseY, nameX, nameY, barX, barY, compassX, compassY, mugX, mugY;
 
             int curId = msgId + curPlay;
             int plrTid = i + PLN_TID_SHRT;
 
-            int yOffs = FixedMul(baseScale, curPlay * (TEAMINFO_COMPASS + TEAMINFO_BUFFER));
+            int orientation = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
+            int mirrored = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR") * 2;
 
-            int baseX = startX;
-            int baseY = startY - yOffs;
+            if(orientation == horizontal) {
+                if(mirrored == straight) {
+                    xOffs = 0;
+                    yOffs = FixedMul(baseScale, curPlay * stackOffs);
 
-            int nameX = baseX;
-            int nameY = baseY;
+                    baseX = startX;
+                    baseY = startY - yOffs;
 
-            int barX = baseX;
-            int barY = baseY + FixedMul(baseScale, TEAMINFO_NAMEHEIGHT);
+                    nameX = baseX;
+                    nameY = baseY;
 
-            int compassX = baseX-FixedMul(baseScale, TEAMINFO_COMPASS);
-            int compassY = baseY+FixedMul(baseScale, TEAMINFO_COMPASS);
+                    barX = baseX;
+                    barY = baseY + FixedMul(baseScale, 8);
 
-            int mugX = baseX-FixedMul(baseScale, (TEAMINFO_MUGSHOT/2+1));
-            int mugY = baseY+FixedMul(baseScale, (TEAMINFO_MUGSHOT/2-4));
+                    compassX = baseX+FixedMul(baseScale, 32);
+                    compassY = baseY+FixedMul(baseScale, 32);
+
+                    mugX = baseX-FixedMul(baseScale, 15);
+                    mugY = baseY+FixedMul(baseScale, 10);
+                } else {
+                    xOffs = 0;
+                    yOffs = FixedMul(baseScale, curPlay * stackOffs);
+
+                    baseX = startX;
+                    baseY = startY - yOffs;
+
+                    nameX = baseX + FixedMul(baseScale, 32);
+                    nameY = baseY;
+
+                    barX = baseX - FixedMul(baseScale, 64);
+                    barY = baseY + FixedMul(baseScale, 8);
+
+                    compassX = baseX+FixedMul(baseScale, 32);
+                    compassY = baseY+FixedMul(baseScale, 32);
+
+                    mugX = baseX+FixedMul(baseScale, 48);
+                    mugY = baseY+FixedMul(baseScale, 10);
+                }
+            } else {
+                if(mirrored == straight) {
+                    xOffs = FixedMul(baseScale, curPlay * stackOffs);
+                    yOffs = 0;
+
+                    baseX = startX + xOffs;
+                    baseY = startY;
+
+                    nameX = baseX;
+                    nameY = baseY;
+
+                    barX = baseX + FixedMul(baseScale, 8);
+                    barY = baseY;
+
+                    compassX = baseX;
+                    compassY = baseY;
+
+                    mugX = baseX+FixedMul(baseScale, 12);
+                    mugY = baseY-FixedMul(baseScale, 16);
+                } else {
+                    xOffs = FixedMul(baseScale, curPlay * stackOffs);
+                    yOffs = 0;
+
+                    baseX = startX + xOffs;
+                    baseY = startY;
+
+                    nameX = baseX;
+                    nameY = baseY;
+
+                    barX = baseX + FixedMul(baseScale, 8);
+                    barY = baseY - FixedMul(baseScale, 98);
+
+                    compassX = baseX;
+                    compassY = baseY;
+
+                    mugX = baseX+FixedMul(baseScale, 12);
+                    mugY = baseY+FixedMul(baseScale, 16);
+                }
+            }
 
             if(drawName) {
-                SetFont("SMALLFONT");
                 str loc = 0;
                 if(drawLocation)
-                    loc = rotateLocation(i+PLN_TID_SHRT, false);
+                    loc = rotateLocation(i+PLN_TID_SHRT, orientation);
 
-                if(loc != 0) {
-                    displayMessageL(StrParam(n:i+1, s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                if(orientation == horizontal) {
+                    SetFont("SMALLFONT");
+                    if(mirrored == straight) {
+                        if(loc != 0) {
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        } else {
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        }
+                    } else {
+                        if(loc != 0) {
+                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        } else {
+                            displayMessageR(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        }
+                    }
                 } else {
-                    displayMessageL(StrParam(n:i+1), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                    SetFont("ROTAFONT");
+                    if(mirrored == straight) {
+                        if(loc != 0) {
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        } else {
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        }
+                    } else {
+                        if(loc != 0) {
+                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        } else {
+                            displayMessageU(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                        }
+                    }
                 }
             }
 
             if(drawHealth) {
                 int chp = GetActorProperty(plrTid, AProp_Health);
-                int vertical = 0;
+
+                int font = orientation + mirrored;
 
                 if(cbmx10())
                     chp /= 10;
@@ -151,12 +258,12 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                 }
 
                 int barScale = FixedMul(baseScale, 1.5);
-                displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][vertical], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][vertical], TeamBarsStrings[TEAMINFO_BAR_FONT][vertical], rem, TEAMINFO_BARMAX, curId+TEAMINFO_ID_HP1, barX, barY, barScale, barScale, baseAlpha);
+                displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][font], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][font], TeamBarsStrings[TEAMINFO_BAR_FONT][font], rem, TEAMINFO_BARMAX, (orientation == horizontal && mirrored>0), curId+TEAMINFO_ID_HP1, barX, barY, barScale, barScale, baseAlpha);
             }
 
             if(drawCompass) {
                 int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
-                int size = TEAMINFO_COMPASS/2;
+                int size = 16;
                 int compassScale = FixedMul(baseScale, 1.3);
                 int compassScaleDiff = FixedMul(baseScale, 0.3);
 

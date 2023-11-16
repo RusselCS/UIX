@@ -57,13 +57,29 @@ OptionMenu "UIXOptions"
 	Control "Activate Lockstep", "+sr"
 
     StaticText " "
+	StaticText  "Team Info", 1
+	Option "Team Info Enabled", "UIX_CL_TEAMINFO", "OnOff"
+    Slider "Team Info X", "UIX_CL_TEAMINFOOFFSX", -640, 640, 10
+    Slider "Team Info Y", "UIX_CL_TEAMINFOOFFSY", -640, 640, 10
+    Slider "Team Info Scale", "UIX_CL_TEAMINFOSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Team Info Alpha", "UIX_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
+	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
+	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
+	Option "Reserve Stack", "UIX_CL_TEAMINFOSTACK", "OnOff"
+	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
+	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
+	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
+	// Option "Show Compass", "UIX_CL_TEAMINFOSHOWCOMPASS", "OnOff"
+	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
+
+    StaticText " "
 	StaticText  "Weapon Bar", 1
 	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
     Slider "Weapon Bar X", "UIX_CL_WEAPBAROFFSX", -640, 640, 10
     Slider "Weapon Bar Y", "UIX_CL_WEAPBAROFFSY", -640, 640, 10
     Slider "Weapon Bar Scale", "UIX_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
 	Slider "Weapon Bar Alpha", "UIX_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
-	Option "Mirror Bar", "UIX_CL_WEAPBARMIRROR", "OnOff"
+	Option "Mirror Orientation", "UIX_CL_WEAPBARMIRROR", "OnOff"
 	Option "Bar Orientation", "UIX_CL_WEAPBARDIR", "WeapOrientation"
 }
 
@@ -71,4 +87,10 @@ OptionValue "WeapOrientation"
 {
 	0, "Vertical"
 	1, "Horizontal"
+}
+
+OptionValue "TeamOrientation"
+{
+	0, "Horizontal"
+	1, "Vertical"
 }

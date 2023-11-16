@@ -19,8 +19,8 @@ script "UITweaks_Register_Server" OPEN
 
 #define UIT_MAX 2
 str UI_Scripts[UIT_MAX][2] = {
-    {"UITweaks_TeamInfo", "UIT_CL_EnableTeamInfo"},
-    {"UIX_WeapBar", "UIT_CL_EnableWeaponBar"},
+    {"UITweaks_TeamInfo", "UIX_CL_TEAMINFO"},
+    {"UIX_WeapBar", "UIX_CL_WEAPBAR"},
 };
 
 script "UITweaks_Runner" (int cam) CLIENTSIDE

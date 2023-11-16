@@ -71,7 +71,7 @@ script "UIXPickupTest" (void)
 
 script "UIX_WeapBar" (int cam, int cpn, int cv)
 {
-    if(!GetUserCvar(cpn, "UIX_CL_WEAPBAR") || GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
+    if(GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
         terminate;
 
     bool mirrored = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");

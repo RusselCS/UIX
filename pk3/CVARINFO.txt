@@ -1,8 +1,6 @@
 
 // UITweaks CVars
 user bool UIT_CL_Enable = true;
-user bool UIT_CL_EnableTeamInfo = true;
-user bool UIT_CL_EnableWeaponBar = true;
 
 user bool UIX_CL_UsingSR50 = false;
 user noarchive bool UIX_TempStore_SR50Checked = false;
@@ -17,8 +15,19 @@ user bool UIX_CL_WEAPBARMIRROR = false;
 user bool UIX_CL_WEAPBARDIR = false; // false = vertical, true = horizontal
 user float UIX_CL_WEAPBARALPHA = 1.0;
 
-user float UIX_CL_TEAMINFOSCALE = 2.0;
+user bool UIX_CL_TEAMINFO = true;
+user int UIX_CL_TEAMINFOOFFSX = -600;
+user int UIX_CL_TEAMINFOOFFSY = 300;
+user float UIX_CL_TEAMINFOSCALE = 1.0;
 user float UIX_CL_TEAMINFOALPHA = 1.0;
+user bool UIX_CL_TEAMINFOMIRROR = false;
+user bool UIX_CL_TEAMINFODIR = false;
+user bool UIX_CL_TEAMINFOSTACK = false;
+user bool UIX_CL_TEAMINFOSHOWNAME = true;
+user bool UIX_CL_TEAMINFOSHOWHEALTH = true;
+user bool UIX_CL_TEAMINFOSHOWLOCATION = false;
+user bool UIX_CL_TEAMINFOSHOWCOMPASS = false;
+user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
 
 // name storage (pain)
 local noarchive string temp_uix_namestore_horz_0 = "";
