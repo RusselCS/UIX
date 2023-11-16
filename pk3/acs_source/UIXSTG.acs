@@ -15,11 +15,19 @@
 // 0 - Actor to check for
 // 1 - Ammo script
 // 2 - Buster script
-#define MAX_MODS 10
-str modTables[MAX_MODS][3] = {
-    {"MegaBuster", "core_ammos", "core_busters"},
-    {"EnergyBusterWep", "UIX_UKI", ""},
-    {"", "", ""},
+#define MAX_MODS 20
+str modTables[MAX_MODS][2] = {
+    {"MegaBuster", "UIX_CORE"},
+    {"EnergyBusterWep", "UIX_UKI"},
+    {"CrushingFistWep", "UIX_ArmoryOfEvil"},
+    {"SonicPulseWep", "UIX_DOSReborn"},
+    {"CircuitBreakerWep", "UIX_RockForce"},
+    {"NailShieldWep_J", "UIX_Unlimited"},
+    {"WindSlicerWep", "UIX_NoConstancy"},
+    {"NightBirdWep", "UIX_EoSD"},
+    {"ObscureReferenceWep", "UIX_AllanXWeps"},
+    {"AsylBibleWep", "UIX_ItemAsylum"},
+    {"", ""},
 };
 
 script "UIX_DataStaging" OPEN CLIENTSIDE
@@ -31,13 +39,11 @@ script "UIX_DataStaging" OPEN CLIENTSIDE
         for(int i = 0; i < MAX_MODS; i++) {
             str act = modTables[i][0];
             str wep = modTables[i][1];
-            str bus = modTables[i][2];
             if(StrLen(act) == 0)
                 terminate;
             
             if(ActorExists(act)) {
                 if(StrLen(wep) != 0) CallACS0(wep);
-                if(StrLen(bus) != 0) CallACS0(bus);
             }
         }
     }
@@ -48,9 +54,62 @@ script "UIX_CoreExtras" OPEN
     DefineBusterUpgrade("TAG_MEGABUSTER", "MegaBuster", "", "", "WEAPX0", false, false, false);
 }
 
+script "UIX_CORE" (void)
+{
+    CallACS0("core_ammos");
+    CallACS0("core_busters");
+}
+
 script "UIX_UKI" (void)
 {
     CallACS0("uki_ammos");
     CallACS0("unreal_ammos");
     CallACS0("unreal_initialammos");
+}
+
+script "UIX_ArmoryOfEvil" (void)
+{
+    CallACS0("AoE_WeaponInfo");
+    CallACS0("AoE_BusterInfo");
+}
+
+script "UIX_DOSReborn" (void)
+{
+    CallACS0("dosr_ammos");
+}
+
+script "UIX_RockForce" (void)
+{
+    CallACS0("mmrf_ammos");
+}
+
+script "UIX_Unlimited" (void)
+{
+    CallACS0("mmu_ammos");
+}
+
+script "UIX_NoConstancy" (void)
+{
+    CallACS0("rnc_items");
+}
+
+script "UIX_EoSD" (void)
+{
+    CallACS0("THweps_info");
+}
+
+script "UIX_AllanXWeps" (void)
+{
+    CallACS0("RouletteWeapons");
+    CallACS0("RouletteMagicodeWeps");
+    CallACS0("RouletteSPWeps");
+    CallACS0("RouletteMMWORLDWeps");
+    CallACS0("RouletteXoverWeps");
+    CallACS0("RouletteTatsWeps");
+    CallACS0("RouletteCM+Weps");
+}
+
+script "UIX_ItemAsylum" (void)
+{
+    CallACS0("asylweps_info");
 }
