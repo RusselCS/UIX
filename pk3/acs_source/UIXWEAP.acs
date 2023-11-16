@@ -83,9 +83,10 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     int pln = PlayerNumber();
     if(pln == -1)
         terminate;
-    SetActivator(-1);
 
     str curWeap = GetWeapon();
+
+    SetActivator(-1);
 
     int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;
     int scaleY = scaleX;
