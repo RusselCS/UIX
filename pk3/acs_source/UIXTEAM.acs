@@ -5,8 +5,6 @@
 
 #import "8BDT.acs"
 
-global int 4: ServerMAX;
-
 #define TEAMINFO_ID_OFFS    10000
 #define TEAMINFO_ID_NAME    0100
 #define TEAMINFO_ID_HP1     0200
@@ -96,7 +94,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(team == 255) { // Spectator
 
     } else {
-        for(int i = 0; i < ServerMAX; i++) {
+        for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
             // Log(i:i, s:" == ", i:pln);
             if(i == pln)
                 continue;
