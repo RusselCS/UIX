@@ -244,14 +244,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                         bar2x = bar1x + FixedMul(WEPBAR_BAR_WIDTH, ScaleX);
                         bar2y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
                         slotx = xStart - FixedMul(3 * WEPBAR_X_OFFS, scaleX);
-                        sloty = icoy - FixedMul(WEPBAR_X_OFFS, scaleY);
+                        sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
                     } else {
                         bar1x = icox - FixedMul(WEPBAR_X_OFFS + WEPBAR_BAR_WIDTH, ScaleX);
                         bar1y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
                         bar2x = bar1x - FixedMul(WEPBAR_BAR_WIDTH, ScaleX);
                         bar2y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
                         slotx = xStart + FixedMul(2 * WEPBAR_X_OFFS, scaleX);
-                        sloty = icoy - FixedMul(WEPBAR_X_OFFS, scaleY);
+                        sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
                     }
                 } else {
                     if(!mirrored) {
@@ -290,7 +290,15 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     slotDrawn[slot] = true;
                     slotKey = StrParam(s:slotCol, k:StrParam(s:"slot ", i:slot));
                     SetFont("SMALLFONT");
-                    displayMessage(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                    if(!horizontal) {
+                        if(!mirrored) {
+                            displayMessageR(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                        } else {
+                            displayMessageL(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                        }
+                    } else {
+                        displayMessage(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                    }
                 }
         }
     }
