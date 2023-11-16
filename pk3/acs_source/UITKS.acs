@@ -7,6 +7,13 @@
 
 #include "SHRTFUNC.acs"
 
+script "UIX_Notifier" OPEN CLIENTSIDE {
+	int cpn = ConsolePlayerNumber();
+	if(GetUserCvar(cpn,"uix_cl_notification")) {
+		Log(s:"\cfUI Extensions \cjenabled. Type \cgUIEXOptions\cj in console for available options.");
+	}
+}
+
 script "UITweaks_Register" OPEN CLIENTSIDE
 {
     DefineAssistDisplay("UITweaks_Runner");

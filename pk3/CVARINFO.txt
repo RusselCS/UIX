@@ -1,5 +1,7 @@
 
 // UIExtensions CVars
+user bool uix_cl_notification = true;
+
 user bool UIX_CL_Enable = true;
 
 user bool UIX_CL_UsingSR50 = true;

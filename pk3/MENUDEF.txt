@@ -48,6 +48,14 @@ OptionMenu "UIXOptions"
 
 	Title "UI Extensions"
 
+	Option "UI Extensions Enabled", "uix_cl_notification", "OnOff"
+	Option "UI Extensions Notification", "uix_cl_notification", "OnOff"
+
+	StaticText " "
+	StaticText "Clashing Items", 1
+	StaticText "$UIX_MNU_CLASHES", 1
+	Option "Default Coop Info", "cl_drawcoopinfo", "OnOff"
+
 	StaticText " "
 	StaticText "Scuttlerun (SR50)", 1
 	StaticText "$UIX_MNU_SR50_1", 1

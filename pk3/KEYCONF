@@ -1,4 +1,4 @@
-alias "UIXOptions" "Openmenu UIXOptions"
+alias "UIEXOptions" "Openmenu UIXOptions"
 
 alias +left2 "+left; +moveleft"
 alias -left2 "-left; -moveleft"
