@@ -48,7 +48,7 @@ OptionMenu "UIXOptions"
 
 	Title "UI Extensions"
 
-	Option "UI Extensions Enabled", "uix_cl_notification", "OnOff"
+	Option "UI Extensions", "UIX_CL_Enable", "OnOff"
 	Option "UI Extensions Notification", "uix_cl_notification", "OnOff"
 
 	StaticText " "
