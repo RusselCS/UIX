@@ -80,6 +80,11 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     bool drawSlot = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
     
     SetActivator(cam);
+    int pln = PlayerNumber();
+    if(pln == -1)
+        terminate;
+    SetActivator(-1);
+
     str curWeap = GetWeapon();
 
     int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;

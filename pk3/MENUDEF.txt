@@ -48,13 +48,13 @@ OptionMenu "UIXOptions"
 	// TextField "King Team text color",			"trill_pb_textcolor3"
 
 	StaticText " "
-	StaticText "Lockstep (SR50)", 1
+	StaticText "Scuttlerun (SR50)", 1
 	StaticText "$UIX_MNU_SR50_1", 1
-	Option "Enable Lockstep", "UIX_CL_UsingSR50", "OnOff"
+	Option "Enable Scuttlerun", "UIX_CL_UsingSR50", "OnOff"
 	StaticText "$UIX_MNU_SR50_2", 1
-	Control "Strafe Left (LS)", "+left2"
-	Control "Strafe Right (LS)", "+right2"
-	Control "Activate Lockstep", "+sr"
+	Control "Strafe Left (SR)", "+left2"
+	Control "Strafe Right (SR)", "+right2"
+	Control "Activate Scuttlerun", "+sr"
 
     StaticText " "
 	StaticText  "Team Info", 1
