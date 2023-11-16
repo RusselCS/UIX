@@ -2,26 +2,27 @@
 // UITweaks CVars
 user bool UIT_CL_Enable = true;
 
-user bool UIX_CL_UsingSR50 = false;
+user bool UIX_CL_UsingSR50 = true;
 user noarchive bool UIX_TempStore_SR50Checked = false;
 user bool UIX_CL_SR50Visual = true;
 server noarchive bool UIX_SV_SR50Visual = true;
 
 user bool UIX_CL_WEAPBAR = true;
 user int UIX_CL_WEAPBAROFFSX = 500;
-user int UIX_CL_WEAPBAROFFSY = 500;
+user int UIX_CL_WEAPBAROFFSY = 250;
 user float UIX_CL_WEAPBARSCALE = 2.5;
 user bool UIX_CL_WEAPBARMIRROR = false;
 user bool UIX_CL_WEAPBARDIR = false; // false = vertical, true = horizontal
 user float UIX_CL_WEAPBARALPHA = 1.0;
+user bool UIX_CL_WEAPBARSHOWSLOTS = true;
 
 user bool UIX_CL_TEAMINFO = true;
-user int UIX_CL_TEAMINFOOFFSX = -600;
-user int UIX_CL_TEAMINFOOFFSY = 300;
-user float UIX_CL_TEAMINFOSCALE = 1.0;
+user int UIX_CL_TEAMINFOOFFSX = -430;
+user int UIX_CL_TEAMINFOOFFSY = 440;
+user float UIX_CL_TEAMINFOSCALE = 1.25;
 user float UIX_CL_TEAMINFOALPHA = 1.0;
 user bool UIX_CL_TEAMINFOMIRROR = false;
-user bool UIX_CL_TEAMINFODIR = false;
+user bool UIX_CL_TEAMINFODIR = true; // false = horizontal, true = vertical
 user bool UIX_CL_TEAMINFOSTACK = false;
 user bool UIX_CL_TEAMINFOSHOWNAME = true;
 user bool UIX_CL_TEAMINFOSHOWHEALTH = true;

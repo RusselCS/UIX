@@ -1,0 +1,17 @@
+V1A TO DO
+- TeamInfo: Toggle
+- TeamInfo: Scale
+- TeamInfo: Alpha
+- TeamInfo: Bar Style (Vert/Horz)
+- TeamInfo: Build Direction (Up or Down)
+- TeamInfo: Mirror
+- TeamInfo: Toggle Name
+- TeamInfo: Toggle Health
+- TeamInfo: Toggle Mugshot
+- TeamInfo: Toggle Location
+- TeamInfo: Toggle Radar
+- WeapBar: Toggle Slots
+- WeapBar: Alpha
+- ???????: Move MSGIDs to v6b's data structure???
+
+V1B TO DO
