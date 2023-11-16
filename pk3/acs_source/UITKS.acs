@@ -26,7 +26,7 @@ str UI_Scripts[UIT_MAX][2] = {
 script "UITweaks_Runner" (int cam) CLIENTSIDE
 {
     int cpn = ConsolePlayerNumber();
-    if(!GetUserCvar(cpn, "UIT_CL_Enable"))
+    if(!GetUserCvar(cpn, "UIX_CL_Enable"))
         terminate;
 
     for(int i = 0; i < UIT_MAX; i++) {
