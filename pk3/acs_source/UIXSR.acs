@@ -98,6 +98,7 @@ function bool kindaCloseTo(int n, int x, int range) {
 // [Russ] Removes the tailwind particles under the following circumstances:
 // - If the SR50 visual is disabled.
 // - If the client is the user *and* is running Software to prevent vision blocking.
+// - Sets the user's alpha of the SR50 visual.
 //
 script "UIXSR_SRParticles" (void) CLIENTSIDE
 {
@@ -109,6 +110,9 @@ script "UIXSR_SRParticles" (void) CLIENTSIDE
         Thing_Remove(0);
         terminate;
     }
+
+    int alp = GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50VisualAlpha");
+    SetActorProperty(0, AProp_Alpha, alp);
 }
 
 script "UIXSR_RemoveForUser" (void) CLIENTSIDE
@@ -117,6 +121,7 @@ script "UIXSR_RemoveForUser" (void) CLIENTSIDE
         int cam = CheckPlayerCamera(ConsolePlayerNumber());
         if(CallACS1("UIXSR_CompareTIDs", cam)) {
             SetResultValue(true);
+            terminate;
         }
     }
     SetResultValue(false);

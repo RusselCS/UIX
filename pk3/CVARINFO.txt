@@ -7,6 +7,7 @@ user bool UIX_CL_Enable = true;
 user bool UIX_CL_UsingSR50 = true;
 user noarchive bool UIX_TempStore_SR50Checked = false;
 user bool UIX_CL_SR50Visual = true;
+user float UIX_CL_SR50VisualAlpha = 0.8;
 server noarchive bool UIX_SV_SR50Visual = true;
 
 user bool UIX_CL_WEAPBAR = true;

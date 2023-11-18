@@ -61,7 +61,7 @@ actor UIXSREffect : BasicGraphicEffect
     var int user_y;
     var int user_z;
     renderstyle "translucent"
-    alpha 0.7
+    //alpha 0.7
     scale 2.5
     States
     {

@@ -64,6 +64,8 @@ OptionMenu "UIXOptions"
 	Control "Strafe Left (SR)", "+left2"
 	Control "Strafe Right (SR)", "+right2"
 	Control "Activate Scuttlerun", "+sr"
+	Option "SR Tailwind Visual", "UIX_CL_SR50Visual", "OnOff"
+	Slider "SR Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
 
     StaticText " "
 	StaticText  "Team Info", 1
