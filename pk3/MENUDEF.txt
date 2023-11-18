@@ -79,6 +79,7 @@ OptionMenu "UIXOptions"
 	Slider "Team Info Alpha", "UIX_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
 	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
 	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
+	Option "Swap Font Orientation", "UIX_CL_TEAMINFOFONTDIR", "OnOff"
 	Option "Reserve Stack", "UIX_CL_TEAMINFOSTACK", "OnOff"
 
     StaticText " "

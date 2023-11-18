@@ -53,6 +53,11 @@ str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][4] = {
     {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ", "JIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJI", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
 };
 
+str nameFonts[2] = {
+    "SMALLFONT",
+    "ROTAFONT"
+};
+
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
     int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
@@ -75,25 +80,28 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
     // Log(i:team, s:" cam: ", i:cam);
 
-    int startX = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
-    int startY = -GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
-    int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
-
-    SetFont("SMALLFONT");
-
-    int curPlay = 0;
-
-    int msgId = BASE_ID + TEAMINFO_ID_OFFS;
-
-    bool drawName = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
-    bool drawHealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
-    bool drawLocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
-    bool drawCompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
-    bool drawMugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
-
     if(team == 255) { // Spectator
 
     } else {
+        int startX = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
+        int startY = -GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
+        int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+
+        int curPlay = 0;
+
+        int msgId = BASE_ID + TEAMINFO_ID_OFFS;
+
+        bool drawName = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
+        bool drawHealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
+        bool drawLocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
+        bool drawCompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
+        bool drawMugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
+
+        int orientation = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
+        int mirrored = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR") * 2;
+
+        bool fontVers = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
+
         for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
             // Log(i:i, s:" == ", i:pln);
             if(i == pln)
@@ -114,9 +122,6 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             int curId = msgId + curPlay;
             int plrTid = i + PLN_TID_SHRT;
-
-            int orientation = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
-            int mirrored = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR") * 2;
 
             if(orientation == horizontal) {
                 if(mirrored == straight) {
@@ -197,38 +202,40 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             }
 
             if(drawName) {
+                str nameFont = nameFonts[orientation ^ fontVers];
+
                 str loc = 0;
                 if(drawLocation)
                     loc = rotateLocation(i+PLN_TID_SHRT, orientation);
 
                 if(orientation == horizontal) {
-                    SetFont("SMALLFONT");
+                    SetFont(nameFont);
                     if(mirrored == straight) {
                         if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         }
                     } else {
                         if(loc != 0) {
-                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageR(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         }
                     }
                 } else {
-                    SetFont("ROTAFONT");
+                    SetFont(nameFont);
                     if(mirrored == straight) {
                         if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         }
                     } else {
                         if(loc != 0) {
-                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageU(StrParam(s:getPlayerName(i, orientation)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageU(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
                         }
                     }
                 }
@@ -295,6 +302,10 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             curPlay++;
         }
+
+        if(GetCvar("temp_uix_namestore_reverse") != fontVers) {
+            SetCvar("temp_uix_namestore_reverse", fontVers);
+        }
     }
 }
 
@@ -311,7 +322,13 @@ function str getMugshotGraphicFromTID(int tid) {
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
-function str getPlayerName(int plr, int vert)
+int reverseNames[MAX_PLAYERS_SHRT];
+
+function int isNameReversed(int pln) {
+    return reversenames[pln]-1;
+}
+
+function str getPlayerName(int plr, int vert, int reverse)
 {
     str name = StrParam(n:1+plr);
 
@@ -326,10 +343,13 @@ function str getPlayerName(int plr, int vert)
     if(StrICmp(GetCvarString(cvhorz), name) != 0)
         update = true;
 
+    if(isNameReversed(plr) != reverse)
+        update = true;
+
     if(update) {
         str vertName;
 
-        vertName = rebuildName(name);
+        vertName = rebuildName(name, reverse);
 
         SetCvarString(cvhorz, name);
         SetCvarString(cvvert, vertName);
@@ -348,7 +368,7 @@ int nameColorless[NAME_MAX];
 str colorSlots[NAME_MAX]; // no idea what size this should be tbh
 int colorPos[NAME_MAX];
 
-function str rebuildName(str name) {
+function str rebuildName(str name, bool reverse) {
     strCpy(a:nameBuilder, name);
     nameSize = StrLen(name);
 
@@ -412,22 +432,48 @@ function str rebuildName(str name) {
     colorSize--;
     str ccblbsc = "-"; // currentColorBecauseLineBreaksStopColor - because acc won't let me compile with this long a var
 
-    for(i = colorLessSize; i >= 0; i--) {
+    if(colorSize >= 0) {
+        ccblbsc = colorSlots[colorSize];
+    }
 
-        if(nameColorless[i] != 0) {
-            if(nameColorless[i] == ' ') {
-                outName = StrParam(s:outName, c:'\n');
-            } else {
-                outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
+    if(!reverse) {
+        for(i = colorLessSize; i >= 0; i--) {
+
+            if(nameColorless[i] != 0) {
+                if(nameColorless[i] == ' ') {
+                    outName = StrParam(s:outName, c:'\n');
+                } else {
+                    outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
+                }
+            }
+            nameColorless[i] = 0;
+
+            if(colorSize > 0) {
+                if(i == colorPos[colorSize]) {
+                    ccblbsc = colorSlots[colorSize-1];
+                    colorSize--;
+                }
             }
         }
-        nameColorless[i] = 0;
+    } else {
+        int x = 0;
+        for(i = 0; i < colorLessSize+1; i++) {
 
-        if(colorSize > 0) {
-            if(i == colorPos[colorSize]) {
-                ccblbsc = colorSlots[colorSize-1];
-                colorSize--;
+            if(x < colorSize+1) {
+                if(i == colorPos[x]) {
+                    ccblbsc = colorSlots[x];
+                    x++;
+                }
             }
+
+            if(nameColorless[i] != 0) {
+                if(nameColorless[i] == ' ') {
+                    outName = StrParam(s:outName, c:'\n');
+                } else {
+                    outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
+                }
+            }
+            nameColorless[i] = 0;
         }
     }
 
@@ -437,7 +483,7 @@ function str rebuildName(str name) {
 #define LOC_SIZE_LIMIT 1000
 int LOC_SIZE = 0;
 
-str locs[LOC_SIZE_LIMIT][2];
+str locs[LOC_SIZE_LIMIT][3];
 
 function str rotateLocation(int tid, int vert)
 {
@@ -453,10 +499,24 @@ function str rotateLocation(int tid, int vert)
     
     int idx = findLoc(loc);
 
-    if(idx == -1) {
-        locs[LOC_SIZE][0] = loc;
-        locs[LOC_SIZE][1] = rebuildName(loc);
-        idx = LOC_SIZE++;
+    bool update = false;
+
+    if(idx == -1)
+        update = true;
+
+    int cv = GetUserCvar(ConsolePlayerNumber(), "UIX_CL_TEAMINFOFONTDIR");
+
+    if(!update)
+        if(locs[idx][2] != cv)
+            update = true;
+
+    if(update) {
+        if(idx == -1)
+            idx = LOC_SIZE++;
+
+        locs[idx][0] = loc;
+        locs[idx][1] = rebuildName(loc, cv);
+        locs[idx][2] = cv;
     }
 
     return locs[idx][1];

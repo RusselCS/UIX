@@ -25,6 +25,7 @@ user float UIX_CL_TEAMINFOSCALE = 1.25;
 user float UIX_CL_TEAMINFOALPHA = 1.0;
 user bool UIX_CL_TEAMINFOMIRROR = false;
 user bool UIX_CL_TEAMINFODIR = true; // false = horizontal, true = vertical
+user bool UIX_CL_TEAMINFOFONTDIR = false;
 user bool UIX_CL_TEAMINFOSTACK = false;
 user bool UIX_CL_TEAMINFOSHOWNAME = true;
 user bool UIX_CL_TEAMINFOSHOWHEALTH = true;
