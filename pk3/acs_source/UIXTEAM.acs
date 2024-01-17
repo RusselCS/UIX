@@ -102,6 +102,8 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
         bool fontVers = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
 
+        int maxNameLength = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
+
         for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
             // Log(i:i, s:" == ", i:pln);
             if(i == pln)
@@ -203,7 +205,6 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             if(drawName) {
                 str nameFont = nameFonts[orientation ^ fontVers];
-                int maxNameLength = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
 
                 int nameScale = baseScale;
                 int nameLength = getPlayerNameLength(i, orientation);
@@ -336,8 +337,6 @@ function int isNameReversed(int pln) {
     return reversenames[pln]-1;
 }
 
-int nameLengths[MAX_PLAYERS_SHRT][2];
-
 function str getPlayerName(int plr, int vert, int reverse)
 {
     str name = StrParam(n:1+plr);
@@ -357,9 +356,6 @@ function str getPlayerName(int plr, int vert, int reverse)
         update = true;
 
     if(update) {
-        nameLengths[plr][0] = 0;
-        nameLengths[plr][1] = 0;
-
         str vertName;
 
         vertName = rebuildName(name, reverse);
@@ -544,11 +540,58 @@ function int findLoc(str loc) {
     return -1;
 }
 
+// [russ] surely i'll redo this cache system at some point to actually work smarter not harder
+int nameLengths[MAX_PLAYERS_SHRT][3];
+
 function int getPlayerNameLength(int plr, int vert) {
-    if(nameLengths[plr][0] == 0 || nameLengths[plr][1] == 0) {
-        str name = StrParam(n:1+plr);
-        nameLengths[plr][0] = stringLengthSmallFont(name);
-        nameLengths[plr][1] = StrLen(name) * 9;
+    str name = StrParam(n:1+plr);
+
+    if(StrCmp(nameLengths[plr][2], name) != 0) {
+        strCpy(a:nameBuilder, name);
+        nameSize = StrLen(name);
+
+        str outName = "";
+
+        int inColor = 0;
+        int colorStart;
+
+        int colorLessSize = 0;
+        int colorSize = 0;
+
+        int i;
+
+        int vertLen = 0;
+        int horzLen = 0;
+
+        for(i = 0; i < nameSize; i++) {
+            switch(inColor) {
+                case 0:
+                    if(nameBuilder[i] == CHAR_COLOR) {
+                        colorPos[colorSize] = colorLessSize;
+                        inColor = 1;
+                    } else {
+                        horzLen += charWidths[nameBuilder[i]];
+                        vertLen += 9;
+                    }
+                    break;
+                case 1: // check next char
+                    if(nameBuilder[i] == '[') {
+                        colorStart = i;
+                        inColor = 2;
+                    } else {
+                        inColor = 0;
+                    }
+                    break;
+                case 2: // in big string
+                    if(nameBuilder[i] == ']') {
+                        inColor = 0;
+                    }
+                    break;
+            }
+        }
+
+        nameLengths[plr][0] = horzLen;
+        nameLengths[plr][1] = vertLen;
     }
 
     return nameLengths[plr][vert];
