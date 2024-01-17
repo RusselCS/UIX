@@ -258,14 +258,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                         bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
                         bar1y = icoy - FixedMul(WEPBAR_Y_OFFS + WEPBAR_BAR_WIDTH, scaleX);
                         bar2x = bar1x;
-                        bar2y = bar2y - FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
+                        bar2y = bar1y - FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
                         slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
                         sloty = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY);
                     } else {
                         bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
                         bar1y = icoy - FixedMul(WEPBAR_BAR_WIDTH << 1, scaleX);
                         bar2x = bar1x;
-                        bar2y = bar2y + FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
+                        bar2y = bar1y + FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
                         slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
                         sloty = yStart - FixedMul(4 * WEPBAR_ICON_WIDTH - WEPBAR_BAR_WIDTH, scaleY);
                     }
@@ -359,6 +359,8 @@ function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
                 if(!success) {
                     cyan1 = CheckInventory("SBARCyan")-1;
                     blue1 = CheckInventory("SBARBlue")-1;
+                    cyan2 = CheckInventory("SBARCyan2")-1;
+                    blue2 = CheckInventory("SBARBlue2")-1;
                     success = (cyan1 != -1 && blue1 != -1);
                 }
 
@@ -374,6 +376,14 @@ function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
                 } else {
                     cyan1 = Dec2Hex(cyan1, 2);
                     blue1 = Dec2Hex(blue1, 2);
+                }
+
+                if(cyan2 == -1 || blue2 == -1) {
+                    cyan2 = 0;
+                    blue2 = 0;
+                } else {
+                    cyan2 = Dec2Hex(cyan2, 2);
+                    blue2 = Dec2Hex(blue2, 2);
                 }
 
                 SetActivator(-1);
@@ -395,8 +405,8 @@ function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
         blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
         destroy(obj);
     } else { // use the base color for secondbar if secondbar doesn't exist
-        cyan2 = cyan1;
-        blue2 = blue1;
+        if(cyan2 == 0) cyan2 = cyan1;
+        if(blue2 == 0) blue2 = blue1;
     }
         
     if(isBuster) {
