@@ -1,6 +1,7 @@
 # UIX
 
 UI Extensions for MM8BDM v6b
+(now with limited v6a support!)
 by Russel
 
 Addon that implements additional UI elements:
@@ -22,7 +23,23 @@ Modder notes:
   - Ukiweps (by Ukiyama)
   - Allanxweps (by Allanxindustries)
   - Item Asylum (by JumboDS64)
+  - VileWeps (by MegaVile)
+  - Encore Weps (by MegaVile)
+  - MM6 Busters (by Trill, adapted by MegaVile)
 
 If your mod is not on this list and you want it to be, raise an issue on github.com/russelcs/uix or ping me on discord.
 I typically hang out in the MM8BDM unofficial discord (linked from the forums), TSPG discord, or in the Gondola discord.
 My name is Russel, or RusselCS. Please describe me with he/him or they/them pronouns.
+
+v1b changelog:
+- Added VileWeps, Encore Weps, and MM6 Busters to the supported mods
+- UI elements now update the same tick as their data, as opposed to every 0.2 seconds (Thanks Trill!)
+- Added limited support for v6a. Scuttlerun and Teaminfo should function properly!
+- Teaminfo now works in coop, survival, and invasion.
+- Weapon Inventory now pulls second bar colors from scriptedbars.
+- Weapon Inventory now properly positions second bars in horizontal orientation.
+
+FAQs:
+- Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
+--- No. Or rather, not in a way that keeps this mod as generally applicable as possible.
+--- The infrastructure isn't yet there to facilitate something like this. Maybe in the future.
