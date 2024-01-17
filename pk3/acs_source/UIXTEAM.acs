@@ -203,6 +203,14 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             if(drawName) {
                 str nameFont = nameFonts[orientation ^ fontVers];
+                int maxNameLength = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
+
+                int nameScale = baseScale;
+                int nameLength = getPlayerNameLength(i, orientation);
+
+                if(nameLength > maxNameLength) {
+                    nameScale = FixedMul(baseScale, FixedDiv(maxNameLength, nameLength));
+                }
 
                 str loc = 0;
                 if(drawLocation)
@@ -212,30 +220,30 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                     SetFont(nameFont);
                     if(mirrored == straight) {
                         if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                         }
                     } else {
                         if(loc != 0) {
-                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                         } else {
-                            displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                         }
                     }
                 } else {
                     SetFont(nameFont);
                     if(mirrored == straight) {
                         if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                         } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                         }
                     } else {
                         if(loc != 0) {
-                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                         } else {
-                            displayMessageU(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, baseScale, baseAlpha);
+                            displayMessageU(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                         }
                     }
                 }
@@ -328,6 +336,8 @@ function int isNameReversed(int pln) {
     return reversenames[pln]-1;
 }
 
+int nameLengths[MAX_PLAYERS_SHRT][2];
+
 function str getPlayerName(int plr, int vert, int reverse)
 {
     str name = StrParam(n:1+plr);
@@ -347,6 +357,9 @@ function str getPlayerName(int plr, int vert, int reverse)
         update = true;
 
     if(update) {
+        nameLengths[plr][0] = 0;
+        nameLengths[plr][1] = 0;
+
         str vertName;
 
         vertName = rebuildName(name, reverse);
@@ -529,4 +542,14 @@ function int findLoc(str loc) {
         }
     }
     return -1;
+}
+
+function int getPlayerNameLength(int plr, int vert) {
+    if(nameLengths[plr][0] == 0 || nameLengths[plr][1] == 0) {
+        str name = StrParam(n:1+plr);
+        nameLengths[plr][0] = stringLengthSmallFont(name);
+        nameLengths[plr][1] = StrLen(name) * 9;
+    }
+
+    return nameLengths[plr][vert];
 }

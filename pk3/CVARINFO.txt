@@ -24,6 +24,7 @@ user int UIX_CL_TEAMINFOOFFSX = -430;
 user int UIX_CL_TEAMINFOOFFSY = 440;
 user float UIX_CL_TEAMINFOSCALE = 1.25;
 user float UIX_CL_TEAMINFOALPHA = 1.0;
+user int UIX_CL_TEAMINFONAMESIZE = 96;
 user bool UIX_CL_TEAMINFOMIRROR = false;
 user bool UIX_CL_TEAMINFODIR = true; // false = horizontal, true = vertical
 user bool UIX_CL_TEAMINFOFONTDIR = false;
