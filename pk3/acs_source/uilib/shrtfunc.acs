@@ -318,3 +318,12 @@ function bool isv6b(void) {
 	}
 	return isv6bFlag;
 }
+
+function int getPlayerTeam(int pln) {
+	
+	if(GetCvar("cooperative") || GetCvar("invasion") || GetCvar("survival")) {
+        return 1;
+    }
+	
+	return GetPlayerInfo(pln, PLAYERINFO_TEAM);
+}

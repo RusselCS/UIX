@@ -77,7 +77,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(pln == -1)
         terminate;
 
-    int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
+    int team = getPlayerTeam(pln);
     // Log(i:team, s:" cam: ", i:cam);
 
     if(team == 255) { // Spectator
@@ -114,7 +114,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                 continue;
             
             // Log(i:i, s:" team: ", i:GetPlayerInfo(i, PLAYERINFO_TEAM), s:" == ", i:team);
-            if(GetPlayerInfo(i, PLAYERINFO_TEAM) != team)
+            if(getPlayerTeam(i) != team)
                 continue;
 
             // Log(s:"Made it into main for player ", i:i, s:" while viewing player ", i:pln);
