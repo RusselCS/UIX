@@ -1,5 +1,17 @@
-actor UIXSRWatcher : BasicWatcher
+actor UIXSRWatcher
 {
+    +MISSILE
+    -SOLID
+    +NOCLIP
+    +NOINTERACTION
+    +NOGRAVITY
+    +DONTBLAST
+    +DONTREFLECT
+    +THRUACTORS
+    +NOBLOCKMAP
+    renderstyle none
+    radius 2
+    height 2
     States
     {
     Spawn:

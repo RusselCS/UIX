@@ -307,14 +307,15 @@ int charWidths[256] = {
 };
 // :)
 
-function int stringLengthSmallFont(int strin) {
-	int len = 0;
-	int size = StrLen(strin);
+int isv6bFlag = -1;
 
-	for(int i = 0; i < size; i++) {
-		len += charWidths[GetChar(strin, i)];
+function bool isv6b(void) {
+	if(isv6bFlag == -1) {
+		int u = UniqueTID();
+		int ret = !SpawnForced("YellowSkullST", 0, 0, 0, u, 0);
+		Thing_Remove(u);
+		isv6bFlag = ret;
 	}
-
-	return len;
+	Log(s:"Returning ", i:isv6bFlag);
+	return isv6bFlag;
 }
-

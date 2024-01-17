@@ -16,7 +16,7 @@ script "UIX_Notifier" OPEN CLIENTSIDE {
 
 script "UITweaks_Register" OPEN CLIENTSIDE
 {
-    DefineAssistDisplay("UITweaks_Runner");
+    if(isv6b()) DefineAssistDisplay("UITweaks_Runner");
 }
 
 script "UITweaks_Register_Server" OPEN
@@ -25,9 +25,9 @@ script "UITweaks_Register_Server" OPEN
 }
 
 #define UIT_MAX 2
-str UI_Scripts[UIT_MAX][2] = {
-    {"UITweaks_TeamInfo", "UIX_CL_TEAMINFO"},
-    {"UIX_WeapBar", "UIX_CL_WEAPBAR"},
+str UI_Scripts[UIT_MAX][3] = {
+    {"UITweaks_TeamInfo", "UIX_CL_TEAMINFO", "6A"},
+    {"UIX_WeapBar", "UIX_CL_WEAPBAR", "6B"},
 };
 
 script "UITweaks_Runner" (int cam) CLIENTSIDE
@@ -44,4 +44,50 @@ script "UITweaks_Runner" (int cam) CLIENTSIDE
     }
 }
 
+// v6a pickup script wrappers
+script "uix_pickupcooldown" (int m, int a) { if(isv6b()) ACS_NamedExecuteWithResult("core_spawnPickupCooldown", m, a); }
+script "uix_checkpickupcooldown" (void) { if(isv6b()) ACS_NamedExecuteWithResult("core_checkClientPickupCooldown"); }
 
+// [Russ] v6a flow (backporting code from v6b and then gutting it)
+// backbone of this code is by Jax, mutilated by Russel
+Script "UIX6A_Runner" OPEN CLIENTSIDE {
+	if(isv6b()) terminate;
+
+	int cpn = ConsolePlayerNumber();
+	int validCam = 0;
+	while(true) {
+		validCam = AssistDisplayFunc(cpn, validCam);
+		delay(1);
+	}
+}
+
+function int AssistDisplayFunc(int cpn, int validCam) {
+
+    if(!GetUserCvar(cpn, "UIX_CL_Enable"))
+        return 0;
+    
+	int cam = CheckPlayerCamera(cpn);
+	if((cam > 0 && cam < PLN_TID_SHRT) || cam >= PLN_TID_SHRT + MAX_PLAYERS_SHRT) {
+		if(validCam != 0 && PlayerInGame(validCam - PLN_TID_SHRT) && ThingCount(T_NONE, validCam) > 0) {
+			cam = validCam;
+		} else if (validCam != 0 && PlayerInGame(validCam - PLN_TID_SHRT)) {
+			return validCam;
+		} else {
+			return 0;
+		}
+	}
+	if(cam >= PLN_TID_SHRT && cam < PLN_TID_SHRT + MAX_PLAYERS_SHRT) {
+		AssistDisplayFunc2(cam);
+	}
+	return cam;
+}
+
+function void AssistDisplayFunc2(int cam) {
+	for(int i = 0; i<UIT_MAX; i++) {
+        if(UI_Scripts[i][2] == "6A") {
+            if(GetUserCvar(ConsolePlayerNumber(), UI_Scripts[i][1])) {
+                CallACS2(UI_Scripts[i][0],cam,ConsolePlayerNumber());
+            }
+        }
+    }
+}

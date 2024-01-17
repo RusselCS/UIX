@@ -44,7 +44,7 @@ SpawnLoop:
 WEAP X 1
 loop
 HideDoomish:
-TNT1 A 1400 ACS_NamedExecuteWithResult("core_spawnPickupCooldown", mass, accuracy)
+TNT1 A 1400 ACS_NamedExecuteWithResult("uix_pickupcooldown", mass, accuracy)
 TNT1 A 0 A_RestoreSpecialPosition
 TNT1 A 1 A_RestoreSpecialDoomThing
 stop
@@ -81,7 +81,7 @@ SpawnLoop:
 WEAP X 1
 loop
 HideDoomish:
-TNT1 A 1400 ACS_NamedExecuteWithResult("core_spawnPickupCooldown", mass, accuracy)
+TNT1 A 1400 ACS_NamedExecuteWithResult("uix_pickupcooldown", mass, accuracy)
 TNT1 A 0 A_RestoreSpecialPosition
 TNT1 A 1 A_RestoreSpecialDoomThing
 stop
@@ -124,7 +124,7 @@ actor 8BDMItemRespawn
 		PUC5 A 0
 		goto SpawnLoop
 	SpawnLoop:
-		"####" A 0 ACS_NamedExecuteWithResult("core_checkClientPickupCooldown")
+		"####" A 0 ACS_NamedExecuteWithResult("uix_checkpickupcooldown")
 		"####" A 0 A_SetUserVar(user_respawntime, mass / RESPAWN_FRAMES)
 		"####" A 0 A_SetUserVar(user_remainder, mass % RESPAWN_FRAMES)
 		"####" A 1
@@ -181,7 +181,7 @@ actor 8BDMItemRespawnShadow : BasicGraphicEffect
 		"----" "#" 0
 		goto SpawnWait
 	SpawnWait:
-		"----" "#" 0 ACS_NamedExecuteWithResult("core_checkClientPickupCooldown")
+		"----" "#" 0 ACS_NamedExecuteWithResult("uix_checkpickupcooldown")
 		"----" "#" 1 A_SetTics(mass)
 		stop
 	}
