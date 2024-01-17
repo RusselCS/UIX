@@ -316,6 +316,5 @@ function bool isv6b(void) {
 		Thing_Remove(u);
 		isv6bFlag = ret;
 	}
-	Log(s:"Returning ", i:isv6bFlag);
 	return isv6bFlag;
 }
