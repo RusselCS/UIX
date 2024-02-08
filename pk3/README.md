@@ -39,6 +39,11 @@ v1b changelog:
 - Weapon Inventory now pulls second bar colors from scriptedbars.
 - Weapon Inventory now properly positions second bars in horizontal orientation.
 
+v1c changelog:
+- Updated support for AllanXWeps and VileWeps
+- Redid fix: UI elements now update the same tick as their data, as opposed to every 0.2 seconds (Thanks Trill!)
+- Added server toggles for all UI elements
+
 FAQs:
 - Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
 --- No. Or rather, not in a way that keeps this mod as generally applicable as possible.
