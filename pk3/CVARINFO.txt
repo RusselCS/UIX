@@ -10,6 +10,7 @@ user bool UIX_CL_SR50Visual = true;
 user float UIX_CL_SR50VisualAlpha = 0.8;
 server noarchive bool UIX_SV_SR50Visual = true;
 
+server noarchive bool UIX_SV_WEAPBAR = true;
 user bool UIX_CL_WEAPBAR = true;
 user int UIX_CL_WEAPBAROFFSX = 500;
 user int UIX_CL_WEAPBAROFFSY = 250;
@@ -19,6 +20,7 @@ user bool UIX_CL_WEAPBARDIR = false; // false = vertical, true = horizontal
 user float UIX_CL_WEAPBARALPHA = 1.0;
 user bool UIX_CL_WEAPBARSHOWSLOTS = true;
 
+server noarchive bool UIX_SV_TEAMINFO = true;
 user bool UIX_CL_TEAMINFO = true;
 user int UIX_CL_TEAMINFOOFFSX = -430;
 user int UIX_CL_TEAMINFOOFFSY = 440;

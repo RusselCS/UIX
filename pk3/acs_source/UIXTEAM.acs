@@ -67,6 +67,9 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK"))
         stackOffs *= -1;
 
+    if(!GetCvar("UIX_SV_TEAMINFO"))
+        terminate;
+
     if(baseAlpha == 0.0)
         terminate;
 
