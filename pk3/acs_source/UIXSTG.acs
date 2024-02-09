@@ -30,6 +30,8 @@ str modTables[MAX_MODS][2] = {
     {"JetAdaptorUpgrade", "UIX_MM6Busters"},
     {"BerserkerRushWep", "UIX_VileWeps"},
     {"BulletVulcanWep", "UIX_EncoreWeps"},
+    {"BluemanBlasterWep", "UIX_BluemanBlaster"},
+    {"HyperPropellantWep", "UIX_Experimental_Weapons"},
     {"", ""},
 };
 
@@ -129,7 +131,7 @@ script "UIX_VileWeps" (void)
     CallACS0("vile_artificialweapons");
     CallACS0("vile_mm11weapons");
     CallACS0("vile_redistributedweapons");
-    CallACS0("vile_reprogrmamedweapons");
+    CallACS0("vile_reprogrammedweapons");
     CallACS0("vile_rokkochanweapons");
     CallACS0("vile_quintsrevengeweapons");
     CallACS0("vile_christmascarolweapons");
@@ -144,4 +146,15 @@ script "UIX_VileWeps" (void)
 script "UIX_EncoreWeps" (void)
 {
     CallACS0("enc_items");
+}
+
+script "UIX_BluemanBlaster" (void)
+{
+    CallACS0("blueblaster_info");
+}
+
+script "UIX_Experimental_Weapons" (void)
+{
+    CallACS0("experimental_busters");
+    CallACS0("experimental_defineweps");
 }
