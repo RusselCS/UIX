@@ -44,6 +44,10 @@ v1c changelog:
 - Redid fix: UI elements now update the same tick as their data, as opposed to every 0.2 seconds (Thanks Trill!)
 - Added server toggles for all UI elements
 
+v1ch changelog:
+- Added support for Experimental_Weapons and BluemanBlaster
+- Fixed a typo in VileWeps support script
+
 FAQs:
 - Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
 --- No. Or rather, not in a way that keeps this mod as generally applicable as possible.
