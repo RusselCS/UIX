@@ -146,7 +146,7 @@ special
 	
 	143:Player_RemoveItem(2),			// Skulltag Functions
 	144:Player_GiveItem(2),				// Skulltag Functions
-	145:Player_SetTeam(1),				// Skulltag Functions
+	145:Player_SetTeam(1, 2),			// Skulltag Functions
 	150:Line_SetHealth(2),
 	151:Sector_SetHealth(3),
 	152:Team_Score(2),					// Skulltag Functions
