@@ -1247,6 +1247,7 @@
 #define LUMP_READ_FLOAT 5
                 
 #define LUMP_INFO_SIZE 0
+#define LUMP_INFO_NAME 1
 
 // [SB] Disconnect reasons for GAMEEVENT_PLAYERLEAVESSERVER.
 #define LEAVEREASON_LEFT 0
