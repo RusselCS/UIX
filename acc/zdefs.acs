@@ -934,6 +934,7 @@
 #define GAMEEVENT_DOMINATION_CONTROL		13
 #define GAMEEVENT_DOMINATION_POINT		14
 #define GAMEEVENT_PLAYERLEAVESSERVER	15
+#define GAMEEVENT_LEVEL_INIT            16
 
 // Events when you have input grabbed
 
