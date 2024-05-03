@@ -1,4 +1,5 @@
-V1A TO DO
+== V1A TO DO ==
+Done
 - TeamInfo: Toggle
 - TeamInfo: Scale
 - TeamInfo: Alpha
@@ -12,6 +13,40 @@ V1A TO DO
 - TeamInfo: Toggle Radar
 - WeapBar: Toggle Slots
 - WeapBar: Alpha
-- ???????: Move MSGIDs to v6b's data structure???
 
-V1B TO DO
+== V1B TO DO ==
+Done
+- Player name length cap?
+- v6a modal code support
+- MSG_TIME should be 1873
+- Doublebars on scriptbars
+- WeaponBar: Horizontal + mirrored double bars drawn in the wrong place
+- Teaminfo support coop
+
+== V1C TO DO ==
+Done:
+- AllanX update
+- MegaVile update
+
+== V1D TO DO ==
+Done:
+- Remove MegaVile and Encore
+
+- Check BluemanBlaster
+
+== V2A TO DO ==
+- Team ammo bar (most requested feature)
+- Bar Rework! Use simplified graphics instead of pieces.
+
+- ???????: Move MSGIDs to v6b's data structure???
+- Look into Hexen's inventory cycler
+- Wire UI element
+- Debuff Icons/Timers
+- Compress weapon bar
+- Map stuff
+- Show how many stocks on the TeamUI
+- Show your own stocks!! on the UI
+- Exit Unit UI element
+- Error with Strlen someplace. Check for null strings.
+- Manually stage copywep class busters for CBM
+- Weapon bar appear/disappear when switching weapons

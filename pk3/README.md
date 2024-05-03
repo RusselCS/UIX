@@ -10,6 +10,9 @@ Addon that implements additional UI elements:
 - SR50 tailwind.
 - Enhanced pickup respawn indicators.
 
+Asset Credits:
+- SR50 Tailwind graphics adapted from SRB2.
+
 Modder notes:
 - Currently only works with v6b.
 - Due to the way weapons are implemented in v6b, this mod manually has to support mods to work with the weapon bar.
@@ -23,9 +26,10 @@ Modder notes:
   - Ukiweps (by Ukiyama)
   - Allanxweps (by Allanxindustries)
   - Item Asylum (by JumboDS64)
-  - VileWeps (by MegaVile)
-  - Encore Weps (by MegaVile)
   - MM6 Busters (by Trill, adapted by MegaVile)
+
+Please note that some mods not listed above handle UIX support themselves. MegaVile's packs in particular will ship
+with the necessary integrations, so they do not need to be implemented directly by UIX itself.
 
 If your mod is not on this list and you want it to be, raise an issue on github.com/russelcs/uix or ping me on discord.
 I typically hang out in the MM8BDM unofficial discord (linked from the forums), TSPG discord, or in the Gondola discord.
@@ -47,6 +51,11 @@ v1c changelog:
 v1ch changelog:
 - Added support for Experimental_Weapons and BluemanBlaster
 - Fixed a typo in VileWeps support script
+
+v1d changelog:
+NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Versions following should contain them.
+- Removed VileWeps and Encore from supported mods (they support themselves now!)
+- Renamed "ScuttleRun" to "SR50" in the menus because people complained
 
 FAQs:
 - Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")

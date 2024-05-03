@@ -15,14 +15,14 @@ OptionMenu "UIXOptions"
 	StaticText "Global Toggle", 1
 	Option "UI Extensions", "UIX_CL_Enable", "OnOff"
 	StaticText " "
-	StaticText "Scuttlerun (SR50)", 1
+	StaticText "SR50", 1
 	StaticText "$UIX_MNU_SR50_1", 1
-	Option "Enable Scuttlerun", "UIX_CL_UsingSR50", "OnOff"
+	Option "Enable SR50", "UIX_CL_UsingSR50", "OnOff"
 	Control "Activate Scuttlerun", "+sr"
 	StaticText " "
 	StaticText "$UIX_MNU_SR50_2", 1
-	Control "Strafe Left (SR)", "+left2"
-	Control "Strafe Right (SR)", "+right2"
+	Control "Strafe Left (SR50)", "+left2"
+	Control "Strafe Right (SR50)", "+right2"
 	StaticText " "
 	Option "SR Tailwind Visual", "UIX_CL_SR50Visual", "OnOff"
 	Slider "SR Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
