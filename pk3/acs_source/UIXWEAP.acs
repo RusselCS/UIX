@@ -77,6 +77,9 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     if(GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
         terminate;
 
+    if(CheckActorInventory(cam, "UIX_NoWeaponBar") > 0)
+        terminate;
+
     bool mirrored = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
     bool horizontal = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
     int userAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");

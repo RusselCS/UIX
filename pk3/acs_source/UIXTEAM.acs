@@ -73,6 +73,9 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(baseAlpha == 0.0)
         terminate;
 
+    if(CheckActorInventory(cam, "UIX_NoTeamBar") > 0)
+        terminate;
+
     SetActivator(cam);
     int pln = PlayerNumber();
     SetActivator(-1);

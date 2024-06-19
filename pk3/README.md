@@ -38,7 +38,7 @@ My name is Russel, or RusselCS. Please describe me with he/him or they/them pron
 v1b changelog:
 - Added VileWeps, Encore Weps, and MM6 Busters to the supported mods
 - UI elements now update the same tick as their data, as opposed to every 0.2 seconds (Thanks Trill!)
-- Added limited support for v6a. Scuttlerun and Teaminfo should function properly!
+- Added limited support for v6a. SR50 and Teaminfo should function properly!
 - Teaminfo now works in coop, survival, and invasion.
 - Weapon Inventory now pulls second bar colors from scriptedbars.
 - Weapon Inventory now properly positions second bars in horizontal orientation.

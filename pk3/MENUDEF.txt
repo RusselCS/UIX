@@ -18,7 +18,7 @@ OptionMenu "UIXOptions"
 	StaticText "SR50", 1
 	StaticText "$UIX_MNU_SR50_1", 1
 	Option "Enable SR50", "UIX_CL_UsingSR50", "OnOff"
-	Control "Activate Scuttlerun", "+sr"
+	Control "Activate SR50", "+sr"
 	StaticText " "
 	StaticText "$UIX_MNU_SR50_2", 1
 	Control "Strafe Left (SR50)", "+left2"

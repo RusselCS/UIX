@@ -1,0 +1,10 @@
+actor UIX_Flag : Once {
+    States {
+        Spawn:
+            TNT1 AA 0
+            stop
+    }
+}
+
+actor UIX_NoTeamBar : UIX_Flag {}
+actor UIX_NoWeaponBar : UIX_Flag {}
