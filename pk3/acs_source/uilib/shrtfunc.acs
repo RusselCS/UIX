@@ -25,6 +25,8 @@
 
 #define MSG_TIME 1873
 
+function int getNewUIId(void) { return CallACS0("UIX_GetNewID"); }
+
 function void displayBar(str baseStr, str fillPiece, str empPiece, int cur, int max, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
 	bool vertical = GetChar(baseStr, 1) == '\n';
@@ -143,6 +145,56 @@ function void displayIconBold(str icon, int id, int offsX, int offsY, int scaleX
 {
     SetFont(icon);
     displayMessageBold("A", id, offsX, offsY, scaleX, scaleY, alpha);
+}
+
+#define BAR_DISPLAY_NONE 0
+#define BAR_DISPLAY_VERT 1
+#define BAR_DISPLAY_HORI 2
+
+// Bar drawing stuff
+// Original concept by BinaryCode
+//
+function void drawLayeredBar(str bar1, str bar2, str empty, int offsx, int offsy, int width, int height, int scalex, int scaley, int alpha, int amount, int maxAmount, int mode, int reverse, int bar1Id, int bar2Id, int backId)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	// width = FixedMul(width, scaleX);
+	// height = FixedMul(height, scaleY);
+	int x = 1.0*(resX/2)+1.0*offsX;
+	int y = 1.0*(resY/2)+1.0*offsY;
+
+	SetHudSize(resX, resY, 0);
+
+    if(mode == BAR_DISPLAY_NONE)
+       return;
+    
+    int clip;
+    if(mode == BAR_DISPLAY_VERT) {
+        clip = (amount * height) / maxAmount;
+        SetHudClipRect((x >> 16), (y >> 16) + (height - clip), width, clip);
+    }
+    if(mode == BAR_DISPLAY_HORI) {
+        clip = (amount * width) / maxAmount;
+		SetHudClipRect((x >> 16), (y >> 16), clip, height);
+    }
+
+	SetFont(bar1);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, x + 0.1, y + 0.1, MSG_TIME, alpha);
+	SetFont(bar2);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar2Id, CR_UNTRANSLATED, x + 0.1, y + 0.1, MSG_TIME, alpha);
+    SetHudClipRect((x >> 16), (y >> 16), width, height);
+    SetFont(empty);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, x + 0.1, y + 0.1, MSG_TIME, alpha);
+	SetHudClipRect(0,0,0,0);
+}
+
+function int abs(int x)
+{
+	if(x < 0)
+		return -x;
+	return x;
 }
 
 int lastmsgXBold;

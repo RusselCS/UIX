@@ -15,17 +15,6 @@ DATA NEEDED:
 - Slot
 */
 
-#define WEPBAR_ID_OFFS       20000
-#define WEPBAR_ID_ICON       0001
-#define WEPBAR_ID_ICONFADE   0002
-#define WEPBAR_ID_BAR1TOP    0003
-#define WEPBAR_ID_BAR1MID    0004
-#define WEPBAR_ID_BAR1BOT    0005
-#define WEPBAR_ID_BAR2TOP    0006
-#define WEPBAR_ID_BAR2MID    0007
-#define WEPBAR_ID_BAR2BOT    0008
-#define WEPBAR_ID_SLOTKEY    0009 // i don't *need* this many ids for this...
-
 #define BARDATA_FIELDS 9
 
 #define BARDATA_CHECKED 0
@@ -84,6 +73,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     bool horizontal = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
     int userAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
     bool drawSlot = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
+    int barWidth, barHeight;
     
     SetActivator(cam);
     int pln = PlayerNumber();
@@ -103,18 +93,24 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     int xStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX"); // 500;
     int yStart = -GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY"); // 500;
 
-    str barFont1, barFont2, bart, barb;
+    str barFontCyan, barFontBlue, barFontEmpt, bart, barb;
 
     if(!horizontal) {
-        barFont1 = "UXWFTV";
-        barFont2 = "UIXWVEMP";
+        barFontCyan = "UIXWVC";
+        barFontBlue = "UIXWVB";
+        barFontEmpt = "UIXVHEMP";
         bart = STR_WEP_V;
         barb = STR_WEP_V2;
+        barWidth = WEPBAR_BAR_WIDTH * 10;
+        barHeight = WEPBAR_ICON_WIDTH * 10;
     } else {
-        barFont1 = "UXWFTH";
-        barFont2 = "UIXWHEMP";
+        barFontCyan = "UIXWHC";
+        barFontBlue = "UIXWHB";
+        barFontEmpt = "UIXWHEMP";
         bart = STR_WEP_H;
         barb = STR_WEP_H2;
+        barWidth = WEPBAR_ICON_WIDTH * 10;
+        barHeight = WEPBAR_BAR_WIDTH * 10;
     }
 
     int icWep, alpha;
@@ -191,9 +187,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 } else {
                     slotPos--;
                 }
-                
-                int idStart = BASE_ID + WEPBAR_ID_OFFS + (fakeId*10);
-                int slotId = BASE_ID + WEPBAR_ID_OFFS + WEPBAR_ID_SLOTKEY + (slot*10);
 
                 str slotCol = "\cq";
 
@@ -246,9 +239,9 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 if(!horizontal) {
                     if(!mirrored) {
                         bar1x = icox;
-                        bar1y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
-                        bar2x = bar1x + FixedMul(WEPBAR_BAR_WIDTH, ScaleX);
-                        bar2y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
+                        bar1y = icoy - FixedMul(WEPBAR_ICON_WIDTH + WEPBAR_ICON_WIDTH/2, scaleY);
+                        bar2x = bar1x + FixedMul(WEPBAR_BAR_WIDTH, scaleY);
+                        bar2y = bar1y;
                         slotx = xStart - FixedMul(3 * WEPBAR_X_OFFS, scaleX);
                         sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
                     } else {
@@ -269,7 +262,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                         sloty = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY);
                     } else {
                         bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
-                        bar1y = icoy - FixedMul(WEPBAR_BAR_WIDTH << 1, scaleX);
+                        bar1y = icoy - FixedMul(WEPBAR_BAR_WIDTH*2, scaleY);
                         bar2x = bar1x;
                         bar2y = bar1y + FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
                         slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
@@ -277,19 +270,17 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     }
                 }
 
-                displayIcon(ico, idStart + WEPBAR_ID_ICON, icox, icoy, scaleX, scaleY, alpha);
-                displayIcon("UXICA0", idStart + WEPBAR_ID_ICONFADE, icox, icoy, scaleX, scaleY, userAlpha);
+                displayIcon(ico, getNewUIId(), icox, icoy, scaleX, scaleY, alpha);
+                displayIcon("UXICA0", getNewUIId(), icox, icoy, scaleX, scaleY, userAlpha);
 
                 // format: UXWFT#XX
 
                 if(amx1) {
-                    displayBar(barb, StrParam(s:barFont1, s:amo1cyan), "TNT1A0", amt1, amx1, idStart + WEPBAR_ID_BAR1TOP, idStart + WEPBAR_ID_BAR1BOT, bar1X, bar1Y, scaleX, scaleY, userAlpha);
-                    displayBar(bart, StrParam(s:barFont1, s:amo1blue), barFont2, amt1, amx1, idStart + WEPBAR_ID_BAR1MID, idStart + WEPBAR_ID_BAR1BOT, bar1X, bar1Y, scaleX, scaleY, userAlpha);
+                    drawLayeredBar(StrParam(s:barFontCyan, s:amo1cyan), StrParam(s:barFontBlue, s:amo1blue), barFontEmpt, bar1X, bar1Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt1, amx1, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
                 }
 
                 if(amx2) {
-                    displayBar(barb, StrParam(s:barFont1, s:amo2cyan), "TNT1A0", amt2, amx2, idStart + WEPBAR_ID_BAR2TOP, idStart + WEPBAR_ID_BAR2BOT, bar2X, bar2Y, scaleX, scaleY, userAlpha);
-                    displayBar(bart, StrParam(s:barFont1, s:amo2blue), barFont2, amt2, amx2, idStart + WEPBAR_ID_BAR2MID, idStart + WEPBAR_ID_BAR2BOT, bar2X, bar2Y, scaleX, scaleY, userAlpha);
+                    drawLayeredBar(StrParam(s:barFontCyan, s:amo2cyan), StrParam(s:barFontBlue, s:amo2blue), barFontEmpt, bar2X, bar2Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt2, amx2, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
                 }
 
                 if(drawSlot && !slotDrawn[slot]) {
@@ -298,12 +289,12 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     SetFont("SMALLFONT");
                     if(!horizontal) {
                         if(!mirrored) {
-                            displayMessageR(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                            displayMessageR(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
                         } else {
-                            displayMessageL(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                            displayMessageL(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
                         }
                     } else {
-                        displayMessage(slotKey, slotId, slotx, sloty, scaleX, scaleY, userAlpha);
+                        displayMessage(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
                     }
                 }
         }

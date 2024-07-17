@@ -19,6 +19,14 @@ script "UITweaks_Register" OPEN CLIENTSIDE
     if(isv6b()) DefineAssistDisplay("UITweaks_Runner");
 }
 
+#DEFINE MESSAGE_ID_START BASE_ID
+int msgId = MESSAGE_ID_START;
+
+script "UIX_GetNewID" (void)
+{
+	SetResultValue(msgId++);
+}
+
 script "UITweaks_Register_Server" OPEN
 {
     // AddSpawnFunc("UIX_WeapBar_Register", DTADD_SFT_WEP);
@@ -42,6 +50,7 @@ script "UITweaks_Runner" (int cam) CLIENTSIDE
         if(cv != 0)
             CallACS3(UI_Scripts[i][0], cam, cpn, cv);
     }
+	msgId = MESSAGE_ID_START;
 }
 
 // v6a pickup script wrappers
