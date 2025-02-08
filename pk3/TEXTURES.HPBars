@@ -9,3 +9,9 @@ texture UXTEMHVH, 8, 1 {patch UXTEMHPH, 0, 0 {Rotate 270}}
 texture UXTEMHVI, 8, 1 {patch UXTEMHPI, 0, 0 {Rotate 270}}
 texture UXTEMHVJ, 8, 1 {patch UXTEMHPJ, 0, 0 {Rotate 270}}
 texture UXTEMHV_, 8, 1 {patch UXTEMHP_, 0, 0 {Rotate 270}}
+
+texture UXTEMHVB, 8, 64 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0}
+texture UXTEMHV1, 8, 64 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0}
+
+texture UXTEMHHB, 64, 8 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0 {Rotate 90 flipy}}
+texture UXTEMHH1, 64, 8 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0 {Rotate 90 flipy}}
