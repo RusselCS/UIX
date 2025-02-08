@@ -126,7 +126,13 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             // Log(s:"Made it into main for player ", i:i, s:" while viewing player ", i:pln);
 
             // many variables
-            int xOffs, yOffs, baseX, baseY, nameX, nameY, barX, barY, compassX, compassY, mugX, mugY;
+            int baseX, baseY;
+            int xOffs, yOffs;
+            int nameX, nameY;
+            int barX, barY;
+            int compassX, compassY;
+            int mugX, mugY;
+            int locX, locY;
 
             int curId = msgId + curPlay;
             int plrTid = i + PLN_TID_SHRT;
@@ -256,29 +262,19 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                 }
             }
 
-            if(drawHealth) {
+            int mhp = GetActorProperty(plrTid, AProp_SpawnHealth);
+            if(drawHealth && mhp > 0) {
                 int chp = GetActorProperty(plrTid, AProp_Health);
+                int sbar_orientation = orientation ? 1 : 2;
 
-                int font = orientation + mirrored;
+                int hpWidth = orientation ? 80 : 640;
+                int hpHeight = orientation ? 640 : 80;
 
-                if(cbmx10())
-                    chp /= 10;
+                int hpTop = orientation ? "UXTEMHV1" : "UXTEMHH1";
+                int hpBot = orientation ? "UXTEMHVB" : "UXTEMHHB";
 
-                if(chp > 500)
-                    chp = 500;
-
-                int tier, rem;
-
-                if(chp <= 0) {
-                    tier = 0;
-                    rem = 0;
-                } else {
-                    tier = chp/TEAMINFO_BARMAX;
-                    rem = chp%TEAMINFO_BARMAX;
-                }
-
-                int barScale = FixedMul(baseScale, 1.5);
-                displayBar1M(TeamBarsStrings[TEAMINFO_BAR_START+tier][font], TeamBarsStrings[TEAMINFO_BAR_START+tier-1][font], TeamBarsStrings[TEAMINFO_BAR_FONT][font], rem, TEAMINFO_BARMAX, (orientation == horizontal && mirrored>0), curId+TEAMINFO_ID_HP1, barX, barY, barScale, barScale, baseAlpha);
+                int barScale = FixedMul(FixedMul(baseScale, 1.5), 0.1);
+                drawBar(hpTop, hpBot, barX, barY, hpWidth, hpHeight, barScale, barScale, baseAlpha, chp, mhp, sbar_orientation, false, getNewUIId(), getNewUIId());
             }
 
             if(drawCompass) {

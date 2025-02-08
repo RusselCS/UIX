@@ -31,12 +31,30 @@ Done:
 == V1D TO DO ==
 Done:
 - Remove MegaVile and Encore
-
 - Check BluemanBlaster
+
+== V1F TO DO ==
+- Teaminfo: Finish setbarcliprect update
+- Teaminfo: Fix name caching
+- Teaminfo: Add number toggles for everything
+- Frag messages: Add mugshot on frag message
+- Stock pips over mugshots (Teaminfo)
+- Assist message?
+- Missed a "scuttlerun" in the menu somewhere. Squash that.
 
 == V2A TO DO ==
 - Team ammo bar (most requested feature)
 - Bar Rework! Use simplified graphics instead of pieces.
+- Mugshot on frag message
+- Team info:
+--- Support for 999 health bars (up to 99900/999000 health total)
+--- Copywep icon/ammo
+--- Stock pips over the mugshot
+--- Toggle numbers instead of bars
+mockups here: https://discord.com/channels/160876376662999040/160882052177199104/1236026688438009976
+              https://discord.com/channels/160876376662999040/160882052177199104/1236018379538694144
+              (8bdm unofficial discord)
+- Reset to defaults button!
 
 - ???????: Move MSGIDs to v6b's data structure???
 - Look into Hexen's inventory cycler
