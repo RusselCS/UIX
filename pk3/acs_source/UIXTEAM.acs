@@ -1,9 +1,10 @@
 #library "UIXTEAM"
 
 #include "zcommon.acs"
-#include "SHRTFUNC.acs"
 
 #import "8BDT.acs"
+
+#include "SHRTFUNC.acs"
 
 #define TEAMINFO_ID_OFFS    10000
 #define TEAMINFO_ID_NAME    0100
@@ -54,8 +55,8 @@ str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][4] = {
 };
 
 str nameFonts[2] = {
-    "SMALLFONT",
-    "ROTAFONT"
+    "SMALLFNT",
+    "SIDEFNTL",
 };
 
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
@@ -118,7 +119,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             // Log(i:i, s:"in game? ", i:PlayerInGame(i));
             if(!PlayerInGame(i))
                 continue;
-            
+
             // Log(i:i, s:" team: ", i:GetPlayerInfo(i, PLAYERINFO_TEAM), s:" == ", i:team);
             if(getPlayerTeam(i) != team)
                 continue;
@@ -146,7 +147,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                     baseY = startY - yOffs;
 
                     nameX = baseX;
-                    nameY = baseY;
+                    nameY = baseY + FixedMul(baseScale, -2);
 
                     barX = baseX;
                     barY = baseY + FixedMul(baseScale, 8);
@@ -219,45 +220,29 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                 str nameFont = nameFonts[orientation ^ fontVers];
 
                 int nameScale = baseScale;
-                int nameLength = getPlayerNameLength(i, orientation);
+                int nameLength = getCacheNameWidth(i, orientation, !fontVers);
 
                 if(nameLength > maxNameLength) {
                     nameScale = FixedMul(baseScale, FixedDiv(maxNameLength, nameLength));
                 }
 
-                str loc = 0;
-                if(drawLocation)
-                    loc = rotateLocation(i+PLN_TID_SHRT, orientation);
+            //     str loc = 0;
+            //     if(drawLocation)
+            //         loc = rotateLocation(i+PLN_TID_SHRT, orientation);
 
                 if(orientation == horizontal) {
                     SetFont(nameFont);
                     if(mirrored == straight) {
-                        if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false), s:" ", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                        } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                        }
+                        displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                     } else {
-                        if(loc != 0) {
-                            displayMessageR(StrParam(s:loc, s:" ", s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                        } else {
-                            displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                        }
+                        displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
                     }
                 } else {
                     SetFont(nameFont);
                     if(mirrored == straight) {
-                        if(loc != 0) {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers), s:"\n", s:loc), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                        } else {
-                            displayMessageL(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                        }
+                        displayMessageL(StrParam(s:getPlayerName(i, orientation, !fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                     } else {
-                        if(loc != 0) {
-                            displayMessageU(StrParam(s:loc, s:"\n", s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                        } else {
-                            displayMessageU(StrParam(s:getPlayerName(i, orientation, fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                        }
+                        displayMessageU(StrParam(s:getPlayerName(i, orientation, !fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
                     }
                 }
             }
@@ -333,162 +318,211 @@ function str getMugshotGraphicFromTID(int tid) {
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
-int reverseNames[MAX_PLAYERS_SHRT];
-
-function int isNameReversed(int pln) {
-    return reversenames[pln]-1;
-}
-
-function str getPlayerName(int plr, int vert, int reverse)
-{
-    str name = StrParam(n:1+plr);
-
-    if(!vert)
-        return name;
-
-    bool update = false;
-
-    str cvhorz = StrParam(s:"temp_uix_namestore_horz_", i:plr);
-    str cvvert = StrParam(s:"temp_uix_namestore_vert_", i:plr);
-
-    if(StrICmp(GetCvarString(cvhorz), name) != 0)
-        update = true;
-
-    if(isNameReversed(plr) != reverse)
-        update = true;
-
-    if(update) {
-        str vertName;
-
-        vertName = rebuildName(name, reverse);
-
-        SetCvarString(cvhorz, name);
-        SetCvarString(cvvert, vertName);
-        return vertName;
-    }
-    return GetCvarString(cvvert);
-}
-
-#define NAME_MAX 96
+#define NAME_MAX 1000
 #define CHAR_COLOR 28
 
 int nameSize;
 int nameBuilder[NAME_MAX];
 
 int nameColorless[NAME_MAX];
-str colorSlots[NAME_MAX]; // no idea what size this should be tbh
-int colorPos[NAME_MAX];
+int nameColors[NAME_MAX];
+int colorPos[NAME_MAX][3];
 
-function str rebuildName(str name, bool reverse) {
+function int getColorPos(int i) { return colorPos[i][0]; }
+function int getColorStart(int i) { return colorPos[i][1]; }
+function int getColorEnd(int i) { return colorPos[i][2]; }
+
+function void setColorPos(int i, int val) { colorPos[i][0] = val; }
+function void setColorStart(int i, int val) { colorPos[i][1] = val; }
+function void setColorEnd(int i, int val) { colorPos[i][2] = val; }
+
+// output of rebuildString stored here.
+str cacheKey;
+str cacheVert;
+str cacheVertReverse;
+int cacheWidth;
+int cacheHeight;
+int cacheHeightReverse;
+
+function void rebuildString(str name) {
+    cacheKey = name;
+
     strCpy(a:nameBuilder, name);
     nameSize = StrLen(name);
 
     str outName = "";
 
-    // for(int i = 0; i < nameSize; i++) {
-    //     if(isAlphanumeric(nameBuilder[i])) {
-    //         outName = StrParam(s:outName, c:nameBuilder[i]);
-    //     } else {
-    //         outName = StrParam(s:outName, s:"[", i:nameBuilder[i], s:"]");
-    //     }
-    // }
-
-    // Log(s:outName);
-
     int inColor = 0;
     int colorStart;
 
     int colorLessSize = 0;
-    int colorSize = 0;
+    int colorsLength = 0;
+    int colorsCount = 0;
 
     int i;
+
+    int nameWidth = 0;
 
     for(i = 0; i < nameSize; i++) {
         switch(inColor) {
             case 0:
                 if(nameBuilder[i] == CHAR_COLOR) {
-                    colorPos[colorSize] = colorLessSize;
                     inColor = 1;
+                    setColorPos(colorsCount, colorLessSize);
+                    setColorStart(colorsCount, colorsLength);
                 } else {
                     nameColorless[colorLessSize++] = nameBuilder[i];
+                    nameWidth += charWidths[nameBuilder[i]];
                 }
                 break;
             case 1: // check next char
                 if(nameBuilder[i] == '[') {
                     colorStart = i;
                     inColor = 2;
+                    setColorPos(colorsCount, colorLessSize);
+                    setColorStart(colorsCount, colorsLength);
+                    nameColors[colorsLength++] = nameBuilder[i];
                 } else {
-                    colorSlots[colorSize++] = StrParam(c:nameBuilder[i]);
                     inColor = 0;
+                    nameColors[colorsLength++] = nameBuilder[i];
+                    setColorEnd(colorsCount, colorsLength);
+                    colorsCount++;
                 }
                 break;
             case 2: // in big string
+                nameColors[colorsLength++] = nameBuilder[i];
                 if(nameBuilder[i] == ']') {
-                    colorSlots[colorSize++] = StrMid(name, colorStart, i-colorStart+1);
-                    // Log(s:"Ending color tag: ", s:colorSlots[colorSize-1], s:" - ", i:StrLen(colorSlots[colorSize-1]));
                     inColor = 0;
+                    setColorEnd(colorsCount, colorsLength);
+                    colorsCount++;
                 }
                 break;
         }
+        nameBuilder[i] = 0;
     }
 
-    // for(i = 0; i < colorSize; i++) {
-    //     Log(s:"Slot ", i:i, s:" - @", i:colorPos[i], s:": ", s:colorSlots[i]);
+    // // Cache test
+    // Log(a:(nameColorless, 0, colorLessSize));
+    // Log(a:(nameColors, 0, colorsLength));
+
+    // // Colors test
+    // str tpos = StrParam(i:getColorPos(0));
+    // str tstart = StrParam(i:getColorStart(0));
+    // str tend = StrParam(i:getColorEnd(0));
+    // for(i = 1; i < colorsCount; i++) {
+    //     tpos = StrParam(s:tpos, s:", ", i:getColorPos(i));
+    //     tstart = StrParam(s:tstart, s:", ", i:getColorStart(i));
+    //     tend = StrParam(s:tend, s:", ", i:getColorEnd(i));
     // }
+    // Log(s:tstart);
+    // Log(s:tend);
+    // Log(s:tpos);
 
-    // for(i = 0; i < colorLessSize; i++) {
-    //     Log(c:nameColorless[i]);
-    // }
+    int c, nidx, curCol;
 
-    colorSize--;
-    str ccblbsc = "-"; // currentColorBecauseLineBreaksStopColor - because acc won't let me compile with this long a var
+    // vertical
+    nidx = 0;
+    curCol = -1;
+    for(i = 0; i < colorLessSize; i++) {
+        if(i == getColorPos(curCol+1)) {
+            curCol++;
+        }
 
-    if(colorSize >= 0) {
-        ccblbsc = colorSlots[colorSize];
+        if(nameColorless[i] != ' ') {
+            if(curCol > -1) {
+                nameBuilder[nidx++] = CHAR_COLOR;
+                for(c = getColorStart(curCol); c < getColorEnd(curCol); c++) {
+                    nameBuilder[nidx++] = nameColors[c];
+                }
+            }
+            nameBuilder[nidx++] = nameColorless[i];
+        }
+
+        nameBuilder[nidx++] = '\n';
     }
 
-    if(!reverse) {
-        for(i = colorLessSize; i >= 0; i--) {
-
-            if(nameColorless[i] != 0) {
-                if(nameColorless[i] == ' ') {
-                    outName = StrParam(s:outName, c:'\n');
-                } else {
-                    outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
-                }
-            }
-            nameColorless[i] = 0;
-
-            if(colorSize > 0) {
-                if(i == colorPos[colorSize]) {
-                    ccblbsc = colorSlots[colorSize-1];
-                    colorSize--;
-                }
-            }
+    cacheVert = StrParam(a:(nameBuilder, 0, nidx));
+    
+    // verticalreverse
+    nidx = 0;
+    curCol = colorsCount-1;
+    for(i = colorLessSize; i > 0; i--) {
+        if(i == getColorPos(curCol)) {
+            curCol--;
         }
-    } else {
-        int x = 0;
-        for(i = 0; i < colorLessSize+1; i++) {
 
-            if(x < colorSize+1) {
-                if(i == colorPos[x]) {
-                    ccblbsc = colorSlots[x];
-                    x++;
+        if(nameColorless[i-1] != ' ') {
+            if(curCol < colorsCount) {
+                nameBuilder[nidx++] = CHAR_COLOR;
+                for(c = getColorStart(curCol); c < getColorEnd(curCol); c++) {
+                    nameBuilder[nidx++] = nameColors[c];
                 }
             }
-
-            if(nameColorless[i] != 0) {
-                if(nameColorless[i] == ' ') {
-                    outName = StrParam(s:outName, c:'\n');
-                } else {
-                    outName = StrParam(s:outName, s:"\c", s:ccblbsc, c:nameColorless[i], c:'\n');
-                }
-            }
-            nameColorless[i] = 0;
+            nameBuilder[nidx++] = nameColorless[i-1];
         }
+
+        nameBuilder[nidx++] = '\n';
     }
 
-    return outName;
+    cacheVertReverse = StrParam(a:(nameBuilder, 0, nidx));
+    cacheWidth = nameWidth;
+    cacheHeight = colorLessSize * 11;
+    cacheHeightReverse = colorLessSize * 9;
+}
+
+// bool init
+// string name
+// string vertical
+// string reversevertical
+// int width horizontal
+// int width vertical
+// int width vertical reverse
+//
+str namesCache[64][7];
+
+function int isCacheInit(int plr) { return namesCache[plr][0]; }
+function void setCacheInit(int plr, int val) { namesCache[plr][0] = val; }
+
+function str getCacheName(int plr, int o, int r) { return namesCache[plr][1 + (o ? o + r : 0)]; }
+function void setCacheName(int plr, int o, int r, str val) { namesCache[plr][1 + (o ? o + r : 0)] = val; }
+
+function int getCacheNameWidth(int plr, int o, int r) { return namesCache[plr][5 + (o ? o + r : 0)]; }
+function void setCacheNameWidth(int plr, int o, int r, int val) { namesCache[plr][5 + (o ? o + r : 0)] = val; }
+
+function bool needsReset(int plr, str name)
+{
+    // [Russ] keeping in pattern with other uix stuff, short circuit the most important fail case
+    if(!isCacheInit(plr)) {
+        Log(s:"init");
+        return true;
+    }
+
+    if(StrCmp(name, getCacheName(plr, 0, 0)) != 0) {
+        Log(s:"mismatch: ", s:name, s:" ", s:getCacheName(plr, 0, 0));
+        return true;
+    }
+
+    return false;
+}
+
+function str getPlayerName(int plr, int o, int r)
+{
+    str name = StrParam(n:1+plr);
+
+    if(needsReset(plr, name)) {
+        Log(s:"Rebuilding name for ", s:name);
+        rebuildString(name);
+
+        setCacheInit(plr, true);
+        setCacheName(plr, false, false, cacheKey);
+        setCacheName(plr, true, false, cacheVert);
+        setCacheName(plr, true, true, cacheVertReverse);
+        setCacheNameWidth(plr, false, false, cacheWidth);
+        setCacheNameWidth(plr, true, false, cacheHeight);
+        setCacheNameWidth(plr, true, true, cacheHeightReverse);
+    }
+
+    return getCacheName(plr, o, r);
 }
 
 #define LOC_SIZE_LIMIT 1000
@@ -496,105 +530,109 @@ int LOC_SIZE = 0;
 
 str locs[LOC_SIZE_LIMIT][3];
 
-function str rotateLocation(int tid, int vert)
-{
-    str loc = GetActorSectorLocation(tid, false);
+// function str rotateLocation(int tid, int vert)
+// {
+//     str loc = GetActorSectorLocation(tid, false);
 
-    if(StrLen(loc) == 0)
-        return 0;
+//     if(StrLen(loc) == 0)
+//         return 0;
 
-    loc = StrParam(s:"\cf(", s:loc, s:"\cf)");
+//     loc = StrParam(s:"\cf(", s:loc, s:"\cf)");
 
-    if(!vert)
-        return loc;
-    
-    int idx = findLoc(loc);
+//     if(!vert)
+//         return loc;
 
-    bool update = false;
+//     int idx = findLoc(loc);
 
-    if(idx == -1)
-        update = true;
+//     bool update = false;
 
-    int cv = GetUserCvar(ConsolePlayerNumber(), "UIX_CL_TEAMINFOFONTDIR");
+//     if(idx == -1)
+//         update = true;
 
-    if(!update)
-        if(locs[idx][2] != cv)
-            update = true;
+//     int cv = GetUserCvar(ConsolePlayerNumber(), "UIX_CL_TEAMINFOFONTDIR");
 
-    if(update) {
-        if(idx == -1)
-            idx = LOC_SIZE++;
+//     if(!update)
+//         if(locs[idx][2] != cv)
+//             update = true;
 
-        locs[idx][0] = loc;
-        locs[idx][1] = rebuildName(loc, cv);
-        locs[idx][2] = cv;
-    }
+//     if(update) {
+//         if(idx == -1)
+//             idx = LOC_SIZE++;
 
-    return locs[idx][1];
-}
+//         locs[idx][0] = loc;
+//         locs[idx][1] = rebuildName(loc, cv);
+//         locs[idx][2] = cv;
+//     }
 
-function int findLoc(str loc) {
-    for(int i = 0; i < LOC_SIZE; i++) {
-        if(StrCmp(loc, locs[i][0])==0) {
-            return i;
-        }
-    }
-    return -1;
+//     return locs[idx][1];
+// }
+
+// function int findLoc(str loc) {
+//     for(int i = 0; i < LOC_SIZE; i++) {
+//         if(StrCmp(loc, locs[i][0])==0) {
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+function int getPlayerNameLength(int plr, int vert) {
+    return 0;
 }
 
 // [russ] surely i'll redo this cache system at some point to actually work smarter not harder
-int nameLengths[MAX_PLAYERS_SHRT][3];
+// int nameLengths[MAX_PLAYERS_SHRT][3];
 
-function int getPlayerNameLength(int plr, int vert) {
-    str name = StrParam(n:1+plr);
+// function int getPlayerNameLength(int plr, int vert) {
+//     str name = StrParam(n:1+plr);
 
-    if(StrCmp(nameLengths[plr][2], name) != 0) {
-        strCpy(a:nameBuilder, name);
-        nameSize = StrLen(name);
+//     if(StrCmp(nameLengths[plr][2], name) != 0) {
+//         strCpy(a:nameBuilder, name);
+//         nameSize = StrLen(name);
 
-        str outName = "";
+//         str outName = "";
 
-        int inColor = 0;
-        int colorStart;
+//         int inColor = 0;
+//         int colorStart;
 
-        int colorLessSize = 0;
-        int colorSize = 0;
+//         int colorLessSize = 0;
+//         int colorSize = 0;
 
-        int i;
+//         int i;
 
-        int vertLen = 0;
-        int horzLen = 0;
+//         int vertLen = 0;
+//         int horzLen = 0;
 
-        for(i = 0; i < nameSize; i++) {
-            switch(inColor) {
-                case 0:
-                    if(nameBuilder[i] == CHAR_COLOR) {
-                        colorPos[colorSize] = colorLessSize;
-                        inColor = 1;
-                    } else {
-                        horzLen += charWidths[nameBuilder[i]];
-                        vertLen += 9;
-                    }
-                    break;
-                case 1: // check next char
-                    if(nameBuilder[i] == '[') {
-                        colorStart = i;
-                        inColor = 2;
-                    } else {
-                        inColor = 0;
-                    }
-                    break;
-                case 2: // in big string
-                    if(nameBuilder[i] == ']') {
-                        inColor = 0;
-                    }
-                    break;
-            }
-        }
+//         for(i = 0; i < nameSize; i++) {
+//             switch(inColor) {
+//                 case 0:
+//                     if(nameBuilder[i] == CHAR_COLOR) {
+//                         colorPos[colorSize] = colorLessSize;
+//                         inColor = 1;
+//                     } else {
+//                         horzLen += charWidths[nameBuilder[i]];
+//                         vertLen += 9;
+//                     }
+//                     break;
+//                 case 1: // check next char
+//                     if(nameBuilder[i] == '[') {
+//                         colorStart = i;
+//                         inColor = 2;
+//                     } else {
+//                         inColor = 0;
+//                     }
+//                     break;
+//                 case 2: // in big string
+//                     if(nameBuilder[i] == ']') {
+//                         inColor = 0;
+//                     }
+//                     break;
+//             }
+//         }
 
-        nameLengths[plr][0] = horzLen;
-        nameLengths[plr][1] = vertLen;
-    }
+//         nameLengths[plr][0] = horzLen;
+//         nameLengths[plr][1] = vertLen;
+//     }
 
-    return nameLengths[plr][vert];
-}
+//     return nameLengths[plr][vert];
+// }
