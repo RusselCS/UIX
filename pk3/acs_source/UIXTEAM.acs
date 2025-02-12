@@ -2,8 +2,6 @@
 
 #include "zcommon.acs"
 
-#import "8BDT.acs"
-
 #include "SHRTFUNC.acs"
 
 #define TEAMINFO_ID_OFFS    10000
@@ -32,45 +30,33 @@
 #define horizontal 0
 #define vertical 1
 
-#define straight 0
-#define flipped 2
+int cvOffsx;
+int cvOffsy;
+int cvScale;
+int cvAlpha;
+int cvNamesize;
+int cvMirror;
+int cvDir;
+int cvFontdir;
+int cvStack;
+int cvShowname;
+int cvShowhealth;
+int cvShowlocation;
+int cvShowcompass;
+int cvShowmugshot;
 
-str TeamBarsStrings[TEAMINFO_BAR_START+TEAMINFO_BAR_MAX+1][4] = {
-    // Fonts
-    {"UXHPHORZ", "UXHPVERT", "UXHPHORZ", "UXHPVERT"},
-    // Empty
-    {"________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_", "________________________________________________________________", "_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_\n_"},
-    // 000-100
-    {"ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB", "BABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABA", "A\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB\nA\nB"},
-    // 100-200
-    {"CDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCD", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD", "DCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDCDC", "C\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD\nC\nD"},
-    // 200-300
-    {"EFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEF", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF", "FEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFE", "E\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF\nE\nF"},
-    // 300-400
-    {"GHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGH", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH", "HGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHGHG", "G\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH\nG\nH"},
-    // 400-500
-    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ", "JIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJI", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
-    // copy the last one here to buffer the "max health"
-    {"IJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJ", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ", "JIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJIJI", "I\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ\nI\nJ"},
-};
+int tiCache_Scale = MIN_INT;
+int tiCache_Stack = MIN_INT;
 
-str nameFonts[2] = {
-    "SMALLFNT",
-    "SIDEFNTL",
-};
+#define STACK_OFFS 36
+int tiStackOffs;
 
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
-    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
-
-    int stackOffs = 33;
-
-    if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK"))
-        stackOffs *= -1;
-
     if(!GetCvar("UIX_SV_TEAMINFO"))
         terminate;
 
+    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
     if(baseAlpha == 0.0)
         terminate;
 
@@ -78,11 +64,12 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         terminate;
 
     SetActivator(cam);
-    int pln = PlayerNumber();
-    SetActivator(-1);
 
+    int pln = PlayerNumber();
     if(pln == -1)
         terminate;
+
+    SetActivator(-1);
 
     int team = getPlayerTeam(pln);
     // Log(i:team, s:" cam: ", i:cam);
@@ -90,26 +77,30 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(team == 255) { // Spectator
 
     } else {
-        int startX = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
-        int startY = -GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
-        int baseScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+        cvOffsx = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
+        cvOffsy = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
+        cvScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+        cvAlpha = baseAlpha;
+        cvNamesize = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
+        cvMirror = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR");
+        cvDir = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
+        cvFontdir = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
+        cvStack = GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK");
+        cvShowname = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
+        cvShowhealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
+        cvShowlocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
+        cvShowcompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
+        cvShowmugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
 
-        int curPlay = 0;
+        if(tiCache_Scale != cvScale || tiCache_Stack != cvStack)
+        {
+            tiCache_Scale = cvScale;
+            tiCache_Stack = cvStack;
 
-        int msgId = BASE_ID + TEAMINFO_ID_OFFS;
+            tiStackOffs = (cvStack ? -1 : 1) * FixedMul(STACK_OFFS, cvScale);
+        }
 
-        bool drawName = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
-        bool drawHealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
-        bool drawLocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
-        bool drawCompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
-        bool drawMugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
-
-        int orientation = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
-        int mirrored = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR") * 2;
-
-        bool fontVers = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
-
-        int maxNameLength = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
+        int drawnPlayers = 0;
 
         for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
             // Log(i:i, s:" == ", i:pln);
@@ -124,188 +115,112 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             if(getPlayerTeam(i) != team)
                 continue;
 
-            // Log(s:"Made it into main for player ", i:i, s:" while viewing player ", i:pln);
+            int baseX = cvOffsx + (cvDir ? drawnPlayers * tiStackOffs : 0);
+            int baseY = cvOffsy + (!cvDir ? drawnPlayers * tiStackOffs : 0);
 
-            // many variables
-            int baseX, baseY;
-            int xOffs, yOffs;
-            int nameX, nameY;
-            int barX, barY;
-            int compassX, compassY;
-            int mugX, mugY;
-            int locX, locY;
+            drawMugshot(i, baseX, baseY);
+            drawName(i, baseX, baseY);
+            // drawLocation(i, baseX, baseY);
+            drawHealth(i, baseX, baseY);
+            // drawWeapon(i, baseX, baseY);
 
-            int curId = msgId + curPlay;
-            int plrTid = i + PLN_TID_SHRT;
+            drawnPlayers++;
 
-            if(orientation == horizontal) {
-                if(mirrored == straight) {
-                    xOffs = 0;
-                    yOffs = FixedMul(baseScale, curPlay * stackOffs);
+    //         int mhp = GetActorProperty(plrTid, AProp_SpawnHealth);
+    //         if(drawHealth && mhp > 0) {
+    //             int chp = GetActorProperty(plrTid, AProp_Health);
 
-                    baseX = startX;
-                    baseY = startY - yOffs;
+    //             int hpWidth = orientation ? 80 : 640;
+    //             int hpHeight = orientation ? 640 : 80;
 
-                    nameX = baseX;
-                    nameY = baseY + FixedMul(baseScale, -2);
+    //             int hpTop = orientation ? "UXTEMHV1" : "UXTEMHH1";
+    //             int hpBot = orientation ? "UXTEMHVB" : "UXTEMHHB";
 
-                    barX = baseX;
-                    barY = baseY + FixedMul(baseScale, 8);
+    //             int barScale = FixedMul(FixedMul(baseScale, 1.0), 0.1);
+    //             drawBar(hpTop, hpBot, barX, barY, hpWidth, hpHeight, barScale, barScale, baseAlpha, chp, mhp, sbar_orientation, false, getNewUIId(), getNewUIId());
+    //         }
 
-                    compassX = baseX+FixedMul(baseScale, 32);
-                    compassY = baseY+FixedMul(baseScale, 32);
+    //         if(drawWeapon) {
+    //             int amt1, amt2, amx1, amx2, cyan, cyan2, blue, blue2, black, icon, iconScale, weapBarScale;
 
-                    mugX = baseX-FixedMul(baseScale, 15);
-                    mugY = baseY+FixedMul(baseScale, 10);
-                } else {
-                    xOffs = 0;
-                    yOffs = FixedMul(baseScale, curPlay * stackOffs);
+    //             iconScale = FixedMul(baseScale, 0.5);
+    //             weapBarScale = FixedMul(baseScale, 0.1);
 
-                    baseX = startX;
-                    baseY = startY - yOffs;
+    //             icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", i, UIX_WeapProp_Icon);
+    //             cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", orientation, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", i, UIX_WeapProp_Cyan));
+    //             blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", orientation, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", i, UIX_WeapProp_Blue));
+    //             black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", orientation, 2);
 
-                    nameX = baseX + FixedMul(baseScale, 32);
-                    nameY = baseY;
+    //             amt1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", i, 0, 0);
+    //             amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", i, 0, 1);
 
-                    barX = baseX - FixedMul(baseScale, 64);
-                    barY = baseY + FixedMul(baseScale, 8);
+    //             amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", i, 1, 0);
 
-                    compassX = baseX+FixedMul(baseScale, 32);
-                    compassY = baseY+FixedMul(baseScale, 32);
+    //             displayIcon(icon, getNewUIId(), wepIconX, wepIconY, iconScale, iconScale, baseAlpha);
 
-                    mugX = baseX+FixedMul(baseScale, 48);
-                    mugY = baseY+FixedMul(baseScale, 10);
-                }
-            } else {
-                if(mirrored == straight) {
-                    xOffs = FixedMul(baseScale, curPlay * stackOffs);
-                    yOffs = 0;
+    //             if(amt2 != -1) {
+    //                 amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", i, 1, 1);
+    //                 cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", orientation, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", i, UIX_WeapProp_Cyan2));
+    //                 blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", orientation, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", i, UIX_WeapProp_Blue2));
 
-                    baseX = startX + xOffs;
-                    baseY = startY;
+    //                 drawLayeredBar(cyan, blue, black, wepBar1X, wepBar1Y, 160, 40, weapBarScale, weapBarScale, baseAlpha, amt1, amx1, sbar_orientation, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //                 drawLayeredBar(cyan2, blue2, black, wepBar2X, wepBar2Y, 160, 40, weapBarScale, weapBarScale, baseAlpha, amt1, amx1, sbar_orientation, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //             } else {
+    //                 drawLayeredBar(cyan, blue, black, wepBarX, wepBarY, 160, 40, weapBarScale, weapBarScale, baseAlpha, amt1, amx1, sbar_orientation, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //             }
+    //         }
 
-                    nameX = baseX;
-                    nameY = baseY;
+    //         if(drawMugshot) {
+    //             str face = getMugshotGraphicFromTID(plrTid);
+    //             int faceScale = FixedMul(baseScale, 4.0);
+    //             if(face != 0)
+    //                 if(StrLen(face) > 0)
+    //                     displayIcon(face, getNewUIId(), mugX, mugY, faceScale, faceScale, baseAlpha);
+    //         }
 
-                    barX = baseX + FixedMul(baseScale, 8);
-                    barY = baseY;
+    //         // if(wep != -1) {
+    //         //     int ammo = getWeaponAmmoType(wep);
+    //         //     int mwe = getPlayerAmmoCapacity(i, ammo);
+    //         //     int cwe = checkActorInventory(i+PLN_TID_SHRT, ammo);
+    //         //     // PrintBold(i:mwe);
+    //         //     displayIcon(getWeaponIcon(wep), curId+TEAMINFO_ID_WEI, barX+16, barY+32, 1.0, 1.0, 1.0);
+    //         //     displayHBar("UIXWEFH", "UIXHPBH", cwe, mwe, curId+TEAMINFO_ID_WE1, curId+TEAMINFO_ID_WE2, barX+16, barY+16, 1.0, 1.0, 1.0);
+    //         // }
 
-                    compassX = baseX;
-                    compassY = baseY;
-
-                    mugX = baseX+FixedMul(baseScale, 12);
-                    mugY = baseY-FixedMul(baseScale, 16);
-                } else {
-                    xOffs = FixedMul(baseScale, curPlay * stackOffs);
-                    yOffs = 0;
-
-                    baseX = startX + xOffs;
-                    baseY = startY;
-
-                    nameX = baseX;
-                    nameY = baseY;
-
-                    barX = baseX + FixedMul(baseScale, 8);
-                    barY = baseY - FixedMul(baseScale, 98);
-
-                    compassX = baseX;
-                    compassY = baseY;
-
-                    mugX = baseX+FixedMul(baseScale, 12);
-                    mugY = baseY+FixedMul(baseScale, 16);
-                }
-            }
-
-            if(drawName) {
-                str nameFont = nameFonts[orientation ^ fontVers];
-
-                int nameScale = baseScale;
-                int nameLength = getCacheNameWidth(i, orientation, !fontVers);
-
-                if(nameLength > maxNameLength) {
-                    nameScale = FixedMul(baseScale, FixedDiv(maxNameLength, nameLength));
-                }
-
-            //     str loc = 0;
-            //     if(drawLocation)
-            //         loc = rotateLocation(i+PLN_TID_SHRT, orientation);
-
-                if(orientation == horizontal) {
-                    SetFont(nameFont);
-                    if(mirrored == straight) {
-                        displayMessageL(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                    } else {
-                        displayMessageR(StrParam(s:getPlayerName(i, orientation, false)), curId+TEAMINFO_ID_NAME, nameX, nameY, nameScale, baseScale, baseAlpha);
-                    }
-                } else {
-                    SetFont(nameFont);
-                    if(mirrored == straight) {
-                        displayMessageL(StrParam(s:getPlayerName(i, orientation, !fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                    } else {
-                        displayMessageU(StrParam(s:getPlayerName(i, orientation, !fontVers)), curId+TEAMINFO_ID_NAME, nameX, nameY, baseScale, nameScale, baseAlpha);
-                    }
-                }
-            }
-
-            int mhp = GetActorProperty(plrTid, AProp_SpawnHealth);
-            if(drawHealth && mhp > 0) {
-                int chp = GetActorProperty(plrTid, AProp_Health);
-                int sbar_orientation = orientation ? 1 : 2;
-
-                int hpWidth = orientation ? 80 : 640;
-                int hpHeight = orientation ? 640 : 80;
-
-                int hpTop = orientation ? "UXTEMHV1" : "UXTEMHH1";
-                int hpBot = orientation ? "UXTEMHVB" : "UXTEMHHB";
-
-                int barScale = FixedMul(FixedMul(baseScale, 1.5), 0.1);
-                drawBar(hpTop, hpBot, barX, barY, hpWidth, hpHeight, barScale, barScale, baseAlpha, chp, mhp, sbar_orientation, false, getNewUIId(), getNewUIId());
-            }
-
-            if(drawCompass) {
-                int baseYaw = GetActorAngle(cam) - VectorAngle(GetActorX(cam)-GetActorX(plrTid), GetActorY(cam)-GetActorY(plrTid)) + 0.25;
-                int size = 16;
-                int compassScale = FixedMul(baseScale, 1.3);
-                int compassScaleDiff = FixedMul(baseScale, 0.3);
-
-                int dist = (dist3D(0, i+PLN_TID_SHRT)) / 32;
-
-                SetFont("SMALLFONT");
-                displayMessage(StrParam(s:"\ca", i:dist, s:"m"), curId+TEAMINFO_ID_ARR1, compassX, compassY, compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
-                displayMessage("\c[UIXArrowBright]+", curId+TEAMINFO_ID_ARR2, compassX+FixedMul(cos(baseYaw),      size), compassY+FixedMul(sin(baseYaw),      size), compassScale, compassScale, baseAlpha);
-                displayMessage("\c[UIXArrowMid]+",    curId+TEAMINFO_ID_ARR3, compassX+FixedMul(cos(baseYaw+0.1),  size), compassY+FixedMul(sin(baseYaw+0.1),  size), compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
-                displayMessage("\c[UIXArrowMid]+",    curId+TEAMINFO_ID_ARR4, compassX+FixedMul(cos(baseYaw-0.1),  size), compassY+FixedMul(sin(baseYaw-0.1),  size), compassScale-compassScaleDiff, compassScale-compassScaleDiff, baseAlpha);
-                displayMessage("\c[UIXArrowDark]+",   curId+TEAMINFO_ID_ARR5, compassX+FixedMul(cos(baseYaw+0.18), size), compassY+FixedMul(sin(baseYaw+0.18), size), compassScale-2*compassScaleDiff, compassScale-2*compassScaleDiff, baseAlpha);
-                displayMessage("\c[UIXArrowDark]+",   curId+TEAMINFO_ID_ARR6, compassX+FixedMul(cos(baseYaw-0.18), size), compassY+FixedMul(sin(baseYaw-0.18), size), compassScale-2*compassScaleDiff, compassScale-2*compassScaleDiff, baseAlpha);
-            }
-
-            if(drawMugshot) {
-                str face = getMugshotGraphicFromTID(plrTid);
-                int faceScale = FixedMul(baseScale, 3.0);
-                if(face != 0)
-                    if(StrLen(face) > 0)
-                        displayIcon(face, curId+TEAMINFO_ID_MUG, mugX, mugY, faceScale, faceScale, baseAlpha);
-            }
-
-            // if(wep != -1) {
-            //     int ammo = getWeaponAmmoType(wep);
-            //     int mwe = getPlayerAmmoCapacity(i, ammo);
-            //     int cwe = checkActorInventory(i+PLN_TID_SHRT, ammo);
-            //     // PrintBold(i:mwe);
-            //     displayIcon(getWeaponIcon(wep), curId+TEAMINFO_ID_WEI, barX+16, barY+32, 1.0, 1.0, 1.0);
-            //     displayHBar("UIXWEFH", "UIXHPBH", cwe, mwe, curId+TEAMINFO_ID_WE1, curId+TEAMINFO_ID_WE2, barX+16, barY+16, 1.0, 1.0, 1.0);
-            // }
-
-            curPlay++;
-        }
-
-        if(GetCvar("temp_uix_namestore_reverse") != fontVers) {
-            SetCvar("temp_uix_namestore_reverse", fontVers);
+    //         curPlay++;
         }
     }
 }
 
-// from pingbutton
+// Generic Draw constants ===========================================================================================================================
+#define ROW_LENGTH 9
+
+// Draw mugshot =====================================================================================================================================
+int mugCache_Scale = 0;
+int mugScale;
+
+function void drawMugshot(int pln, int x, int y)
+{
+    if(!cvShowmugshot)
+        return;
+
+    str face = getMugshotGraphicFromTID(pln+PLN_TID_SHRT);
+
+    if(face == 0)
+        return;
+
+    if(StrLen(face) == 0)
+        return;
+
+    if(mugCache_Scale != cvScale) {
+        mugCache_Scale = cvScale;
+        mugScale = FixedMul(cvScale, 4.0);
+    }
+
+    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvAlpha);
+}
+
+// Mugshot data pull, from pingbutton
 function str getMugshotGraphicFromTID(int tid) {
 	str class = GetActorClass(tid);
 
@@ -318,6 +233,142 @@ function str getMugshotGraphicFromTID(int tid) {
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
+// Draw Name ========================================================================================================================================
+#define TEXT_SCALE 0.7
+
+#define NAME_X_00 16
+#define NAME_Y_00 -10
+
+#define NAME_X_01 0
+#define NAME_Y_01 0
+
+#define NAME_X_10 0
+#define NAME_Y_10 0
+
+#define NAME_X_11 0
+#define NAME_Y_11 0
+
+str nameFonts[2] = {
+    "SMALLFNT",
+    "SIDEFNTL",
+};
+
+int nameCache_Scale;
+int nameCache_Mirror;
+int nameCache_Dir;
+
+int nameCache_Namesize;
+
+int nameX;
+int nameY;
+int nameScale;
+int nameHAlign;
+int nameVAlign;
+
+int nameLength;
+
+function void drawName(int pln, int x, int y)
+{
+    if(!cvShowName)
+        return;
+
+    if(
+        nameCache_Scale != cvScale ||
+        nameCache_Mirror != cvMirror ||
+        nameCache_Dir != cvDir ||
+        nameCache_Namesize != cvNamesize
+    )
+    {
+        nameCache_Scale = cvScale;
+        nameCache_Mirror = cvMirror;
+        nameCache_Dir = cvDir;
+        nameCache_Namesize = cvNamesize;
+
+        nameX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_X_00 : NAME_X_01) : (!cvMirror ? NAME_X_10 : NAME_X_11)));
+        nameY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_Y_00 : NAME_Y_01) : (!cvMirror ? NAME_Y_10 : NAME_Y_11)));
+        nameScale = FixedMul(cvScale, TEXT_SCALE);
+        nameLength = cvNamesize; // FixedDiv(cvNamesize, TEXT_SCALE);
+        nameHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        nameVAlign = cvMirror && cvDir == vertical ? ALIGN_BOTTOM : ALIGN_TOP;
+    }
+
+    str name = getPlayerName(pln, cvDir, cvMirror);
+    int plrNameLength = getCacheNameWidth(pln, cvDir, cvFontdir);
+    int nameLengthScale = 1.0;
+
+    if(plrNameLength > nameLength) {
+        nameLengthScale = FixedDiv(nameLength, plrNameLength);
+    }
+
+    int nameScaleX = cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
+    int nameScaleY = !cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
+    
+    SetFont(nameFonts[cvFontdir]);
+    displayMessage(name, getNewUIId(), x + nameX, y + nameY, nameScaleX, nameScaleY, cvAlpha, nameHAlign, nameVAlign);
+}
+
+// Draw Health ======================================================================================================================================
+#define HP_X_00 16
+#define HP_Y_00 -20+2*ROW_LENGTH
+
+#define HP_X_01 0
+#define HP_Y_01 0
+
+#define HP_X_10 0
+#define HP_Y_10 0
+
+#define HP_X_11 0
+#define HP_Y_11 0
+
+int healthCache_Scale;
+int healthCache_Mirror;
+int healthCache_Dir;
+
+int healthX;
+int healthY;
+int healthScale;
+int healthWidth;
+int healthHeight;
+int healthTop;
+int healthBottom;
+
+str healthBars[2][2] = {
+    {"UXTEMHH1", "UXTEMHV1"},
+    {"UXTEMHHB", "UXTEMHVB"}
+};
+
+int healthBarDimensions[2] = {640, 80};
+
+function void drawHealth(int pln, int x, int y)
+{
+    if(!cvShowName)
+        return;
+
+    int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
+    if(mhp == 0)
+        return;
+
+    if(
+        healthCache_Scale != cvScale ||
+        healthCache_Mirror != cvMirror ||
+        healthCache_Dir != cvDir
+    )
+    {
+        healthCache_Scale = cvScale;
+        healthCache_Mirror = cvMirror;
+        healthCache_Dir = cvDir;
+
+        healthX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_X_00 : HP_X_01) : (!cvMirror ? HP_X_10 : HP_X_11)));
+        healthY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_Y_00 : HP_Y_01) : (!cvMirror ? HP_Y_10 : HP_Y_11)));
+        healthScale = FixedMul(FixedMul(cvScale, 1.0), 0.1);
+    }
+    
+    int chp = GetActorProperty(pln+PLN_TID_SHRT, AProp_Health);
+
+    drawBar(healthBars[0][cvDir], healthBars[1][cvDir], x+healthX, y+healthY, healthBarDimensions[cvDir], healthBarDimensions[!cvDir], healthScale, healthScale, cvAlpha, chp, mhp, !cvDir+1, false, getNewUIId(), getNewUIId());
+}
+
+// Player name cache ================================================================================================================================
 #define NAME_MAX 1000
 #define CHAR_COLOR 28
 
@@ -372,7 +423,7 @@ function void rebuildString(str name) {
                     setColorStart(colorsCount, colorsLength);
                 } else {
                     nameColorless[colorLessSize++] = nameBuilder[i];
-                    nameWidth += charWidths[nameBuilder[i]];
+                    nameWidth += getCharWidth(nameBuilder[i]);
                 }
                 break;
             case 1: // check next char
@@ -493,12 +544,10 @@ function bool needsReset(int plr, str name)
 {
     // [Russ] keeping in pattern with other uix stuff, short circuit the most important fail case
     if(!isCacheInit(plr)) {
-        Log(s:"init");
         return true;
     }
 
     if(StrCmp(name, getCacheName(plr, 0, 0)) != 0) {
-        Log(s:"mismatch: ", s:name, s:" ", s:getCacheName(plr, 0, 0));
         return true;
     }
 
@@ -510,7 +559,6 @@ function str getPlayerName(int plr, int o, int r)
     str name = StrParam(n:1+plr);
 
     if(needsReset(plr, name)) {
-        Log(s:"Rebuilding name for ", s:name);
         rebuildString(name);
 
         setCacheInit(plr, true);
@@ -528,7 +576,117 @@ function str getPlayerName(int plr, int o, int r)
 #define LOC_SIZE_LIMIT 1000
 int LOC_SIZE = 0;
 
-str locs[LOC_SIZE_LIMIT][3];
+// Location name cache ==============================================================================================================================
+// string location
+// string vertical
+// string reversevertical
+// int width horizontal
+// int width vertical
+// int width vertical reverse
+//
+// Index size +1 to append an error state for the last slot
+str locs[LOC_SIZE_LIMIT+1][7];
+
+// previous locations so per-tic comparisons are reduced
+// int loc
+// int idx
+//
+int playerLocs[64][2];
+
+// [Russ] This algorithm is based on one very dangerous assumption.
+// Will the engine generate an identical string with a separate index in the string table?
+// I feel like only god knows.
+// And Graf Zahl in the year 2013, but no one really cares about his opinion anymore.
+//
+function int findLoc(int id) {
+    for(int i = 0; i < LOC_SIZE; i++) {
+        if(getLocId(i) == id)
+            return i;
+    }
+    return -1;
+}
+
+function int getLocId(int idx) { return namesCache[idx][0]; }
+function void setLocId(int idx, int val) { namesCache[idx][0] = val; }
+
+function str getLocName(int idx, int o, int r) { return namesCache[idx][(o ? o + r : 0)]; }
+function void setLocName(int idx, int o, int r, str val) { namesCache[idx][(o ? o + r : 0)] = val; }
+
+function int getLocNameWidth(int idx, int o, int r) { return namesCache[idx][4 + (o ? o + r : 0)]; }
+function void setLocNameWidth(int idx, int o, int r, int val) { namesCache[idx][4 + (o ? o + r : 0)] = val; }
+
+function str findLocation(int plr, int o, int r) {
+    str loc = GetActorSectorLocation(plr+PLN_TID_SHRT, false);
+
+    if(StrLen(loc) == 0)
+        return -1;
+
+    if(playerLocs[plr][0] == loc)
+        return getLocName(playerLocs[plr][1], o, r);
+
+    int idx = findLoc(loc);
+
+    if(idx != -1) {
+        playerLocs[plr][0] = loc;
+        playerLocs[plr][1] = idx;
+        return getLocName(idx, o, r);
+    }
+
+    if(LOC_SIZE > LOC_SIZE_LIMIT) {
+        playerLocs[plr][0] = loc;
+        playerLocs[plr][1] = LOC_SIZE_LIMIT;
+        return getLocName(LOC_SIZE_LIMIT, o, r);
+    }
+    
+    if(LOC_SIZE == LOC_SIZE_LIMIT) {
+        loc = StrParam(l:StrParam(s:"UIX_UNKNOWN_LOC_", i:random(1, 4)));
+    }
+
+    rebuildString(loc);
+
+    setLocName(idx, false, false, cacheKey);
+    setLocName(idx, true, false, cacheVert);
+    setLocName(idx, true, true, cacheVertReverse);
+    setLocNameWidth(idx, false, false, cacheWidth);
+    setLocNameWidth(idx, true, false, cacheHeight);
+    setLocNameWidth(idx, true, true, cacheHeightReverse);
+
+    playerLocs[plr][0] = loc;
+    playerLocs[plr][1] = LOC_SIZE;
+
+    return getLocName(LOC_SIZE++, o, r);
+}
+
+// Character width calculator =======================================================================================================================
+
+int fontCharWidths[256] = {
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+};
+
+function int getCharWidth(int char) {
+    int idx = char + 128;
+    if(fontCharWidths[idx] >= 0)
+        return fontCharWidths[idx];
+
+    int width = parseInt(StrParam(l:StrParam(s:"UI_SMALLFONT_", c:char<0?'N':'P', i:char)));
+    fontCharWidths[idx] = width;
+    return width;
+}
 
 // function str rotateLocation(int tid, int vert)
 // {
