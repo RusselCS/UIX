@@ -294,7 +294,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                             displayMessageL(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
                         }
                     } else {
-                        displayMessage(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
+                        displayMessage(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha, 0, 0);
                     }
                 }
         }

@@ -1,0 +1,16 @@
+{
+	name = "![\c[dark grey]qTEST \cqbot \cdwith LOOOOONG \c[sunstar]name]"
+	accuracy = 1
+	intellect = 3
+	evade = 0
+	anticipation = 1
+	reactiontime = 2
+	perception = 1
+	favoriteweapon = "Protobuster"
+	color = "aa ff 00"
+	gender = "other"
+	skin = "ProtoMan-Break"
+	class = "Protoman"
+	revealed = true
+	script = "humanbot"
+}

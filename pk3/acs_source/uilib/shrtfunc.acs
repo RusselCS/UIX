@@ -3,7 +3,7 @@
 #define ALIGN_RIGHT 0.24
 #define ALIGN_LEFT 0.1
 
-#define ALIGN_BOTTOM 0.1
+#define ALIGN_BOTTOM 0.18
 #define ALIGN_TOP 0.2
 
 #define BASE_RES_X 1280
@@ -24,6 +24,10 @@
 #define STR_BAR_BLANK " \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n"
 
 #define MSG_TIME 1873
+// #define MSG_TIME 5.0
+
+#define MAX_INT 2147483647
+#define MIN_INT -2147483648
 
 function int getNewUIId(void) { return CallACS0("UIX_GetNewID"); }
 
@@ -76,7 +80,7 @@ function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int 
 function void displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
     SetFont(icon);
-    displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha);
+    displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha, 0, 0);
 }
 
 function void displayIconL(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
@@ -88,14 +92,14 @@ function void displayIconL(str icon, int id, int offsX, int offsY, int scaleX, i
 int lastmsgX;
 int lastmsgY;
 
-function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign)
 {
 	int resX = FixedDiv(BASE_RES_X, scaleX);
 	int resY = FixedDiv(BASE_RES_Y, scaleY);
-	offsX = FixedDiv(offsX, scaleX);
-	offsY = FixedDiv(offsY, scaleY);
-	lastmsgX = 1.0*(resX/2)+1.0*offsX;
-	lastmsgY = 1.0*(resY/2)+1.0*offsY;
+	offsX = mask(FixedDiv(offsX << 16, scaleX));
+	offsY = mask(FixedDiv(offsY << 16, scaleY));
+	lastmsgX = 1.0*(resX/2)+offsX+halign;
+	lastmsgY = 1.0*(resY/2)+offsY+valign;
 	SetHudSize(resX, resY, 0);
 	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
 }
@@ -190,11 +194,80 @@ function void drawLayeredBar(str bar1, str bar2, str empty, int offsx, int offsy
 	SetHudClipRect(0,0,0,0);
 }
 
+function void drawBar(str bar1, str empty, int offsx, int offsy, int width, int height, int scalex, int scaley, int alpha, int amount, int maxAmount, int mode, int reverse, int bar1Id, int backId)
+{
+	int resX = FixedDiv(BASE_RES_X, scaleX);
+	int resY = FixedDiv(BASE_RES_Y, scaleY);
+	offsX = FixedDiv(offsX, scaleX);
+	offsY = FixedDiv(offsY, scaleY);
+	// width = FixedMul(width, scaleX);
+	// height = FixedMul(height, scaleY);
+	int x = 1.0*(resX/2)+1.0*offsX;
+	int y = 1.0*(resY/2)+1.0*offsY;
+
+	SetHudSize(resX, resY, 0);
+
+    if(mode == BAR_DISPLAY_NONE)
+       return;
+    
+    int clip;
+    if(mode == BAR_DISPLAY_VERT) {
+        clip = (amount * height) / maxAmount;
+        SetHudClipRect((x >> 16), (y >> 16) + (height - clip), width, clip);
+    }
+    if(mode == BAR_DISPLAY_HORI) {
+        clip = (amount * width) / maxAmount;
+		SetHudClipRect((x >> 16), (y >> 16), clip, height);
+    }
+
+	SetFont(bar1);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, x + 0.1, y + 0.1, MSG_TIME, alpha);
+    SetHudClipRect((x >> 16), (y >> 16), width, height);
+    SetFont(empty);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, x + 0.1, y + 0.1, MSG_TIME, alpha);
+	SetHudClipRect(0,0,0,0);
+}
+
 function int abs(int x)
 {
 	if(x < 0)
 		return -x;
 	return x;
+}
+
+// function int shrtRound(int x)
+// {
+//     return ((x + 0.5) & 0xffff0000);
+// }
+
+function int mask(int x)
+{
+	return (x & 0xffff00ff);
+}
+
+function int parseInt(str in)
+{
+	int l = strLen(in);
+	int ret = 0;
+	for(int i = 0; i < l; i++)
+	{
+		ret *= 10;
+		ret += char2Dec(getChar(in, i));
+	}
+	return ret;
+}
+
+function int char2Dec(int ch)
+{
+	if(numBetween('0', ch, '9')) {
+		return ch - '0';
+	}
+	return -1;
+}
+
+function bool numBetween(int mn, int x, int mx)
+{
+	return x >= mn && x <= mx;
 }
 
 int lastmsgXBold;
@@ -230,6 +303,9 @@ function bool isPlayerTID(int id) { return id >= PLN_TID_SHRT && id < PLN_TID_SH
 
 function bool StrEqual(str str1, str str2) { return StrCmp(str1, str2) == 0; }
 function bool StrMatches(str str1, str str2) { return StrICmp(str1, str2) == 0; }
+
+function int max(int x, int y) { return x > y ? x : y; }
+function int min(int x, int y) { return x < y ? x : y; }
 
 function int clamp(int n, int x, int y) {
     if(n < x)
