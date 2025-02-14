@@ -51,6 +51,13 @@ int tiCache_Stack = MIN_INT;
 #define STACK_OFFS 36
 int tiStackOffs;
 
+script "TEST THING" ENTER
+{
+    if(CheckInventory("MegaBuster")) {
+        GiveInventory("ThunderBoltWep", 1);
+    }
+}
+
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
     if(!GetCvar("UIX_SV_TEAMINFO"))
@@ -120,9 +127,9 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
             drawMugshot(i, baseX, baseY);
             drawName(i, baseX, baseY);
-            // drawLocation(i, baseX, baseY);
+            drawLocation(i, baseX, baseY);
             drawHealth(i, baseX, baseY);
-            // drawWeapon(i, baseX, baseY);
+            drawWeapon(i, baseX, baseY);
 
             drawnPlayers++;
 
@@ -193,7 +200,16 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 }
 
 // Generic Draw constants ===========================================================================================================================
-#define ROW_LENGTH 9
+#define ROW_LENGTH 8
+#define TEXT_SCALE 0.7
+
+#define HP_LENGTH 96
+#define HP_WIDTH 8
+
+str uiFonts[2] = {
+    "SMALLFNT",
+    "SIDEFNTL",
+};
 
 // Draw mugshot =====================================================================================================================================
 int mugCache_Scale = 0;
@@ -205,9 +221,6 @@ function void drawMugshot(int pln, int x, int y)
         return;
 
     str face = getMugshotGraphicFromTID(pln+PLN_TID_SHRT);
-
-    if(face == 0)
-        return;
 
     if(StrLen(face) == 0)
         return;
@@ -234,10 +247,8 @@ function str getMugshotGraphicFromTID(int tid) {
 }
 
 // Draw Name ========================================================================================================================================
-#define TEXT_SCALE 0.7
-
-#define NAME_X_00 16
-#define NAME_Y_00 -10
+#define NAME_X_00 17
+#define NAME_Y_00 -11
 
 #define NAME_X_01 0
 #define NAME_Y_01 0
@@ -247,11 +258,6 @@ function str getMugshotGraphicFromTID(int tid) {
 
 #define NAME_X_11 0
 #define NAME_Y_11 0
-
-str nameFonts[2] = {
-    "SMALLFNT",
-    "SIDEFNTL",
-};
 
 int nameCache_Scale;
 int nameCache_Mirror;
@@ -287,7 +293,7 @@ function void drawName(int pln, int x, int y)
         nameX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_X_00 : NAME_X_01) : (!cvMirror ? NAME_X_10 : NAME_X_11)));
         nameY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_Y_00 : NAME_Y_01) : (!cvMirror ? NAME_Y_10 : NAME_Y_11)));
         nameScale = FixedMul(cvScale, TEXT_SCALE);
-        nameLength = cvNamesize; // FixedDiv(cvNamesize, TEXT_SCALE);
+        nameLength = FixedDiv(cvNamesize, TEXT_SCALE);
         nameHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
         nameVAlign = cvMirror && cvDir == vertical ? ALIGN_BOTTOM : ALIGN_TOP;
     }
@@ -303,8 +309,80 @@ function void drawName(int pln, int x, int y)
     int nameScaleX = cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
     int nameScaleY = !cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
     
-    SetFont(nameFonts[cvFontdir]);
+    SetFont(uiFonts[cvFontdir]);
     displayMessage(name, getNewUIId(), x + nameX, y + nameY, nameScaleX, nameScaleY, cvAlpha, nameHAlign, nameVAlign);
+}
+
+// Draw Location ========================================================================================================================================
+#define LOC_X_00 17
+#define LOC_Y_00 -11 + ROW_LENGTH
+
+#define LOC_X_01 0
+#define LOC_Y_01 0
+
+#define LOC_X_10 0
+#define LOC_Y_10 0
+
+#define LOC_X_11 0
+#define LOC_Y_11 0
+
+int locCache_Scale;
+int locCache_Mirror;
+int locCache_Dir;
+
+int locCache_Namesize;
+
+int locX;
+int locY;
+int locScale;
+int locHAlign;
+int locVAlign;
+
+int locLength;
+
+function void drawLocation(int pln, int x, int y)
+{
+    if(!cvShowLocation)
+        return;
+
+    if(
+        locCache_Scale != cvScale ||
+        locCache_Mirror != cvMirror ||
+        locCache_Dir != cvDir ||
+        locCache_Namesize != cvNamesize
+    )
+    {
+        locCache_Scale = cvScale;
+        locCache_Mirror = cvMirror;
+        locCache_Dir = cvDir;
+        locCache_Namesize = cvNamesize;
+
+        locX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LOC_X_00 : LOC_X_01) : (!cvMirror ? LOC_X_10 : LOC_X_11)));
+        locY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LOC_Y_00 : LOC_Y_01) : (!cvMirror ? LOC_Y_10 : LOC_Y_11)));
+        locScale = FixedMul(cvScale, TEXT_SCALE);
+        locLength = FixedDiv(cvNamesize, TEXT_SCALE);
+        locHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        locVAlign = cvMirror && cvDir == vertical ? ALIGN_BOTTOM : ALIGN_TOP;
+    }
+
+    str loc = findLocation(pln, cvDir, cvMirror);
+
+    if(loc == -1)
+        return;
+    
+    int plrLocLength = getLocWidthPlr(pln, cvDir, cvFontdir);
+
+    int locLengthScale = 1.0;
+
+    if(plrLocLength > locLength) {
+        locLengthScale = FixedDiv(locLength, plrLocLength);
+    }
+
+    int locScaleX = cvDir ? locScale : FixedMul(locScale, locLengthScale);
+    int locScaleY = !cvDir ? locScale : FixedMul(locScale, locLengthScale);
+    
+    SetFont(uiFonts[cvFontdir]);
+    displayMessage(loc, getNewUIId(), x + locX, y + locY, locScaleX, locScaleY, cvAlpha, locHAlign, locVAlign);
 }
 
 // Draw Health ======================================================================================================================================
@@ -319,6 +397,9 @@ function void drawName(int pln, int x, int y)
 
 #define HP_X_11 0
 #define HP_Y_11 0
+
+#define HP_L_CONST HP_LENGTH * 10
+#define HP_W_CONST HP_WIDTH * 10
 
 int healthCache_Scale;
 int healthCache_Mirror;
@@ -337,11 +418,11 @@ str healthBars[2][2] = {
     {"UXTEMHHB", "UXTEMHVB"}
 };
 
-int healthBarDimensions[2] = {640, 80};
+int healthBarDimensions[2] = {HP_L_CONST, HP_W_CONST};
 
 function void drawHealth(int pln, int x, int y)
 {
-    if(!cvShowName)
+    if(!cvShowHealth)
         return;
 
     int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
@@ -361,11 +442,162 @@ function void drawHealth(int pln, int x, int y)
         healthX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_X_00 : HP_X_01) : (!cvMirror ? HP_X_10 : HP_X_11)));
         healthY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_Y_00 : HP_Y_01) : (!cvMirror ? HP_Y_10 : HP_Y_11)));
         healthScale = FixedMul(FixedMul(cvScale, 1.0), 0.1);
+        healthWidth = healthBarDimensions[cvDir];
+        healthHeight = healthBarDimensions[!cvDir];
     }
     
     int chp = GetActorProperty(pln+PLN_TID_SHRT, AProp_Health);
 
-    drawBar(healthBars[0][cvDir], healthBars[1][cvDir], x+healthX, y+healthY, healthBarDimensions[cvDir], healthBarDimensions[!cvDir], healthScale, healthScale, cvAlpha, chp, mhp, !cvDir+1, false, getNewUIId(), getNewUIId());
+    drawBar(healthBars[0][cvDir], healthBars[1][cvDir], x+healthX, y+healthY, healthWidth, healthHeight, healthScale, healthScale, cvAlpha, chp, mhp, !cvDir+1, false, getNewUIId(), getNewUIId());
+}
+
+// Draw Weapon ======================================================================================================================================
+#define WEP_ICONX_00 24
+#define WEP_ICONY_00 1+2*ROW_LENGTH
+
+#define WEP_ICONX_01 0
+#define WEP_ICONY_01 0
+
+#define WEP_ICONX_10 0
+#define WEP_ICONY_10 0
+
+#define WEP_ICONX_11 0
+#define WEP_ICONY_11 0
+
+// Bar is relative to the icon
+#define WEP_BARX_00 -132
+#define WEP_BARY_00 -33
+
+#define WEP_BARX_01 0
+#define WEP_BARY_01 0
+
+#define WEP_BARX_10 0
+#define WEP_BARY_10 0
+
+#define WEP_BARX_11 0
+#define WEP_BARY_11 0
+
+// Double bar has a different set of coords
+#define WEP_BAR1X_00 -132
+#define WEP_BAR1Y_00 -35
+
+#define WEP_BAR1X_01 0
+#define WEP_BAR1Y_01 0
+
+#define WEP_BAR1X_10 0
+#define WEP_BAR1Y_10 0
+
+#define WEP_BAR1X_11 0
+#define WEP_BAR1Y_11 0
+
+#define WEP_BAR2X_00 -132
+#define WEP_BAR2Y_00 -31
+
+#define WEP_BAR2X_01 0
+#define WEP_BAR2Y_01 0
+
+#define WEP_BAR2X_10 0
+#define WEP_BAR2Y_10 0
+
+#define WEP_BAR2X_11 0
+#define WEP_BAR2Y_11 0
+
+
+#define WEP_L_CONST 28 * 10
+#define WEP_W_CONST 4 * 10
+
+#define WEP_ICON_SCALE 0.5
+
+int weaponCache_Scale;
+int weaponCache_Mirror;
+int weaponCache_Dir;
+
+int weaponIconX;
+int weaponIconY;
+int weaponBarX;
+int weaponBarY;
+int weaponBar1X;
+int weaponBar1Y;
+int weaponBar2X;
+int weaponBar2Y;
+int weaponIconScale;
+int weaponBarScale;
+int weaponBarWidth;
+int weaponBarHeight;
+int weaponBar1Top;
+int weaponBar1Bottom;
+int weaponBar2Top;
+int weaponBar2Bottom;
+
+int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
+
+#define UIX_WeapProp_Actor 0
+#define UIX_WeapProp_Tag 1
+#define UIX_WeapProp_Icon 2
+#define UIX_WeapProp_Ammo 3
+#define UIX_WeapProp_Ammo2 4
+
+#define UIX_WeapProp_Slot 5
+#define UIX_WeapProp_Cyan 6
+#define UIX_WeapProp_Blue 7
+#define UIX_WeapProp_Cyan2 8
+#define UIX_WeapProp_Blue2 9
+
+function void drawWeapon(int pln, int x, int y)
+{
+    if(!cvShowName)
+        return;
+
+    // int mwep = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnWeapon);
+    // if(mwep == 0)
+        // return;
+
+    if(
+        weaponCache_Scale != cvScale ||
+        weaponCache_Mirror != cvMirror ||
+        weaponCache_Dir != cvDir
+    )
+    {
+        weaponCache_Scale = cvScale;
+        weaponCache_Mirror = cvMirror;
+        weaponCache_Dir = cvDir;
+
+        weaponIconX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_ICONX_00 : WEP_ICONX_01) : (!cvMirror ? WEP_ICONX_10 : WEP_ICONX_11)));
+        weaponIconY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_ICONY_00 : WEP_ICONY_01) : (!cvMirror ? WEP_ICONY_10 : WEP_ICONY_11)));
+        weaponBarX = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BARX_00 : WEP_BARX_01) : (!cvMirror ? WEP_BARX_10 : WEP_BARX_11)));
+        weaponBarY = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BARY_00 : WEP_BARY_01) : (!cvMirror ? WEP_BARY_10 : WEP_BARY_11)));
+        weaponBar1X = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR1X_00 : WEP_BAR1X_01) : (!cvMirror ? WEP_BAR1X_10 : WEP_BAR1X_11)));
+        weaponBar1Y = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR1Y_00 : WEP_BAR1Y_01) : (!cvMirror ? WEP_BAR1Y_10 : WEP_BAR1Y_11)));
+        weaponBar2X = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR2X_00 : WEP_BAR2X_01) : (!cvMirror ? WEP_BAR2X_10 : WEP_BAR2X_11)));
+        weaponBar2Y = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR2Y_00 : WEP_BAR2Y_01) : (!cvMirror ? WEP_BAR2Y_10 : WEP_BAR2Y_11)));
+        weaponBarScale = FixedMul(FixedMul(cvScale, 1.0), 0.1);
+        weaponIconScale = FixedMul(WEP_ICON_SCALE, cvScale);
+        weaponBarWidth = weaponBarDimensions[cvDir];
+        weaponBarHeight = weaponBarDimensions[!cvDir];
+    }
+
+    str icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Icon);
+    str cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+    str blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+    str black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+
+    int amt1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 0);
+    int amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 1);
+
+    int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
+
+    displayIcon(icon, getNewUIId(), x+weaponIconX, y+weaponIconY, weaponIconScale, weaponIconScale, cvAlpha);
+
+    if(amt2 != -1) {
+        int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
+        str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
+        str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
+
+        drawLayeredBar(cyan, blue, black, weaponBar1X, weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+        drawLayeredBar(cyan2, blue2, black, weaponBar2X, weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    } else {
+        drawLayeredBar(cyan, blue, black, weaponBarX, weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    }
 }
 
 // Player name cache ================================================================================================================================
@@ -596,7 +828,6 @@ int playerLocs[64][2];
 // [Russ] This algorithm is based on one very dangerous assumption.
 // Will the engine generate an identical string with a separate index in the string table?
 // I feel like only god knows.
-// And Graf Zahl in the year 2013, but no one really cares about his opinion anymore.
 //
 function int findLoc(int id) {
     for(int i = 0; i < LOC_SIZE; i++) {
@@ -615,14 +846,17 @@ function void setLocName(int idx, int o, int r, str val) { namesCache[idx][(o ? 
 function int getLocNameWidth(int idx, int o, int r) { return namesCache[idx][4 + (o ? o + r : 0)]; }
 function void setLocNameWidth(int idx, int o, int r, int val) { namesCache[idx][4 + (o ? o + r : 0)] = val; }
 
+function int getLocWidthPlr(int plr, int o, int r) { return getLocNameWidth(playerLocs[plr][1], 0, r); }
+
 function str findLocation(int plr, int o, int r) {
     str loc = GetActorSectorLocation(plr+PLN_TID_SHRT, false);
 
     if(StrLen(loc) == 0)
-        return -1;
+        return "";
 
-    if(playerLocs[plr][0] == loc)
+    if(playerLocs[plr][0] == loc) {
         return getLocName(playerLocs[plr][1], o, r);
+    }
 
     int idx = findLoc(loc);
 
@@ -644,15 +878,17 @@ function str findLocation(int plr, int o, int r) {
 
     rebuildString(loc);
 
-    setLocName(idx, false, false, cacheKey);
-    setLocName(idx, true, false, cacheVert);
-    setLocName(idx, true, true, cacheVertReverse);
-    setLocNameWidth(idx, false, false, cacheWidth);
-    setLocNameWidth(idx, true, false, cacheHeight);
-    setLocNameWidth(idx, true, true, cacheHeightReverse);
+    setLocName(LOC_SIZE, false, false, cacheKey);
+    setLocName(LOC_SIZE, true, false, cacheVert);
+    setLocName(LOC_SIZE, true, true, cacheVertReverse);
+    setLocNameWidth(LOC_SIZE, false, false, cacheWidth);
+    setLocNameWidth(LOC_SIZE, true, false, cacheHeight);
+    setLocNameWidth(LOC_SIZE, true, true, cacheHeightReverse);
 
     playerLocs[plr][0] = loc;
     playerLocs[plr][1] = LOC_SIZE;
+
+    Log(s:"Loc change (new): ", i:playerLocs[plr][0], s:" ", i:playerLocs[plr][1]);
 
     return getLocName(LOC_SIZE++, o, r);
 }
