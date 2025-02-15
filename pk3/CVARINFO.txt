@@ -34,7 +34,7 @@ user bool UIX_CL_TEAMINFOSTACK = false;
 user bool UIX_CL_TEAMINFOSHOWNAME = true;
 user bool UIX_CL_TEAMINFOSHOWHEALTH = true;
 user bool UIX_CL_TEAMINFOSHOWLOCATION = false;
-user bool UIX_CL_TEAMINFOSHOWCOMPASS = false;
+user bool UIX_CL_TEAMINFOSHOWLIVES = true;
 user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
 
 // name storage (pain)

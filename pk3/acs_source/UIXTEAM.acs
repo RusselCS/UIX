@@ -42,7 +42,7 @@ int cvStack;
 int cvShowname;
 int cvShowhealth;
 int cvShowlocation;
-int cvShowcompass;
+int cvShowlives;
 int cvShowmugshot;
 
 int tiCache_Scale = MIN_INT;
@@ -96,7 +96,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvShowname = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
         cvShowhealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
         cvShowlocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
-        cvShowcompass = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWCOMPASS");
+        cvShowlives = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLIVES");
         cvShowmugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
 
         if(tiCache_Scale != cvScale || tiCache_Stack != cvStack)
@@ -130,6 +130,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             drawLocation(i, baseX, baseY);
             drawHealth(i, baseX, baseY);
             drawWeapon(i, baseX, baseY);
+            drawLives(i, baseX, baseY);
 
             drawnPlayers++;
 
@@ -597,6 +598,163 @@ function void drawWeapon(int pln, int x, int y)
         drawLayeredBar(cyan2, blue2, black, weaponBar2X, weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
     } else {
         drawLayeredBar(cyan, blue, black, weaponBarX, weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    }
+}
+
+// Draw Lives =======================================================================================================================================
+#define LIVES_X_00 112
+#define LIVES_Y_00 5+ROW_LENGTH
+
+#define LIVES_X_01 0
+#define LIVES_Y_01 0
+
+#define LIVES_X_10 0
+#define LIVES_Y_10 0
+
+#define LIVES_X_11 0
+#define LIVES_Y_11 0
+
+#define LIVES_TEXT_X_00 -11
+#define LIVES_TEXT_Y_00 0
+
+#define LIVES_TEXT_X_01 0
+#define LIVES_TEXT_Y_01 0
+
+#define LIVES_TEXT_X_10 0
+#define LIVES_TEXT_Y_10 0
+
+#define LIVES_TEXT_X_11 0
+#define LIVES_TEXT_Y_11 0
+
+#define LIVES_OFFS 9
+
+int livesCache_Scale;
+int livesCache_Mirror;
+int livesCache_Dir;
+
+int livesX;
+int livesY;
+int livesTextX;
+int livesTextY;
+int livesScale;
+int livesOffsX;
+int livesOffsY;
+int livesTextScale;
+int livesTextHAlign;
+int livesTextVAlign;
+
+int maxLives = -1;
+
+script "UITweaks_TeamInfo_MaxLives" OPEN CLIENTSIDE
+{
+    if(GetCvar("lastmanstanding") || GetCvar("teamlms")) {
+        maxLives = GetCvar("sv_maxlives");
+    }
+}
+
+str livesIcons[2][256] = {
+    { // cyan
+        "UXTLVC00","UXTLVC01","UXTLVC02","UXTLVC03","UXTLVC04","UXTLVC05","UXTLVC06","UXTLVC07","UXTLVC08","UXTLVC09","UXTLVC0A","UXTLVC0B","UXTLVC0C","UXTLVC0D","UXTLVC0E","UXTLVC0F",
+        "UXTLVC10","UXTLVC11","UXTLVC12","UXTLVC13","UXTLVC14","UXTLVC15","UXTLVC16","UXTLVC17","UXTLVC18","UXTLVC19","UXTLVC1A","UXTLVC1B","UXTLVC1C","UXTLVC1D","UXTLVC1E","UXTLVC1F",
+        "UXTLVC20","UXTLVC21","UXTLVC22","UXTLVC23","UXTLVC24","UXTLVC25","UXTLVC26","UXTLVC27","UXTLVC28","UXTLVC29","UXTLVC2A","UXTLVC2B","UXTLVC2C","UXTLVC2D","UXTLVC2E","UXTLVC2F",
+        "UXTLVC30","UXTLVC31","UXTLVC32","UXTLVC33","UXTLVC34","UXTLVC35","UXTLVC36","UXTLVC37","UXTLVC38","UXTLVC39","UXTLVC3A","UXTLVC3B","UXTLVC3C","UXTLVC3D","UXTLVC3E","UXTLVC3F",
+        "UXTLVC40","UXTLVC41","UXTLVC42","UXTLVC43","UXTLVC44","UXTLVC45","UXTLVC46","UXTLVC47","UXTLVC48","UXTLVC49","UXTLVC4A","UXTLVC4B","UXTLVC4C","UXTLVC4D","UXTLVC4E","UXTLVC4F",
+        "UXTLVC50","UXTLVC51","UXTLVC52","UXTLVC53","UXTLVC54","UXTLVC55","UXTLVC56","UXTLVC57","UXTLVC58","UXTLVC59","UXTLVC5A","UXTLVC5B","UXTLVC5C","UXTLVC5D","UXTLVC5E","UXTLVC5F",
+        "UXTLVC60","UXTLVC61","UXTLVC62","UXTLVC63","UXTLVC64","UXTLVC65","UXTLVC66","UXTLVC67","UXTLVC68","UXTLVC69","UXTLVC6A","UXTLVC6B","UXTLVC6C","UXTLVC6D","UXTLVC6E","UXTLVC6F",
+        "UXTLVC70","UXTLVC71","UXTLVC72","UXTLVC73","UXTLVC74","UXTLVC75","UXTLVC76","UXTLVC77","UXTLVC78","UXTLVC79","UXTLVC7A","UXTLVC7B","UXTLVC7C","UXTLVC7D","UXTLVC7E","UXTLVC7F",
+        "UXTLVC80","UXTLVC81","UXTLVC82","UXTLVC83","UXTLVC84","UXTLVC85","UXTLVC86","UXTLVC87","UXTLVC88","UXTLVC89","UXTLVC8A","UXTLVC8B","UXTLVC8C","UXTLVC8D","UXTLVC8E","UXTLVC8F",
+        "UXTLVC90","UXTLVC91","UXTLVC92","UXTLVC93","UXTLVC94","UXTLVC95","UXTLVC96","UXTLVC97","UXTLVC98","UXTLVC99","UXTLVC9A","UXTLVC9B","UXTLVC9C","UXTLVC9D","UXTLVC9E","UXTLVC9F",
+        "UXTLVCA0","UXTLVCA1","UXTLVCA2","UXTLVCA3","UXTLVCA4","UXTLVCA5","UXTLVCA6","UXTLVCA7","UXTLVCA8","UXTLVCA9","UXTLVCAA","UXTLVCAB","UXTLVCAC","UXTLVCAD","UXTLVCAE","UXTLVCAF",
+        "UXTLVCB0","UXTLVCB1","UXTLVCB2","UXTLVCB3","UXTLVCB4","UXTLVCB5","UXTLVCB6","UXTLVCB7","UXTLVCB8","UXTLVCB9","UXTLVCBA","UXTLVCBB","UXTLVCBC","UXTLVCBD","UXTLVCBE","UXTLVCBF",
+        "UXTLVCC0","UXTLVCC1","UXTLVCC2","UXTLVCC3","UXTLVCC4","UXTLVCC5","UXTLVCC6","UXTLVCC7","UXTLVCC8","UXTLVCC9","UXTLVCCA","UXTLVCCB","UXTLVCCC","UXTLVCCD","UXTLVCCE","UXTLVCCF",
+        "UXTLVCD0","UXTLVCD1","UXTLVCD2","UXTLVCD3","UXTLVCD4","UXTLVCD5","UXTLVCD6","UXTLVCD7","UXTLVCD8","UXTLVCD9","UXTLVCDA","UXTLVCDB","UXTLVCDC","UXTLVCDD","UXTLVCDE","UXTLVCDF",
+        "UXTLVCE0","UXTLVCE1","UXTLVCE2","UXTLVCE3","UXTLVCE4","UXTLVCE5","UXTLVCE6","UXTLVCE7","UXTLVCE8","UXTLVCE9","UXTLVCEA","UXTLVCEB","UXTLVCEC","UXTLVCED","UXTLVCEE","UXTLVCEF",
+        "UXTLVCF0","UXTLVCF1","UXTLVCF2","UXTLVCF3","UXTLVCF4","UXTLVCF5","UXTLVCF6","UXTLVCF7","UXTLVCF8","UXTLVCF9","UXTLVCFA","UXTLVCFB","UXTLVCFC","UXTLVCFD","UXTLVCFE","UXTLVCFF",
+    },
+    { // blue
+        "UXTLVB00","UXTLVB01","UXTLVB02","UXTLVB03","UXTLVB04","UXTLVB05","UXTLVB06","UXTLVB07","UXTLVB08","UXTLVB09","UXTLVB0A","UXTLVB0B","UXTLVB0C","UXTLVB0D","UXTLVB0E","UXTLVB0F",
+        "UXTLVB10","UXTLVB11","UXTLVB12","UXTLVB13","UXTLVB14","UXTLVB15","UXTLVB16","UXTLVB17","UXTLVB18","UXTLVB19","UXTLVB1A","UXTLVB1B","UXTLVB1C","UXTLVB1D","UXTLVB1E","UXTLVB1F",
+        "UXTLVB20","UXTLVB21","UXTLVB22","UXTLVB23","UXTLVB24","UXTLVB25","UXTLVB26","UXTLVB27","UXTLVB28","UXTLVB29","UXTLVB2A","UXTLVB2B","UXTLVB2C","UXTLVB2D","UXTLVB2E","UXTLVB2F",
+        "UXTLVB30","UXTLVB31","UXTLVB32","UXTLVB33","UXTLVB34","UXTLVB35","UXTLVB36","UXTLVB37","UXTLVB38","UXTLVB39","UXTLVB3A","UXTLVB3B","UXTLVB3C","UXTLVB3D","UXTLVB3E","UXTLVB3F",
+        "UXTLVB40","UXTLVB41","UXTLVB42","UXTLVB43","UXTLVB44","UXTLVB45","UXTLVB46","UXTLVB47","UXTLVB48","UXTLVB49","UXTLVB4A","UXTLVB4B","UXTLVB4C","UXTLVB4D","UXTLVB4E","UXTLVB4F",
+        "UXTLVB50","UXTLVB51","UXTLVB52","UXTLVB53","UXTLVB54","UXTLVB55","UXTLVB56","UXTLVB57","UXTLVB58","UXTLVB59","UXTLVB5A","UXTLVB5B","UXTLVB5C","UXTLVB5D","UXTLVB5E","UXTLVB5F",
+        "UXTLVB60","UXTLVB61","UXTLVB62","UXTLVB63","UXTLVB64","UXTLVB65","UXTLVB66","UXTLVB67","UXTLVB68","UXTLVB69","UXTLVB6A","UXTLVB6B","UXTLVB6C","UXTLVB6D","UXTLVB6E","UXTLVB6F",
+        "UXTLVB70","UXTLVB71","UXTLVB72","UXTLVB73","UXTLVB74","UXTLVB75","UXTLVB76","UXTLVB77","UXTLVB78","UXTLVB79","UXTLVB7A","UXTLVB7B","UXTLVB7C","UXTLVB7D","UXTLVB7E","UXTLVB7F",
+        "UXTLVB80","UXTLVB81","UXTLVB82","UXTLVB83","UXTLVB84","UXTLVB85","UXTLVB86","UXTLVB87","UXTLVB88","UXTLVB89","UXTLVB8A","UXTLVB8B","UXTLVB8C","UXTLVB8D","UXTLVB8E","UXTLVB8F",
+        "UXTLVB90","UXTLVB91","UXTLVB92","UXTLVB93","UXTLVB94","UXTLVB95","UXTLVB96","UXTLVB97","UXTLVB98","UXTLVB99","UXTLVB9A","UXTLVB9B","UXTLVB9C","UXTLVB9D","UXTLVB9E","UXTLVB9F",
+        "UXTLVBA0","UXTLVBA1","UXTLVBA2","UXTLVBA3","UXTLVBA4","UXTLVBA5","UXTLVBA6","UXTLVBA7","UXTLVBA8","UXTLVBA9","UXTLVBAA","UXTLVBAB","UXTLVBAC","UXTLVBAD","UXTLVBAE","UXTLVBAF",
+        "UXTLVBB0","UXTLVBB1","UXTLVBB2","UXTLVBB3","UXTLVBB4","UXTLVBB5","UXTLVBB6","UXTLVBB7","UXTLVBB8","UXTLVBB9","UXTLVBBA","UXTLVBBB","UXTLVBBC","UXTLVBBD","UXTLVBBE","UXTLVBBF",
+        "UXTLVBC0","UXTLVBC1","UXTLVBC2","UXTLVBC3","UXTLVBC4","UXTLVBC5","UXTLVBC6","UXTLVBC7","UXTLVBC8","UXTLVBC9","UXTLVBCA","UXTLVBCB","UXTLVBCC","UXTLVBCD","UXTLVBCE","UXTLVBCF",
+        "UXTLVBD0","UXTLVBD1","UXTLVBD2","UXTLVBD3","UXTLVBD4","UXTLVBD5","UXTLVBD6","UXTLVBD7","UXTLVBD8","UXTLVBD9","UXTLVBDA","UXTLVBDB","UXTLVBDC","UXTLVBDD","UXTLVBDE","UXTLVBDF",
+        "UXTLVBE0","UXTLVBE1","UXTLVBE2","UXTLVBE3","UXTLVBE4","UXTLVBE5","UXTLVBE6","UXTLVBE7","UXTLVBE8","UXTLVBE9","UXTLVBEA","UXTLVBEB","UXTLVBEC","UXTLVBED","UXTLVBEE","UXTLVBEF",
+        "UXTLVBF0","UXTLVBF1","UXTLVBF2","UXTLVBF3","UXTLVBF4","UXTLVBF5","UXTLVBF6","UXTLVBF7","UXTLVBF8","UXTLVBF9","UXTLVBFA","UXTLVBFB","UXTLVBFC","UXTLVBFD","UXTLVBFE","UXTLVBFF",
+    },
+};
+
+// premature optimizations
+str livesCounts[100] = {
+    "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
+    "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+    "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+    "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+    "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+    "50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+    "60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
+    "70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
+    "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+    "90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
+};
+
+function void drawLives(int pln, int x, int y)
+{
+    if(maxLives == -1)
+        return;
+
+    if(!cvShowLives)
+        return;
+
+    int lives = GetPlayerLivesLeft(pln);
+    if(lives == 0)
+        return;
+
+    if(
+        livesCache_Scale != cvScale ||
+        livesCache_Mirror != cvMirror ||
+        livesCache_Dir != cvDir
+    )
+    {
+        livesCache_Scale = cvScale;
+        livesCache_Mirror = cvMirror;
+        livesCache_Dir = cvDir;
+
+        livesX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_X_00 : LIVES_X_01) : (!cvMirror ? LIVES_X_10 : LIVES_X_11)));
+        livesY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_Y_00 : LIVES_Y_01) : (!cvMirror ? LIVES_Y_10 : LIVES_Y_11)));
+        livesTextX = livesX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_TEXT_X_00 : LIVES_TEXT_X_01) : (!cvMirror ? LIVES_TEXT_X_10 : LIVES_TEXT_X_11)));
+        livesTextY = livesY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_TEXT_Y_00 : LIVES_TEXT_Y_01) : (!cvMirror ? LIVES_TEXT_Y_10 : LIVES_TEXT_Y_11)));
+        livesScale = cvScale;
+        livesOffsX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? -LIVES_OFFS : LIVES_OFFS) : 0));
+        livesOffsY = FixedMul(cvScale, ( cvDir ? (!cvMirror ? -LIVES_OFFS : LIVES_OFFS) : 0));
+
+        livesTextScale = FixedMul(cvScale, TEXT_SCALE);
+        livesTextHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        livesTextVAlign = cvMirror && cvDir == vertical ? ALIGN_BOTTOM : ALIGN_TOP;
+    }
+
+    int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
+    int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
+    int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
+    
+    if(lives < 5) {
+        for(int i = 0; i < lives; i++) {
+            displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesX+livesOffsX*i, y+livesY+livesOffsY*i, livesScale, livesScale, cvAlpha);
+            displayIcon(livesIcons[1][blue], getNewUIId(), x+livesX+livesOffsX*i, y+livesY+livesOffsY*i, livesScale, livesScale, cvAlpha);
+        }
+    } else {
+        displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesX+livesOffsX*2, y+livesY+livesOffsY*2, livesScale, livesScale, cvAlpha);
+        displayIcon(livesIcons[1][blue], getNewUIId(), x+livesX+livesOffsX*2, y+livesY+livesOffsY*2, livesScale, livesScale, cvAlpha);
+
+        SetFont(uiFonts[cvFontdir]);
+        displayMessage(livesCounts[lives < 100 ? lives : 99], getNewUIId(), x + livesTextX, y + livesTextY, livesTextScale, livesTextScale, cvAlpha, livesTextHAlign, livesTextVAlign);
     }
 }
 

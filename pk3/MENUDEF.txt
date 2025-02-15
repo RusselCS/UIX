@@ -47,7 +47,7 @@ OptionMenu "UIXOptions"
 	StaticText " "
 	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
 	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
-	// Option "Show Compass", "UIX_CL_TEAMINFOSHOWCOMPASS", "OnOff"
+	Option "Show Lives", "UIX_CL_TEAMINFOSHOWLIVES", "OnOff"
 	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
 	StaticText " "
 	StaticText  "Weapon Bar", 1
