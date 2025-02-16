@@ -34,16 +34,16 @@ Done:
 - Check BluemanBlaster
 
 == V1F TO DO ==
-- Teaminfo: Add location back
 - Teaminfo: Add number toggles for everything
-- Teaminfo: Stock pips over mugshots
 - Frag messages: Add mugshot on frag message
 - Assist message?
-- Missed a "scuttlerun" in the menu somewhere. Squash that.
 
 Done:
 - Teaminfo: Fix name caching
 - Teaminfo: Finish setbarcliprect update
+- Teaminfo: Stock pips over mugshots
+- Teaminfo: Add location back
+- Missed a "scuttlerun" in the menu somewhere. Squash that.
 
 == V2A TO DO ==
 - Team ammo bar (most requested feature)
