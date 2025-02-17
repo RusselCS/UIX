@@ -809,8 +809,8 @@ function void rebuildString(str name) {
     }
 
     // // Cache test
-    // Log(a:(nameColorless, 0, colorLessSize));
-    // Log(a:(nameColors, 0, colorsLength));
+    // Log(s:"nameColorLess: ", a:(nameColorless, 0, colorLessSize));
+    // Log(s:"nameColors: ", a:(nameColors, 0, colorsLength));
 
     // // Colors test
     // str tpos = StrParam(i:getColorPos(0));
@@ -858,15 +858,20 @@ function void rebuildString(str name) {
     for(i = colorLessSize; i > 0; i--) {
         if(i == getColorPos(curCol)) {
             curCol--;
+            if(curCol < 0)
+                curCol = colorsCount-1;
         }
 
         if(nameColorless[i-1] != ' ') {
-            if(curCol < colorsCount) {
+            if(curCol > -1 && curCol < colorsCount) {
+                // Log(s:"\\c");
                 nameBuilder[nidx++] = CHAR_COLOR;
                 for(c = getColorStart(curCol); c < getColorEnd(curCol); c++) {
+                    // Log(c:nameColors[c]);
                     nameBuilder[nidx++] = nameColors[c];
                 }
             }
+            // Log(c:nameColorless[i-1]);
             nameBuilder[nidx++] = nameColorless[i-1];
         }
 
@@ -877,6 +882,14 @@ function void rebuildString(str name) {
     cacheWidth = nameWidth;
     cacheHeight = colorLessSize * 11;
     cacheHeightReverse = colorLessSize * 9;
+
+    // Log(s:"===== Final Cache =====");
+    // Log(s:"CacheKey: ", s:cacheKey);
+    // Log(s:"CacheVert: ", s:cacheVert);
+    // Log(s:"CacheVertReverse: ", s:cacheVertReverse);
+    // Log(s:"CacheWidth: ", i:cacheWidth);
+    // Log(s:"CacheHeight: ", i:cacheHeight);
+    // Log(s:"CacheHeightReverse: ", i:cacheHeightReverse);
 }
 
 // bool init
@@ -963,16 +976,16 @@ function int findLoc(int id) {
     return -1;
 }
 
-function int getLocId(int idx) { return namesCache[idx][0]; }
-function void setLocId(int idx, int val) { namesCache[idx][0] = val; }
+function int getLocId(int idx) { return locs[idx][0]; }
+function void setLocId(int idx, int val) { locs[idx][0] = val; }
 
-function str getLocName(int idx, int o, int r) { return namesCache[idx][(o ? o + r : 0)]; }
-function void setLocName(int idx, int o, int r, str val) { namesCache[idx][(o ? o + r : 0)] = val; }
+function str getLocName(int idx, int o, int r) { return locs[idx][(o ? o + r : 0)]; }
+function void setLocName(int idx, int o, int r, str val) { locs[idx][(o ? o + r : 0)] = val; }
 
-function int getLocNameWidth(int idx, int o, int r) { return namesCache[idx][4 + (o ? o + r : 0)]; }
-function void setLocNameWidth(int idx, int o, int r, int val) { namesCache[idx][4 + (o ? o + r : 0)] = val; }
+function int getLocNameWidth(int idx, int o, int r) { return locs[idx][4 + (o ? o + r : 0)]; }
+function void setLocNameWidth(int idx, int o, int r, int val) { locs[idx][4 + (o ? o + r : 0)] = val; }
 
-function int getLocWidthPlr(int plr, int o, int r) { return getLocNameWidth(playerLocs[plr][1], 0, r); }
+function int getLocWidthPlr(int plr, int o, int r) { return getLocNameWidth(playerLocs[plr][1], o, r); }
 
 function str findLocation(int plr, int o, int r) {
     str loc = GetActorSectorLocation(plr+PLN_TID_SHRT, false);
@@ -1014,7 +1027,7 @@ function str findLocation(int plr, int o, int r) {
     playerLocs[plr][0] = loc;
     playerLocs[plr][1] = LOC_SIZE;
 
-    Log(s:"Loc change (new): ", i:playerLocs[plr][0], s:" ", i:playerLocs[plr][1]);
+    // Log(s:"Loc change (new): ", i:playerLocs[plr][0], s:" ", i:playerLocs[plr][1]);
 
     return getLocName(LOC_SIZE++, o, r);
 }
