@@ -684,7 +684,7 @@ function void drawLives(int pln, int x, int y)
         return;
 
     int lives = GetPlayerLivesLeft(pln);
-    if(lives == 0)
+    if(lives <= 0)
         return;
 
     if(
@@ -717,18 +717,11 @@ function void drawLives(int pln, int x, int y)
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
     
-    if(lives < 5) {
-        for(int i = 0; i < lives; i++) {
-            displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesX+livesOffsX*i, y+livesY+livesOffsY*i, livesScale, livesScale, cvAlpha);
-            displayIcon(livesIcons[1][blue], getNewUIId(), x+livesX+livesOffsX*i, y+livesY+livesOffsY*i, livesScale, livesScale, cvAlpha);
-        }
-    } else {
-        displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
-        displayIcon(livesIcons[1][blue], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
+    displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
+    displayIcon(livesIcons[1][blue], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
 
-        SetFont(uiFonts[cvFontIdx]);
-        displayMessage(livesCounts[cvDir + cvReverseText][lives < 100 ? lives : 99], getNewUIId(), x + livesTextX, y + livesTextY, livesTextScale, livesTextScale, cvAlpha, livesTextHAlign, livesTextVAlign);
-    }
+    SetFont(uiFonts[cvFontIdx]);
+    displayMessage(livesCounts[cvDir + cvReverseText][lives < 100 ? lives : 99], getNewUIId(), x + livesTextX, y + livesTextY, livesTextScale, livesTextScale, cvAlpha, livesTextHAlign, livesTextVAlign);
 }
 
 // Player name cache ================================================================================================================================
