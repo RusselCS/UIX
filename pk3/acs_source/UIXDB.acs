@@ -2,6 +2,10 @@
 
 #include "zcommon.acs"
 
+#import "8BDT.acs"
+
+#include "SHRTFUNC.acs"
+
 int lastWeapon_init[64];
 str lastWeapon_str[64][5];
 int lastWeapon_int[64][7];
@@ -40,54 +44,128 @@ function str getWeaponProperty(int pln, int prop)
     return lastWeapon_int[pln][prop-UIX_StrPropCount];
 }
 
+int blue1, cyan1, blue2, cyan2;
+
+function void readWeaponBars(str weap) {
+    Log(s:"Called read weapon bars for weapon: ", s:weap);
+    cyan1 = -1;
+    blue1 = -1;
+    cyan2 = -1;
+    blue2 = -1;
+
+    int obj;
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
+    }
+
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_ArsenalColor"));
+    }
+
+    if(obj) {
+        cyan1 = GetActorArg(obj, 0);
+        blue1 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+
+    obj = new(StrParam(s:weap, s:"_SecondBar"));
+    if(obj) {
+        cyan2 = GetActorArg(obj, 0);
+        blue2 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+    Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
+}
+
 script "UIX_GetCurrentWeapon" (int pln) {
-    // SetActivatorToPlayer(pln);
-    // SetResultValue(GetWeapon());
-    SetResultValue("ThunderBoltWep");
+    SetActivatorToPlayer(pln);
+    SetResultValue(GetWeapon());
 }
 
 script "UIXDB_GetPlayerWeaponProperty" (int pln, int prop)
 {
-    str newWep = ACS_NamedExecuteWithResult("UIX_GetCurrentWeapon");
+    SetResultValue(GetWeaponProperty_S(pln, prop));
+}
+
+function str GetWeaponProperty_S(int pln, int prop) {
+    str newWep = ACS_NamedExecuteWithResult("UIX_GetCurrentWeapon", pln);
     
-    if(lastWeapon_init[pln] != 0)
-        if(StrCmp(lastWeapon_str[pln][UIX_WeapProp_Actor], newWep) == 0)
-            SetResultValue(getWeaponProperty(pln, prop));
+    if(lastWeapon_init[pln])
+        if(newWep == lastWeapon_str[pln][0])
+            return getWeaponProperty(pln, prop);
     
     lastWeapon_init[pln] = 1;
     
     setWeaponProperty(pln, UIX_WeapProp_Actor, newWep);
-    setWeaponProperty(pln, UIX_WeapProp_Tag, "TAG_THUNDERBOLT");
-    setWeaponProperty(pln, UIX_WeapProp_Icon, "WEA3R0");
-    setWeaponProperty(pln, UIX_WeapProp_Ammo, "ThunderBoltAmmo");
-    setWeaponProperty(pln, UIX_WeapProp_Ammo2, "ThunderBoltAmmo");
 
-    setWeaponProperty(pln, UIX_WeapProp_Slot, 2);
-    setWeaponProperty(pln, UIX_WeapProp_Cyan, 228);
-    setWeaponProperty(pln, UIX_WeapProp_Blue, 73);
-    setWeaponProperty(pln, UIX_WeapProp_Cyan2, 4);
-    setWeaponProperty(pln, UIX_WeapProp_Blue2, 228);
+    // [Russ] Assume the weapon will be found by the weapon table, go ahead and populate the bar colors
+    readWeaponBars(newWep);
+    setWeaponProperty(pln, UIX_WeapProp_Cyan, cyan1);
+    setWeaponProperty(pln, UIX_WeapProp_Blue, blue1);
+    setWeaponProperty(pln, UIX_WeapProp_Cyan2, cyan2);
+    setWeaponProperty(pln, UIX_WeapProp_Blue2, blue2);
+
+    int idx = findWeaponByActor(newWep);
+
+    if(idx != -1) {
+        setWeaponProperty(pln, UIX_WeapProp_Tag, getWeaponTag(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Icon, getWeaponIcon(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Ammo, getWeaponAmmoType(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Slot, getWeaponSlot(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Ammo2, getWeaponAmmo2Type(idx));
+
+        return getWeaponProperty(pln, prop);
+    }
+
+    idx = findBusterUpgradeByActor(newWep);
+
+    if(idx != -1) {
+        setWeaponProperty(pln, UIX_WeapProp_Tag, getBusterTag(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Icon, getBusterIcon(idx));
+        setWeaponProperty(pln, UIX_WeapProp_Ammo, "");
+        setWeaponProperty(pln, UIX_WeapProp_Ammo2, "");
+
+        setWeaponProperty(pln, UIX_WeapProp_Slot, 1);
+
+        return getWeaponProperty(pln, prop);
+    }
+
+    setWeaponProperty(pln, UIX_WeapProp_Tag, "");
+    setWeaponProperty(pln, UIX_WeapProp_Icon, "");
+    setWeaponProperty(pln, UIX_WeapProp_Ammo, "");
+    setWeaponProperty(pln, UIX_WeapProp_Ammo2, "");
+
+    setWeaponProperty(pln, UIX_WeapProp_Slot, -1);
+
+    return getWeaponProperty(pln, prop);
 }
 
 script "UIXDB_GetPlayerAmmo" (int pln, int type, int mode)
 {
+    SetResultValue(GetPlayerAmmo_S(pln, type, mode));
+}
+
+function int GetPlayerAmmo_S(int pln, int type, int mode)
+{
     str ammoType;
     if(type > 0) {
         ammoType = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Ammo2);
-        if(ammoType == -1) {
-            SetResultValue(-1);
-            terminate;
-        }
     } else {
         ammoType = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Ammo);
     }
 
+    if(ammoType == -1)
+        return -1;
+    if(StrLen(ammoType) == 0)
+        return -1;
+
     SetActivatorToPlayer(pln);
-    if(!mode) {
-        SetResultValue(CheckInventory(ammoType));
-    } else {
-        SetResultValue(GetAmmoCapacity(ammoType));
-    }
+
+    if(!mode)
+        return CheckInventory(ammoType);
+
+    return GetAmmoCapacity(ammoType);
 }
 
 #define colors 256
@@ -259,10 +337,19 @@ str UIXAmmoBars[4][3][colors] = {
     },
 };
 
+int UIXAmmoBarDefaults[3] = {
+    192,
+    198,
+    0,
+};
+
 script "UIXDB_GetAmmoBar" (int orientation, int layer, int color)
 {
     if(layer == 2)
         color = 0;
+    else
+        if(color == -1)
+            color = UIXAmmoBarDefaults[layer];
     
     SetResultValue(UIXAmmoBars[orientation][layer][color]);
 }

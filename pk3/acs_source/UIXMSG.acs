@@ -11,7 +11,7 @@ int lastDeath[64];
 
 int infiniteRespawns;
 
-script "UITweaks_FragIcon" OPEN
+script "UITweaks_FragIcon" OPEN CLIENTSIDE
 {
     infiniteRespawns = !(GetCvar("lastmanstanding") || GetCvar("teamlms"));
 }
