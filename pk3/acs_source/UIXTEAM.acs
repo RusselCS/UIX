@@ -53,13 +53,6 @@ int tiCache_Stack = MIN_INT;
 #define STACK_OFFS 36
 int tiStackOffs;
 
-script "TEST THING" ENTER
-{
-    if(CheckInventory("MegaBuster")) {
-        GiveInventory("ThunderBoltWep", 1);
-    }
-}
-
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
     if(!GetCvar("UIX_SV_TEAMINFO"))
