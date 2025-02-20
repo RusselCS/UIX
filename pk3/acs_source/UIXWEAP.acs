@@ -101,47 +101,49 @@ int selectedY;
 
 int overflowX;
 int overflowY;
+int overflowScale;
 
 int HAlign;
 int OverflowHAlign;
 
-// Rows/Columns
+// Columns
 #define WEIGHTOFFS_X_00 0
-#define WEIGHTOFFS_Y_00 0
+#define WEIGHTOFFS_Y_00 -12
 
 #define WEIGHTOFFS_X_01 0
-#define WEIGHTOFFS_Y_01 0
+#define WEIGHTOFFS_Y_01 12
 
 #define WEIGHTOFFS_X_10 12
 #define WEIGHTOFFS_Y_10 0
 
-#define WEIGHTOFFS_X_11 0
+#define WEIGHTOFFS_X_11 -12
 #define WEIGHTOFFS_Y_11 0
 
-#define SLOTOFFS_X_00 0
+// Rows
+#define SLOTOFFS_X_00 20
 #define SLOTOFFS_Y_00 0
 
-#define SLOTOFFS_X_01 0
+#define SLOTOFFS_X_01 20
 #define SLOTOFFS_Y_01 0
 
 #define SLOTOFFS_X_10 0
 #define SLOTOFFS_Y_10 20
 
 #define SLOTOFFS_X_11 0
-#define SLOTOFFS_Y_11 0
+#define SLOTOFFS_Y_11 20
 
 // Bar 1
-#define BAR1_X_00 0
-#define BAR1_Y_00 0
+#define BAR1_X_00 -16
+#define BAR1_Y_00 -28
 
-#define BAR1_X_01 0
-#define BAR1_Y_01 0
+#define BAR1_X_01 -16
+#define BAR1_Y_01 -28+16+3
 
 #define BAR1_X_10 -1
 #define BAR1_Y_10 -25
 
-#define BAR1_X_11 0
-#define BAR1_Y_11 0
+#define BAR1_X_11 -1-24+5
+#define BAR1_Y_11 -25
 
 // Bar 2
 #define BAR2_X_00 0
@@ -150,50 +152,50 @@ int OverflowHAlign;
 #define BAR2_X_01 0
 #define BAR2_Y_01 0
 
-#define BAR2_X_10 0
-#define BAR2_Y_10 0
+#define BAR2_X_10 3
+#define BAR2_Y_10 -25
 
-#define BAR2_X_11 0
-#define BAR2_Y_11 0
+#define BAR2_X_11 3
+#define BAR2_Y_11 -25
 
 // Slot number
-#define SLOT_X_00 0
-#define SLOT_Y_00 0
+#define SLOT_X_00 -3
+#define SLOT_Y_00 23
 
-#define SLOT_X_01 0
-#define SLOT_Y_01 0
+#define SLOT_X_01 -16+4
+#define SLOT_Y_01 -54
 
 #define SLOT_X_10 -40
 #define SLOT_Y_10 -16
 
-#define SLOT_X_11 0
-#define SLOT_Y_11 0
+#define SLOT_X_11 26
+#define SLOT_Y_11 -16
 
 // Selected icon
 #define SELECT_X_00 0
-#define SELECT_Y_00 0
+#define SELECT_Y_00 22
 
 #define SELECT_X_01 0
-#define SELECT_Y_01 0
+#define SELECT_Y_01 -20
 
 #define SELECT_X_10 -20
 #define SELECT_Y_10 0
 
-#define SELECT_X_11 0
+#define SELECT_X_11 22
 #define SELECT_Y_11 0
 
 // Overflow count
-#define OVERFLOW_X_00 0
-#define OVERFLOW_Y_00 0
+#define OVERFLOW_X_00 -16
+#define OVERFLOW_Y_00 -23
 
 #define OVERFLOW_X_01 0
-#define OVERFLOW_Y_01 0
+#define OVERFLOW_Y_01 -23+16
 
 #define OVERFLOW_X_10 0
 #define OVERFLOW_Y_10 -16
 
-#define OVERFLOW_X_11 0
-#define OVERFLOW_Y_11 0
+#define OVERFLOW_X_11 -10
+#define OVERFLOW_Y_11 -16
 
 #define BUSTER 0
 #define COPYWEP 1
@@ -288,6 +290,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
         overflowX = cvMaxRow * weightOffsX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? OVERFLOW_X_00 : OVERFLOW_X_01) : (!cvMirror ? OVERFLOW_X_10 : OVERFLOW_X_11)));
         overflowY = cvMaxRow * weightOffsY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? OVERFLOW_Y_00 : OVERFLOW_Y_01) : (!cvMirror ? OVERFLOW_Y_10 : OVERFLOW_Y_11)));
+        overflowScale = cvDir ? cvScale : FixedMul(cvScale, 0.7);
     }
     
     int i;
@@ -442,7 +445,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
             displayMessage(StrParam(s:col, k:slotBinds[slot]), GetNewUIID(), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
 
             if(slotCounts[slot] > cvMaxRow) {
-                displayMessage(UIXWEAP_OverflowNums[slotCounts[slot]-i], GetNewUIID(), baseX + overflowX, baseY + overflowY, cvScale, cvScale, cvAlpha, OverflowHAlign, 0);
+                displayMessage(UIXWEAP_OverflowNums[slotCounts[slot]-i], GetNewUIID(), baseX + overflowX, baseY + overflowY, overflowScale, overflowScale, cvAlpha, OverflowHAlign, 0);
             }
         }
 

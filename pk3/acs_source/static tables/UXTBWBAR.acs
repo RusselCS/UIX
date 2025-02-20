@@ -79,7 +79,7 @@ str UIXAmmoBars[4][3][colors] = {
             "UIXWVBF0","UIXWVBF1","UIXWVBF2","UIXWVBF3","UIXWVBF4","UIXWVBF5","UIXWVBF6","UIXWVBF7","UIXWVBF8","UIXWVBF9","UIXWVBFA","UIXWVBFB","UIXWVBFC","UIXWVBFD","UIXWVBFE","UIXWVBFF",
         },
         { // backing/empty
-            "UIXWVEMP"
+            "UIXVHEMP"
         },
     },
 
