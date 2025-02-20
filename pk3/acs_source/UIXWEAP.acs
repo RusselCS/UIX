@@ -368,8 +368,8 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     for(int sidx = 0; sidx < MAX_SLOTS; sidx++)
     {
         slot = (sidx + 1) % MAX_SLOTS;
-        int baseX = slotOffsX * slot;
-        int baseY = slotOffsY * slot;
+        int baseX = cvOffsX + slotOffsX * slot;
+        int baseY = cvOffsY + slotOffsY * slot;
         
         int idx, col;
         if(slot == selectedSlot) {

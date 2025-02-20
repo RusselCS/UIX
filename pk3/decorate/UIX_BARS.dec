@@ -1,3 +1,6 @@
+// Making my own ColorStore here because I plan on having v6a support for
+// specifically gondola, so any actors need to be original
+
 actor UIXColorStore
 {
     renderstyle "none"
@@ -33,3 +36,6 @@ actor MagmaBazookaWep_ArsenalBar : ArsenalBar { args 216,41 }
 actor BreakDashWep_ArsenalBar : ArsenalBar { args 4,63 }
 actor MirrorBusterWep_ArsenalBar : ArsenalBar { args 229,76 }
 actor DawnBreakerWep_ArsenalBar : ArsenalBar { args 196,70 }
+
+// Mod support. If you make these for your own mod, please just inherit from NormalBar.
+// [to do]
