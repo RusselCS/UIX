@@ -17,6 +17,7 @@ actor SecondArsenalBar : UIXColorStore {}
 actor ArsenalAmmo : UIXColorStore {}
 actor SecondArsenalAmmo : UIXColorStore {}
 
+// V6B Bars
 actor ProtoBuster_ArsenalBar : ArsenalBar { args 87,42 }
 actor ArrowBuster_ArsenalBar : ArsenalBar { args 192,198 }
 actor LaserBuster_ArsenalBar : ArsenalBar { args 192,198 }
