@@ -23,6 +23,7 @@ int cvShowlives;
 int cvShowmugshot;
 int cvFontIdx;
 int cvReverseText;
+int cvShowWeapon;
 
 int tiCache_Scale = MIN_INT;
 int tiCache_Stack = MIN_INT;
@@ -70,6 +71,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvShowlocation = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWLOCATION");
         cvShowlives = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWLIVES");
         cvShowmugshot = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWMUGSHOT");
+        cvShowWeapon = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWWEAPON");
 
         cvFontIdx = cvFontdir ^ cvDir;
         cvReverseText = cvDir && !cvFontDir;
@@ -462,7 +464,7 @@ int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
 function void drawWeapon(int pln, int x, int y)
 {
-    if(!cvShowName)
+    if(!cvShowWeapon)
         return;
 
     // int mwep = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnWeapon);

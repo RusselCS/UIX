@@ -94,7 +94,6 @@ OptionMenu "UIXOptions_TeamInfo"
 	Option "Show Names", "UIX2_CL_TEAMINFOSHOWNAME", "OnOff"
 	Slider "Name Max Length", "UIX2_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
 	StaticText " "
-	Option "Show Names", "UIX2_CL_TEAMINFOSHOWNAME", "OnOff"
 	Option "Show Locations", "UIX2_CL_TEAMINFOSHOWLOCATION", "OnOff"
 	Option "Show Healthbars", "UIX2_CL_TEAMINFOSHOWHEALTH", "OnOff"
 	Option "Show Weapons", "UIX2_CL_TEAMINFOSHOWWEAPON", "OnOff"
@@ -127,7 +126,7 @@ OptionMenu "UIXOptions_WeaponBar"
 	Slider "Weapon Bar Scale", "UIX2_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
 	Slider "Weapon Bar Alpha", "UIX2_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
-	Slider "Max Weapons Per Slot", "UIX2_CL_UIX2_CL_WEAPBARROWMAX", 2, 10, 1, 0
+	Slider "Max Weapons Per Slot", "UIX2_CL_WEAPBARROWMAX", 2, 10, 1, 0
 	StaticText " "
 	Option "Show Slots", "UIX2_CL_WEAPBARSHOWSLOTS", "OnOff"
 	StaticText " "
