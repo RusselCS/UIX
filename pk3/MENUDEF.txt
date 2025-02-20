@@ -2,7 +2,7 @@ OptionMenu "8BDM_UISettings"
 {
 	Title "UI SETTINGS"
 
-	Submenu "$UIX_MENU_TEXT", "UIXOptions"
+	Submenu "$UIX_MENU_TEXT", "UIXOptions" // this a move that will make trill finger waggle at me if i had to guess
 	StaticText " "
 	
 	Submenu "Customize Crosshair", "8BDM_CrosshairSettings"
