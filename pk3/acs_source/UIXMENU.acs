@@ -2,6 +2,29 @@
 
 #include "zcommon.acs"
 
+// version checker/resetter
+// #define VERSIONNUM 1.00 // v1a
+// #define VERSIONNUM 1.01 // v1b
+// #define VERSIONNUM 1.02 // v1c
+// #define VERSIONNUM 1.03 // v1ch
+// #define VERSIONNUM 1.04 // v1d
+// #define VERSIONNUM 1.05 // v1e
+
+#define VERSIONNUM 2.0 // v2a
+
+script "UIX_CurrentVersion" OPEN CLIENTSIDE
+{
+    int cpn = ConsolePlayerNumber();
+    if(GetUserCvar(cpn, "UIX2_CL_LATESTVERSION") < VERSIONNUM) {
+        SetUserCvar(cpn, "UIX2_CL_LATESTVERSION", VERSIONNUM);
+
+        SetUserCvar(cpn, "UIX2_CL_Enable", true);
+        SetUserCvar(cpn, "UIX2_CL_SR50Visual", true);
+        SetUserCvar(cpn, "UIX2_CL_WEAPBAR", true);
+        SetUserCvar(cpn, "UIX2_CL_TEAMINFO", true);
+    }
+}
+
 script "UITweaks_DefaultPresets" (void) NET CLIENTSIDE
 {
     Delay(1);
