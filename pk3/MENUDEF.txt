@@ -48,8 +48,8 @@ OptionMenu "UIXOptions"
 	Submenu "SR50 Options", "UIXOptions_SR50"
 	Submenu "Team Info Options", "UIXOptions_TeamInfo"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
-	
 	StaticText " "
+	SafeCommand "Reset to Defaults", "uix_default_presets"
 }
 
 OptionMenu "UIXOptions_SR50"
@@ -82,7 +82,8 @@ OptionMenu "UIXOptions_TeamInfo"
 	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
 	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
 	Option "Swap Font Orientation", "UIX_CL_TEAMINFOFONTDIR", "OnOff"
-	Option "Reverse Stack", "UIX_CL_TEAMINFOSTACK", "OnOff"
+	Option "Stack Direction (Horizontal)", "UIX_CL_TEAMINFOSTACK", "TeamStackHorz"
+	Option "Stack Direction (Vertical)", "UIX_CL_TEAMINFOSTACK", "TeamStackVert"
 	StaticText " "
 	Slider "Team Info X", "UIX_CL_TEAMINFOOFFSX", -640, 640, 10
 	Slider "Team Info Y", "UIX_CL_TEAMINFOOFFSY", -640, 640, 10
@@ -93,16 +94,28 @@ OptionMenu "UIXOptions_TeamInfo"
 	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
 	Slider "Name Max Length", "UIX_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
 	StaticText " "
-	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
+	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
 	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
+	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
+	Option "Show Weapons", "UIX_CL_TEAMINFOSHOWWEAPON", "OnOff"
 	Option "Show Lives", "UIX_CL_TEAMINFOSHOWLIVES", "OnOff"
 	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
+	StaticText " "
+	StaticText "Presets", 1
+	SafeCommand "Top Middle (Default)", "uix_teaminfo_preset0"
+	SafeCommand "Bottom Left", "uix_teaminfo_preset1"
+	SafeCommand "Bottom Right", "uix_teaminfo_preset2"
 }
 
 OptionMenu "UIXOptions_WeaponBar"
 {
 	Title "WEAPON BAR SETTINGS"
 	StaticText " "
+	StaticText "Clashing Items", 1
+	StaticText "$UIX_MNU_CLASHES", 1
+	Option "LMS Loadout Display", "mm8bdm_drawlmsweapons", "OnOff"
+	StaticText " "
+	StaticText "Weapon Bar Settings", 1
 	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
 	StaticText " "
 	Option "Mirror Orientation", "UIX_CL_WEAPBARMIRROR", "OnOff"
@@ -114,17 +127,30 @@ OptionMenu "UIXOptions_WeaponBar"
 	Slider "Weapon Bar Scale", "UIX_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
 	Slider "Weapon Bar Alpha", "UIX_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
+	Slider "Max Weapons Per Slot", "UIX_CL_UIX_CL_WEAPBARROWMAX", 2, 10, 1, 0
+	StaticText " "
 	Option "Show Slots", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
-}
-
-OptionValue "WeapOrientation"
-{
-	0, "Vertical"
-	1, "Horizontal"
+	StaticText " "
+	StaticText "Presets", 1
+	SafeCommand "Middle Right (Default)", "uix_weaponbar_preset0"
+	SafeCommand "Middle Left", "uix_weaponbar_preset1"
+	SafeCommand "Bottom Middle", "uix_weaponbar_preset2"
 }
 
 OptionValue "TeamOrientation"
 {
 	0, "Horizontal"
 	1, "Vertical"
+}
+
+OptionValue "TeamStackHorz"
+{
+	0, "Downwards"
+	1, "Upwards"
+}
+
+OptionValue "TeamStackVert"
+{
+	0, "Left-To-Right"
+	1, "Right-To-Left"
 }

@@ -7,3 +7,13 @@ alias -right2 "-right; -moveright"
 
 alias +sr "turnspeeds 65536; +strafe"
 alias -sr "turnspeeds 0; -strafe"
+
+alias uix_teaminfo_preset0 "closemenu; pukename UITweaks_TeaminfoPreset 0"
+alias uix_teaminfo_preset1 "closemenu; pukename UITweaks_TeaminfoPreset 1"
+alias uix_teaminfo_preset2 "closemenu; pukename UITweaks_TeaminfoPreset 2"
+
+alias uix_weaponbar_preset0 "closemenu; pukename UITweaks_WeaponBarPreset 0"
+alias uix_weaponbar_preset1 "closemenu; pukename UITweaks_WeaponBarPreset 1"
+alias uix_weaponbar_preset2 "closemenu; pukename UITweaks_WeaponBarPreset 2"
+
+alias uix_default_presets "closemenu; pukename UITweaks_DefaultPresets"
