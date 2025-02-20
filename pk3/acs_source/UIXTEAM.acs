@@ -35,7 +35,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(!GetCvar("UIX_SV_TEAMINFO"))
         terminate;
 
-    int baseAlpha = GetUserCvar(cpn, "UIX_CL_TEAMINFOALPHA");
+    int baseAlpha = GetUserCvar(cpn, "UIX2_CL_TEAMINFOALPHA");
     if(baseAlpha == 0.0)
         terminate;
 
@@ -56,20 +56,20 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(team == 255) { // Spectator
 
     } else {
-        cvOffsx = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
-        cvOffsy = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
-        cvScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+        cvOffsx = GetUserCvar(cpn, "UIX2_CL_TEAMINFOOFFSX");
+        cvOffsy = GetUserCvar(cpn, "UIX2_CL_TEAMINFOOFFSY");
+        cvScale = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSCALE");
         cvAlpha = baseAlpha;
-        cvNamesize = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
-        cvMirror = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR");
-        cvDir = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
-        cvFontdir = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
-        cvStack = GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK");
-        cvShowname = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
-        cvShowhealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
-        cvShowlocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
-        cvShowlives = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLIVES");
-        cvShowmugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
+        cvNamesize = GetUserCvar(cpn, "UIX2_CL_TEAMINFONAMESIZE");
+        cvMirror = GetUserCvar(cpn, "UIX2_CL_TEAMINFOMIRROR");
+        cvDir = GetUserCvar(cpn, "UIX2_CL_TEAMINFODIR");
+        cvFontdir = GetUserCvar(cpn, "UIX2_CL_TEAMINFOFONTDIR");
+        cvStack = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSTACK");
+        cvShowname = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWNAME");
+        cvShowhealth = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWHEALTH");
+        cvShowlocation = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWLOCATION");
+        cvShowlives = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWLIVES");
+        cvShowmugshot = GetUserCvar(cpn, "UIX2_CL_TEAMINFOSHOWMUGSHOT");
 
         cvFontIdx = cvFontdir ^ cvDir;
         cvReverseText = cvDir && !cvFontDir;

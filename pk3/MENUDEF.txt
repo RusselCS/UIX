@@ -39,10 +39,10 @@ OptionMenu "UIXOptions"
 
 	StaticText " "
 	StaticText "Notification Option", 1
-	Option "UI Extensions Notification", "uix_cl_notification", "OnOff"
+	Option "UI Extensions Notification", "UIX2_CL_notification", "OnOff"
 	StaticText " "
 	StaticText "Global Toggle", 1
-	Option "UI Extensions", "UIX_CL_Enable", "OnOff"
+	Option "UI Extensions", "UIX2_CL_Enable", "OnOff"
 	StaticText " "
 	StaticText "Widgets", 1
 	Submenu "SR50 Options", "UIXOptions_SR50"
@@ -57,15 +57,15 @@ OptionMenu "UIXOptions_SR50"
 	Title "SR50 SETTINGS"
 	StaticText " "
 	StaticText "$UIX_MNU_SR50_1", 1
-	Option "Enable SR50", "UIX_CL_UsingSR50", "OnOff"
+	Option "Enable SR50", "UIX2_CL_UsingSR50", "OnOff"
 	StaticText " "
 	StaticText "$UIX_MNU_SR50_2", 1
 	Control "Strafe Left (SR50)", "+left2"
 	Control "Strafe Right (SR50)", "+right2"
 	Control "Activate SR50", "+sr"
 	StaticText " "
-	Option "SR Tailwind Visual", "UIX_CL_SR50Visual", "OnOff"
-	Slider "SR Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
+	Option "SR Tailwind Visual", "UIX2_CL_SR50Visual", "OnOff"
+	Slider "SR Tailwind Alpha", "UIX2_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
 }
 
 OptionMenu "UIXOptions_TeamInfo"
@@ -77,29 +77,29 @@ OptionMenu "UIXOptions_TeamInfo"
 	Option "Default Coop Info", "cl_drawcoopinfo", "OnOff"
 	StaticText " "
 	StaticText "Team Info Settings", 1
-	Option "Team Info Enabled", "UIX_CL_TEAMINFO", "OnOff"
+	Option "Team Info Enabled", "UIX2_CL_TEAMINFO", "OnOff"
 	StaticText " "
-	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
-	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
-	Option "Swap Font Orientation", "UIX_CL_TEAMINFOFONTDIR", "OnOff"
-	Option "Stack Direction (Horizontal)", "UIX_CL_TEAMINFOSTACK", "TeamStackHorz"
-	Option "Stack Direction (Vertical)", "UIX_CL_TEAMINFOSTACK", "TeamStackVert"
+	Option "Mirror Orientation", "UIX2_CL_TEAMINFOMIRROR", "OnOff"
+	Option "Bar Orientation", "UIX2_CL_TEAMINFODIR", "TeamOrientation"
+	Option "Swap Font Orientation", "UIX2_CL_TEAMINFOFONTDIR", "OnOff"
+	Option "Stack Direction (Horizontal)", "UIX2_CL_TEAMINFOSTACK", "TeamStackHorz"
+	Option "Stack Direction (Vertical)", "UIX2_CL_TEAMINFOSTACK", "TeamStackVert"
 	StaticText " "
-	Slider "Team Info X", "UIX_CL_TEAMINFOOFFSX", -640, 640, 10
-	Slider "Team Info Y", "UIX_CL_TEAMINFOOFFSY", -640, 640, 10
+	Slider "Team Info X", "UIX2_CL_TEAMINFOOFFSX", -640, 640, 10
+	Slider "Team Info Y", "UIX2_CL_TEAMINFOOFFSY", -640, 640, 10
 	StaticText " "
-	Slider "Team Info Scale", "UIX_CL_TEAMINFOSCALE", 0.25, 5.00, 0.25, 2
-	Slider "Team Info Alpha", "UIX_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
+	Slider "Team Info Scale", "UIX2_CL_TEAMINFOSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Team Info Alpha", "UIX2_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
-	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
-	Slider "Name Max Length", "UIX_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
+	Option "Show Names", "UIX2_CL_TEAMINFOSHOWNAME", "OnOff"
+	Slider "Name Max Length", "UIX2_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
 	StaticText " "
-	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
-	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
-	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
-	Option "Show Weapons", "UIX_CL_TEAMINFOSHOWWEAPON", "OnOff"
-	Option "Show Lives", "UIX_CL_TEAMINFOSHOWLIVES", "OnOff"
-	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
+	Option "Show Names", "UIX2_CL_TEAMINFOSHOWNAME", "OnOff"
+	Option "Show Locations", "UIX2_CL_TEAMINFOSHOWLOCATION", "OnOff"
+	Option "Show Healthbars", "UIX2_CL_TEAMINFOSHOWHEALTH", "OnOff"
+	Option "Show Weapons", "UIX2_CL_TEAMINFOSHOWWEAPON", "OnOff"
+	Option "Show Lives", "UIX2_CL_TEAMINFOSHOWLIVES", "OnOff"
+	Option "Show Mugshots", "UIX2_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
 	StaticText " "
 	StaticText "Presets", 1
 	SafeCommand "Top Middle (Default)", "uix_teaminfo_preset0"
@@ -116,20 +116,20 @@ OptionMenu "UIXOptions_WeaponBar"
 	Option "LMS Loadout Display", "mm8bdm_drawlmsweapons", "OnOff"
 	StaticText " "
 	StaticText "Weapon Bar Settings", 1
-	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
+	Option "Weapon Bar Enabled", "UIX2_CL_WEAPBAR", "OnOff"
 	StaticText " "
-	Option "Mirror Orientation", "UIX_CL_WEAPBARMIRROR", "OnOff"
-	Option "Bar Orientation", "UIX_CL_WEAPBARDIR", "TeamOrientation"
+	Option "Mirror Orientation", "UIX2_CL_WEAPBARMIRROR", "OnOff"
+	Option "Bar Orientation", "UIX2_CL_WEAPBARDIR", "TeamOrientation"
 	StaticText " "
-	Slider "Weapon Bar X", "UIX_CL_WEAPBAROFFSX", -640, 640, 10
-	Slider "Weapon Bar Y", "UIX_CL_WEAPBAROFFSY", -640, 640, 10
+	Slider "Weapon Bar X", "UIX2_CL_WEAPBAROFFSX", -640, 640, 10
+	Slider "Weapon Bar Y", "UIX2_CL_WEAPBAROFFSY", -640, 640, 10
 	StaticText " "
-	Slider "Weapon Bar Scale", "UIX_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
-	Slider "Weapon Bar Alpha", "UIX_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
+	Slider "Weapon Bar Scale", "UIX2_CL_WEAPBARSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Weapon Bar Alpha", "UIX2_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
-	Slider "Max Weapons Per Slot", "UIX_CL_UIX_CL_WEAPBARROWMAX", 2, 10, 1, 0
+	Slider "Max Weapons Per Slot", "UIX2_CL_UIX2_CL_WEAPBARROWMAX", 2, 10, 1, 0
 	StaticText " "
-	Option "Show Slots", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
+	Option "Show Slots", "UIX2_CL_WEAPBARSHOWSLOTS", "OnOff"
 	StaticText " "
 	StaticText "Presets", 1
 	SafeCommand "Middle Right (Default)", "uix_weaponbar_preset0"

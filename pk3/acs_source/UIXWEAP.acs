@@ -232,7 +232,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     if(!GetCvar("UIX_SV_WEAPBAR"))
         terminate;
 
-    cvAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
+    cvAlpha = GetUserCvar(cpn, "UIX2_CL_WEAPBARALPHA");
 
     if(cvAlpha == 0.0)
         terminate;
@@ -245,14 +245,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     if(CheckInventory("UIX_NoWeaponBar") > 0)
         terminate;
 
-    cvAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
-    cvShowSlots = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
-    cvMirror = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
-    cvDir = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
-    cvScale = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE");
-    cvOffsX = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX");
-    cvOffsY = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY");
-    cvMaxRow = GetUserCvar(cpn, "UIX_CL_WEAPBARROWMAX");
+    cvAlpha = GetUserCvar(cpn, "UIX2_CL_WEAPBARALPHA");
+    cvShowSlots = GetUserCvar(cpn, "UIX2_CL_WEAPBARSHOWSLOTS");
+    cvMirror = GetUserCvar(cpn, "UIX2_CL_WEAPBARMIRROR");
+    cvDir = GetUserCvar(cpn, "UIX2_CL_WEAPBARDIR");
+    cvScale = GetUserCvar(cpn, "UIX2_CL_WEAPBARSCALE");
+    cvOffsX = GetUserCvar(cpn, "UIX2_CL_WEAPBAROFFSX");
+    cvOffsY = GetUserCvar(cpn, "UIX2_CL_WEAPBAROFFSY");
+    cvMaxRow = GetUserCvar(cpn, "UIX2_CL_WEAPBARROWMAX");
 
     if(
         cacheCvMirror != cvMirror ||
@@ -538,16 +538,16 @@ function int busterMap(int idx)
 //     if(!GetCvar("UIX_SV_WEAPBAR"))
 //         terminate;
 
-//     if(GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
+//     if(GetUserCvar(cpn, "UIX2_CL_WEAPBARALPHA") == 0.0)
 //         terminate;
 
 //     if(CheckActorInventory(cam, "UIX_NoWeaponBar") > 0)
 //         terminate;
 
-//     bool mirrored = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
-//     bool horizontal = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
-//     int userAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
-//     bool drawSlot = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
+//     bool mirrored = GetUserCvar(cpn, "UIX2_CL_WEAPBARMIRROR");
+//     bool horizontal = GetUserCvar(cpn, "UIX2_CL_WEAPBARDIR");
+//     int userAlpha = GetUserCvar(cpn, "UIX2_CL_WEAPBARALPHA");
+//     bool drawSlot = GetUserCvar(cpn, "UIX2_CL_WEAPBARSHOWSLOTS");
 //     int barWidth, barHeight;
     
 //     SetActivator(cam);
@@ -558,14 +558,14 @@ function int busterMap(int idx)
 
 //     SetActivator(-1);
 
-//     int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;
+//     int scaleX = GetUserCvar(cpn, "UIX2_CL_WEAPBARSCALE"); // 2.5;
 //     int scaleY = scaleX;
 
 //     int slotCounts[10];
 //     int slotDrawn[10];
 
-//     int xStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX"); // 500;
-//     int yStart = -GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY"); // 500;
+//     int xStart = GetUserCvar(cpn, "UIX2_CL_WEAPBAROFFSX"); // 500;
+//     int yStart = -GetUserCvar(cpn, "UIX2_CL_WEAPBAROFFSY"); // 500;
 
 //     str barFontCyan, barFontBlue, barFontEmpt, bart, barb;
 
