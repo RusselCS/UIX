@@ -1,2 +1,3 @@
+#include "decorate/UIX_BARS.dec"
 #include "decorate/UIX_SR.dec"
 #include "decorate/UIX_FLAGS.dec"

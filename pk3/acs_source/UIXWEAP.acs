@@ -6,6 +6,9 @@
 
 #import "8BDT.acs"
 
+#include "UXTBWBAR.acs"
+#include "UXTBWOVR.acs"
+
 /*
 DATA NEEDED:
 - Wep Actor
@@ -58,377 +61,845 @@ script "UIXPickupTest" (void)
     }
 }
 
+int cvAlpha;
+int cvShowSlots;
+int cvMirror;
+int cvDir;
+int cvScale;
+int cvOffsX;
+int cvOffsY;
+int cvMaxRow;
+
+int cacheCvMirror;
+int cacheCvDir;
+int cacheCvScale;
+int cacheCvOffsX;
+int cacheCvOffsY;
+int cacheCvMaxRow;
+
+int weightOffsX;
+int weightOffsY;
+
+int slotOffsX;
+int slotOffsY;
+
+int barX1;
+int barY1;
+
+int barX2;
+int barY2;
+
+int barHeight;
+int barWidth;
+int barScale;
+
+int slotX;
+int slotY;
+
+int selectedX;
+int selectedY;
+
+int overflowX;
+int overflowY;
+
+int HAlign;
+int OverflowHAlign;
+
+// Rows/Columns
+#define WEIGHTOFFS_X_00 0
+#define WEIGHTOFFS_Y_00 0
+
+#define WEIGHTOFFS_X_01 0
+#define WEIGHTOFFS_Y_01 0
+
+#define WEIGHTOFFS_X_10 12
+#define WEIGHTOFFS_Y_10 0
+
+#define WEIGHTOFFS_X_11 0
+#define WEIGHTOFFS_Y_11 0
+
+#define SLOTOFFS_X_00 0
+#define SLOTOFFS_Y_00 0
+
+#define SLOTOFFS_X_01 0
+#define SLOTOFFS_Y_01 0
+
+#define SLOTOFFS_X_10 0
+#define SLOTOFFS_Y_10 20
+
+#define SLOTOFFS_X_11 0
+#define SLOTOFFS_Y_11 0
+
+// Bar 1
+#define BAR1_X_00 0
+#define BAR1_Y_00 0
+
+#define BAR1_X_01 0
+#define BAR1_Y_01 0
+
+#define BAR1_X_10 -1
+#define BAR1_Y_10 -25
+
+#define BAR1_X_11 0
+#define BAR1_Y_11 0
+
+// Bar 2
+#define BAR2_X_00 0
+#define BAR2_Y_00 0
+
+#define BAR2_X_01 0
+#define BAR2_Y_01 0
+
+#define BAR2_X_10 0
+#define BAR2_Y_10 0
+
+#define BAR2_X_11 0
+#define BAR2_Y_11 0
+
+// Slot number
+#define SLOT_X_00 0
+#define SLOT_Y_00 0
+
+#define SLOT_X_01 0
+#define SLOT_Y_01 0
+
+#define SLOT_X_10 -40
+#define SLOT_Y_10 -16
+
+#define SLOT_X_11 0
+#define SLOT_Y_11 0
+
+// Selected icon
+#define SELECT_X_00 0
+#define SELECT_Y_00 0
+
+#define SELECT_X_01 0
+#define SELECT_Y_01 0
+
+#define SELECT_X_10 -20
+#define SELECT_Y_10 0
+
+#define SELECT_X_11 0
+#define SELECT_Y_11 0
+
+// Overflow count
+#define OVERFLOW_X_00 0
+#define OVERFLOW_Y_00 0
+
+#define OVERFLOW_X_01 0
+#define OVERFLOW_Y_01 0
+
+#define OVERFLOW_X_10 0
+#define OVERFLOW_Y_10 -16
+
+#define OVERFLOW_X_11 0
+#define OVERFLOW_Y_11 0
+
+#define BUSTER 0
+#define COPYWEP 1
+
+#define MAX_SLOTS 10
+
+#define SLOT_BUSTER 1
+
+#define BAR_HEIGHT 160
+#define BAR_WIDTH 40
+#define BAR_SCALE 0.1
+
+str slotBinds[MAX_SLOTS] = {
+    "slot 0","slot 1","slot 2","slot 3","slot 4",
+    "slot 5","slot 6","slot 7","slot 8","slot 9",
+};
+
+#define WEAP_IDX 0
+#define WEAP_TYPE 1
+#define WEAP_AMMO1_AMT 2
+#define WEAP_AMMO1_MAX 3
+#define WEAP_CYAN1 4
+#define WEAP_BLUE1 5
+#define WEAP_AMMO2_AMT 6
+#define WEAP_AMMO2_MAX 7
+#define WEAP_CYAN2 8
+#define WEAP_BLUE2 9
+
+int slotVals[MAX_SLOTS][MAX_BUSTER_LIMIT+MAX_WEAPONS_GLOBAL_LIMIT][10];
+int slotCounts[MAX_SLOTS];
+
 script "UIX_WeapBar" (int cam, int cpn, int cv)
 {
     if(!GetCvar("UIX_SV_WEAPBAR"))
         terminate;
 
-    if(GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
+    cvAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
+
+    if(cvAlpha == 0.0)
         terminate;
 
-    if(CheckActorInventory(cam, "UIX_NoWeaponBar") > 0)
-        terminate;
-
-    bool mirrored = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
-    bool horizontal = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
-    int userAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
-    bool drawSlot = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
-    int barWidth, barHeight;
-    
     SetActivator(cam);
     int pln = PlayerNumber();
     if(pln == -1)
         terminate;
+    
+    if(CheckInventory("UIX_NoWeaponBar") > 0)
+        terminate;
 
-    str curWeap = GetWeapon();
+    cvAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
+    cvShowSlots = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
+    cvMirror = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
+    cvDir = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
+    cvScale = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE");
+    cvOffsX = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX");
+    cvOffsY = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY");
+    cvMaxRow = GetUserCvar(cpn, "UIX_CL_WEAPBARROWMAX");
 
-    SetActivator(-1);
+    if(
+        cacheCvMirror != cvMirror ||
+        cacheCvDir != cvDir ||
+        cacheCvScale != cvScale ||
+        cacheCvMaxRow != cvMaxRow
+    ) {
+        cacheCvMirror = cvMirror;
+        cacheCvDir = cvDir;
+        cacheCvScale = cvScale;
 
-    int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;
-    int scaleY = scaleX;
+        weightOffsX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEIGHTOFFS_X_00 : WEIGHTOFFS_X_01) : (!cvMirror ? WEIGHTOFFS_X_10 : WEIGHTOFFS_X_11)));
+        weightOffsY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEIGHTOFFS_Y_00 : WEIGHTOFFS_Y_01) : (!cvMirror ? WEIGHTOFFS_Y_10 : WEIGHTOFFS_Y_11)));
 
-    int slotCounts[10];
-    int slotDrawn[10];
+        slotOffsX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOTOFFS_X_00 : SLOTOFFS_X_01) : (!cvMirror ? SLOTOFFS_X_10 : SLOTOFFS_X_11)));
+        slotOffsY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOTOFFS_Y_00 : SLOTOFFS_Y_01) : (!cvMirror ? SLOTOFFS_Y_10 : SLOTOFFS_Y_11)));
 
-    int xStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX"); // 500;
-    int yStart = -GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY"); // 500;
+        barWidth = (cvDir ? BAR_WIDTH : BAR_HEIGHT);
+        barHeight = (cvDir ? BAR_HEIGHT : BAR_WIDTH);
+        barScale = FixedMul(cvScale, BAR_SCALE);
+        
+        barX1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_X_00 : BAR1_X_01) : (!cvMirror ? BAR1_X_10 : BAR1_X_11)));
+        barY1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_Y_00 : BAR1_Y_01) : (!cvMirror ? BAR1_Y_10 : BAR1_Y_11)));
+        
+        barX2 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR2_X_00 : BAR2_X_01) : (!cvMirror ? BAR2_X_10 : BAR2_X_11)));
+        barY2 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR2_Y_00 : BAR2_Y_01) : (!cvMirror ? BAR2_Y_10 : BAR2_Y_11)));
+        
+        slotX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOT_X_00 : SLOT_X_01) : (!cvMirror ? SLOT_X_10 : SLOT_X_11)));
+        slotY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOT_Y_00 : SLOT_Y_01) : (!cvMirror ? SLOT_Y_10 : SLOT_Y_11)));
+        HAlign = (cvMirror ? ALIGN_LEFT : ALIGN_RIGHT);
+        OverflowHAlign = (!cvMirror ? ALIGN_LEFT : ALIGN_RIGHT);
 
-    str barFontCyan, barFontBlue, barFontEmpt, bart, barb;
+        selectedX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SELECT_X_00 : SELECT_X_01) : (!cvMirror ? SELECT_X_10 : SELECT_X_11)));
+        selectedY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SELECT_Y_00 : SELECT_Y_01) : (!cvMirror ? SELECT_Y_10 : SELECT_Y_11)));
 
-    if(!horizontal) {
-        barFontCyan = "UIXWVC";
-        barFontBlue = "UIXWVB";
-        barFontEmpt = "UIXVHEMP";
-        bart = STR_WEP_V;
-        barb = STR_WEP_V2;
-        barWidth = WEPBAR_BAR_WIDTH * 10;
-        barHeight = WEPBAR_ICON_WIDTH * 10;
-    } else {
-        barFontCyan = "UIXWHC";
-        barFontBlue = "UIXWHB";
-        barFontEmpt = "UIXWHEMP";
-        bart = STR_WEP_H;
-        barb = STR_WEP_H2;
-        barWidth = WEPBAR_ICON_WIDTH * 10;
-        barHeight = WEPBAR_BAR_WIDTH * 10;
+        overflowX = cvMaxRow * weightOffsX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? OVERFLOW_X_00 : OVERFLOW_X_01) : (!cvMirror ? OVERFLOW_X_10 : OVERFLOW_X_11)));
+        overflowY = cvMaxRow * weightOffsY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? OVERFLOW_Y_00 : OVERFLOW_Y_01) : (!cvMirror ? OVERFLOW_Y_10 : OVERFLOW_Y_11)));
+    }
+    
+    int i;
+    int slot, icon, ammo1, ammo2;
+
+    int selectedSlot = -1; 
+    int selected = -1;
+
+    int check;
+
+    for(i = MAX_BUSTERUPGRADES-1; i >= 0; i--)
+    {
+        check = getBusterActor(i);
+
+        // Don't have it, don't care.
+        if(!CheckActorInventory(cam, check))
+            continue;
+        
+        // Buster's got info in the ammo table, don't care.
+        if(busterMap(i) != -1)
+            continue;
+        
+        if(selected == -1) {
+            if(CheckWeapon(check)) {
+                selectedSlot = SLOT_BUSTER;
+                selected = slotCounts[SLOT_BUSTER];
+            }
+        }
+
+        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_IDX] = i;
+        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_TYPE] = BUSTER;
+        slotCounts[SLOT_BUSTER]++;
     }
 
-    int icWep, alpha;
+    for(i = MAX_WEAPONS_GLOBAL-1; i >= 0; i--)
+    {
+        check = getWeaponActor(i);
 
-    // if(getUserCvar(cpn, );
-
-    for(int fakeId = 0; fakeId < MAX_BUSTERUPGRADES + MAX_WEAPONS_GLOBAL; fakeId++) {
+        // Don't have it, don't care.
+        if(!CheckActorInventory(cam, check))
+            continue;
         
-        int i;
-        bool isBuster;
-        if(fakeId < MAX_BUSTERUPGRADES) {
-            i = fakeId;
-            isBuster = true;
+        slot = getWeaponSlot(i);
+        
+        if(selected == -1) {
+            if(CheckWeapon(check)) {
+                selectedSlot = slot;
+                selected = slotCounts[slot];
+            }
+        }
+
+        slotVals[slot][slotCounts[slot]][WEAP_IDX] = i;
+        slotVals[slot][slotCounts[slot]][WEAP_TYPE] = COPYWEP;
+
+        ammo1 = getWeaponAmmoType(i);
+        ammo2 = getWeaponAmmo2Type(i);
+        
+        if(strLen(ammo1) != 0) {
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = CheckInventory(ammo1);
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = GetAmmoCapacity(ammo1);
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = UIXAmmoBars[cvDir][0][weaponBarColor(i, 1)];
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = UIXAmmoBars[cvDir][1][weaponBarColor(i, 2)];
+        }
+
+        if(strLen(ammo2) != 0) {
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] = CheckInventory(ammo2);
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] = GetAmmoCapacity(ammo2);
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = UIXAmmoBars[cvDir][0][weaponBarColor(i, 3)];
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = UIXAmmoBars[cvDir][1][weaponBarColor(i, 4)];
+        }
+        slotCounts[slot]++;
+    }
+    SetActivator(-1);
+
+    for(int sidx = 0; sidx < MAX_SLOTS; sidx++)
+    {
+        slot = (sidx + 1) % MAX_SLOTS;
+        int baseX = slotOffsX * slot;
+        int baseY = slotOffsY * slot;
+        
+        int idx, col;
+        if(slot == selectedSlot) {
+            idx = selected;
+            col = "\c[gold]";
         } else {
-            i = fakeId - MAX_BUSTERUPGRADES;
-            isBuster = false;
+            idx = -1;
+            col = "\c[darkgray]";
         }
-
-        if(isBuster)
-            icWep = getBusterActor(i);
-        else
-            icWep = getWeaponActor(i);
         
-        if(CheckActorInventory(cam, icWep)) {
+        for(i = 0; i < min(slotCounts[slot], cvMaxRow + (slot == selectedSlot)); i++)
+        {
+            int weap;
 
-                str ico, amo1, amo2, amo1blue, amo1cyan, amo2blue, amo2cyan;
-                int amt1, amt2, amx1, amx2, slot;
+            int iconX, iconY;
 
-                int icox, icoy, bar1x, bar1y, bar2x, bar2y, slotx, sloty;
+            if(idx > -1) {
+                weap = (i + idx) % slotCounts[slot];
 
-                stageWeaponData(i, icWep, isBuster, cam);
-
-                if(isBuster) {
-                    ico = getBusterIcon(i);
-                    amo1 = bustBarData[i][BARDATA_AMMOTYPE1];
-                    amo2 = bustBarData[i][BARDATA_AMMOTYPE2];
-                    slot = bustBarData[i][BARDATA_SLOT];
-                    amo1cyan = bustBarData[i][BARDATA_CYAN1];
-                    amo1blue = bustBarData[i][BARDATA_BLUE1];
-                    amo2cyan = bustBarData[i][BARDATA_CYAN2];
-                    amo2blue = bustBarData[i][BARDATA_BLUE2];
+                if(weap == selected) {
+                    iconX = baseX + selectedX;
+                    iconY = baseY + selectedY;
                 } else {
-                    ico = getWeaponIcon(i);
-                    amo1 = wepBarData[i][BARDATA_AMMOTYPE1];
-                    amo2 = wepBarData[i][BARDATA_AMMOTYPE2];
-                    slot = wepBarData[i][BARDATA_SLOT];
-                    amo1cyan = wepBarData[i][BARDATA_CYAN1];
-                    amo1blue = wepBarData[i][BARDATA_BLUE1];
-                    amo2cyan = wepBarData[i][BARDATA_CYAN2];
-                    amo2blue = wepBarData[i][BARDATA_BLUE2];
+                    iconX = baseX + weightOffsX * (i-1);
+                    iconY = baseY + weightOffsY * (i-1);
+                    displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5));
+                }
+            } else {
+                weap = i;
+
+                iconX = baseX + weightOffsX * i;
+                iconY = baseY + weightOffsY * i;
+                displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5));
+            }
+
+            if(!slotVals[slot][weap][WEAP_TYPE]) {
+                icon = getBusterIcon(slotVals[slot][weap][WEAP_IDX]);
+            } else {
+                icon = getWeaponIcon(slotVals[slot][weap][WEAP_IDX]);
+
+                if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
+                    drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
+                                   slotVals[slot][weap][WEAP_BLUE1],
+                                   UIXAmmoBars[cvDir][2][0],
+                                   iconX + barX1,
+                                   iconY + barY1,
+                                   barWidth, barHeight,
+                                   barScale, barScale, cvAlpha,
+                                   slotVals[slot][weap][WEAP_AMMO1_AMT],
+                                   slotVals[slot][weap][WEAP_AMMO1_MAX],
+                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
                 }
 
-                if(StrLen(amo1) > 0) {
-                    amt1 = CheckActorInventory(cam, amo1);
-                    amx1 = getPlayerAmmoCapacity(cpn, amo1);
-                } else {
-                    amt1 = 0;
-                    amx1 = 0;
+                if(slotVals[slot][weap][WEAP_AMMO2_MAX] > 0) {
+                    drawLayeredBar(slotVals[slot][weap][WEAP_CYAN2],
+                                   slotVals[slot][weap][WEAP_BLUE2],
+                                   UIXAmmoBars[cvDir][2][0],
+                                   iconX + barX1,
+                                   iconY + barY1,
+                                   barWidth, barHeight,
+                                   barScale, barScale, cvAlpha,
+                                   slotVals[slot][weap][WEAP_AMMO2_AMT],
+                                   slotVals[slot][weap][WEAP_AMMO2_MAX],
+                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
                 }
 
-                if(StrLen(amo2) > 0) {
-                    amt2 = CheckActorInventory(cam, amo2);
-                    amx2 = getPlayerAmmoCapacity(cpn, amo2);
-                } else {
-                    amt2 = 0;
-                    amx2 = 0;
-                }
-
-                str slotKey = -1;
-                int count = slotCounts[slot];
-                int slotPos = slot;
-                if(slotPos == 0) {
-                    slotPos = 9;
-                } else {
-                    slotPos--;
-                }
-
-                str slotCol = "\cq";
-
-                if(StrMatches(curWeap, icWep)) {
-                    if(!horizontal) {
-                        if(!mirrored) {
-                            icox = xStart - FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleX);
-                            icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos;
-                        } else {
-                            icox = xStart + FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleX);
-                            icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos;
-                        }
-                    } else {
-                        if(!mirrored) {
-                            icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos;
-                            icoy = yStart + FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleY);
-                        } else {
-                            icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos;
-                            icoy = yStart - FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleY);
-                        }
-                    }
-                    alpha = FixedMul(1.0, userAlpha);
-
-                    // hard override, even if the slot is drawn, it needs to be redrawn
-                    slotDrawn[slot] = false;
-                    slotCol = "\cf";
-                } else {
-                    if(!horizontal) {
-                        if(!mirrored) {
-                            icox = xStart + FixedMul(WEPBAR_X_OFFS, scaleX) * count;
-                            icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos + FixedMul(slotCounts[slot], scaleY);
-                        } else {
-                            icox = xStart - FixedMul(WEPBAR_X_OFFS, scaleX) * count;
-                            icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos + FixedMul(slotCounts[slot], scaleY);
-                        }
-                    } else {
-                        if(!mirrored) {
-                            icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos + FixedMul(slotCounts[slot], scaleX);
-                            icoy = yStart - FixedMul(WEPBAR_X_OFFS, scaleY) * count;
-                        } else {
-                            icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos + FixedMul(slotCounts[slot], scaleX);
-                            icoy = yStart + FixedMul(WEPBAR_X_OFFS, scaleY) * count;
-                        }
-                    }
-                    alpha = FixedMul(0.5, userAlpha);
-
-                    slotCounts[slot]++;
-                }
-
-                if(!horizontal) {
-                    if(!mirrored) {
-                        bar1x = icox;
-                        bar1y = icoy - FixedMul(WEPBAR_ICON_WIDTH + WEPBAR_ICON_WIDTH/2, scaleY);
-                        bar2x = bar1x + FixedMul(WEPBAR_BAR_WIDTH, scaleY);
-                        bar2y = bar1y;
-                        slotx = xStart - FixedMul(3 * WEPBAR_X_OFFS, scaleX);
-                        sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
-                    } else {
-                        bar1x = icox - FixedMul(WEPBAR_X_OFFS + WEPBAR_BAR_WIDTH, ScaleX);
-                        bar1y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
-                        bar2x = bar1x - FixedMul(WEPBAR_BAR_WIDTH, ScaleX);
-                        bar2y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
-                        slotx = xStart + FixedMul(2 * WEPBAR_X_OFFS, scaleX);
-                        sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
-                    }
-                } else {
-                    if(!mirrored) {
-                        bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
-                        bar1y = icoy - FixedMul(WEPBAR_Y_OFFS + WEPBAR_BAR_WIDTH, scaleX);
-                        bar2x = bar1x;
-                        bar2y = bar1y - FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
-                        slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
-                        sloty = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY);
-                    } else {
-                        bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
-                        bar1y = icoy - FixedMul(WEPBAR_BAR_WIDTH*2, scaleY);
-                        bar2x = bar1x;
-                        bar2y = bar1y + FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
-                        slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
-                        sloty = yStart - FixedMul(4 * WEPBAR_ICON_WIDTH - WEPBAR_BAR_WIDTH, scaleY);
-                    }
-                }
-
-                displayIcon(ico, getNewUIId(), icox, icoy, scaleX, scaleY, alpha);
-                displayIcon("UXICA0", getNewUIId(), icox, icoy, scaleX, scaleY, userAlpha);
-
-                // format: UXWFT#XX
-
-                if(amx1) {
-                    drawLayeredBar(StrParam(s:barFontCyan, s:amo1cyan), StrParam(s:barFontBlue, s:amo1blue), barFontEmpt, bar1X, bar1Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt1, amx1, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-                }
-
-                if(amx2) {
-                    drawLayeredBar(StrParam(s:barFontCyan, s:amo2cyan), StrParam(s:barFontBlue, s:amo2blue), barFontEmpt, bar2X, bar2Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt2, amx2, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-                }
-
-                if(drawSlot && !slotDrawn[slot]) {
-                    slotDrawn[slot] = true;
-                    slotKey = StrParam(s:slotCol, k:StrParam(s:"slot ", i:slot));
-                    SetFont("SMALLFONT");
-                    if(!horizontal) {
-                        if(!mirrored) {
-                            displayMessageR(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
-                        } else {
-                            displayMessageL(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
-                        }
-                    } else {
-                        displayMessage(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha, 0, 0);
-                    }
-                }
+            }
+            displayIcon(icon, GetNewUIID(), iconX, iconY, cvScale, cvScale, cvAlpha);
         }
+
+        if(slotCounts[slot]) {
+            SetFont("SMALLFONT");
+            displayMessage(StrParam(s:col, k:slotBinds[slot]), GetNewUIID(), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
+
+            if(slotCounts[slot] > cvMaxRow) {
+                displayMessage(UIXWEAP_OverflowNums[slotCounts[slot]-i], GetNewUIID(), baseX + overflowX, baseY + overflowY, cvScale, cvScale, cvAlpha, OverflowHAlign, 0);
+            }
+        }
+
+        slotCounts[slot] = 0;
     }
 }
 
-function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
-    int blue1, cyan1, blue2, cyan2, obj, weapIdx;
+int readBlue1, readCyan1, readBlue2, readCyan2;
 
-    if(isBuster) {
-        weapIdx = findWeaponByActor(weap);
-        if(bustBarData[idx][BARDATA_CHECKED])
-            return;
-        bustBarData[idx][BARDATA_CHECKED] = true;
-        drawBusters[buster_count++] = weap;
+function void readWeaponBars(str weap) {
+    // Log(s:"Called read weapon bars for weapon: ", s:weap);
+    readCyan1 = -1;
+    readBlue1 = -1;
+    readCyan2 = -1;
+    readBlue2 = -1;
 
-        bool escape = false;
-
-        if(!escape)
-            escape = (weapIdx == -1);
-        if(!escape)
-            escape = (StrCmp("", getWeaponAmmoType(weapIdx)) == 0);
-
-        if(escape) { // early escape if there's no ammo here
-            bustBarData[idx][BARDATA_CYAN1] = "";
-            bustBarData[idx][BARDATA_BLUE1] = "";
-            bustBarData[idx][BARDATA_CYAN2] = "";
-            bustBarData[idx][BARDATA_BLUE2] = "";
-            bustBarData[idx][BARDATA_AMMOTYPE1] = "";
-            bustBarData[idx][BARDATA_AMMOTYPE2] = "";
-            bustBarData[idx][BARDATA_SLOT] = 1;
-            return;
-        }
-    } else {
-        if(wepBarData[idx][BARDATA_CHECKED])
-            return;
-        wepBarData[idx][BARDATA_CHECKED] = true;
+    int obj;
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
     }
 
-    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
+    }
+
     if(obj) {
-        cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
-        blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
-        destroy(obj);
-    } else { // ScriptBar attempted contingencies
-        obj = new(StrParam(s:weap, s:"_MugshotColor"));
-
-        if(obj) {
-            cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
-            blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
-        } else { // ScriptBar final contingency
-            obj = new(StrParam(s:weap, s:"_ScriptBar"));
-
-            if(obj) {
-                // this feels like danger tbh
-                SetActivator(cam);
-                CallACS0(StrParam(s:"DrawBar_", s:weap));
-                bool success = false;
-                if(!success) {
-                    cyan1 = CheckInventory("SBARCyan")-1;
-                    blue1 = CheckInventory("SBARBlue")-1;
-                    cyan2 = CheckInventory("SBARCyan2")-1;
-                    blue2 = CheckInventory("SBARBlue2")-1;
-                    success = (cyan1 != -1 && blue1 != -1);
-                }
-
-                if(!success) {
-                    cyan1 = CheckInventory("SBARMugshotCyan")-1;
-                    blue1 = CheckInventory("SBARMugshotBlue")-1;
-                    success = (cyan1 != -1 && blue1 != -1);
-                }
-
-                if(!success) { // :RussOof:
-                    cyan1 = Dec2Hex(192, 2);
-                    blue1 = Dec2Hex(198, 2);
-                } else {
-                    cyan1 = Dec2Hex(cyan1, 2);
-                    blue1 = Dec2Hex(blue1, 2);
-                }
-
-                if(cyan2 == -1 || blue2 == -1) {
-                    cyan2 = 0;
-                    blue2 = 0;
-                } else {
-                    cyan2 = Dec2Hex(cyan2, 2);
-                    blue2 = Dec2Hex(blue2, 2);
-                }
-
-                SetActivator(-1);
-                CallACS1("core_DrawBar_Clear", cam);
-                destroy(obj);
-            } else {
-                cyan1 = Dec2Hex(192, 2);
-                blue1 = Dec2Hex(198, 2);
-            }
-            destroy(obj);
-        }
+        readCyan1 = GetActorArg(obj, 0);
+        readBlue1 = GetActorArg(obj, 1);
         destroy(obj);
     }
 
     obj = new(StrParam(s:weap, s:"_SecondBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
+    }
 
     if(obj) {
-        cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
-        blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
+        readCyan2 = GetActorArg(obj, 0);
+        readBlue2 = GetActorArg(obj, 1);
         destroy(obj);
-    } else { // use the base color for secondbar if secondbar doesn't exist
-        if(cyan2 == 0) cyan2 = cyan1;
-        if(blue2 == 0) blue2 = blue1;
     }
-        
-    if(isBuster) {
-        bustBarData[idx][BARDATA_CYAN1] = cyan1;
-        bustBarData[idx][BARDATA_BLUE1] = blue1;
-        bustBarData[idx][BARDATA_CYAN2] = cyan2;
-        bustBarData[idx][BARDATA_BLUE2] = blue2;
-        bustBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(weapIdx);
-        bustBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(weapIdx);
-        bustBarData[idx][BARDATA_SLOT] = getWeaponSlot(weapIdx);
-    } else {
-        wepBarData[idx][BARDATA_CYAN1] = cyan1;
-        wepBarData[idx][BARDATA_BLUE1] = blue1;
-        wepBarData[idx][BARDATA_CYAN2] = cyan2;
-        wepBarData[idx][BARDATA_BLUE2] = blue2;
-        wepBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(idx);
-        wepBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(idx);
-        wepBarData[idx][BARDATA_SLOT] = getWeaponSlot(idx);
-    }
+    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
 }
 
-function bool isBusterDrawn(str which) {
-    for(int i = 0; i < buster_count; i++) {
-        if(StrMatches(which, drawBusters[i]))
-            return true;
-    }
-    return false;
+// 0: init
+// 1: cyan1
+// 2: blue1
+// 3: cyan2
+// 4: blue2
+// 6: busterIdx
+//
+int newProperties[MAX_WEAPONS_GLOBAL_LIMIT][6];
+
+// 0: init
+// 1: weaponSlot
+//
+int busterInit[MAX_BUSTER_LIMIT][2];
+
+function int WeaponBarColor(int idx, int col)
+{
+    if(newProperties[idx][0])
+        return newProperties[idx][col];
+
+    readWeaponBars(getWeaponActor(idx));
+    
+    newProperties[idx][0] = true;
+    newProperties[idx][1] = readCyan1;
+    newProperties[idx][2] = readBlue1;
+    newProperties[idx][3] = readCyan2;
+    newProperties[idx][4] = readBlue2;
+
+    return newProperties[idx][col];
 }
+
+function int busterMap(int idx)
+{
+    if(busterInit[idx][0])
+        return busterInit[idx][1];
+    
+    int wep = findWeaponByActor(getBusterActor(idx));
+
+    busterInit[idx][0] = true;
+    busterInit[idx][1] = wep;
+
+    return wep;
+}
+    
+
+//     if(!GetCvar("UIX_SV_WEAPBAR"))
+//         terminate;
+
+//     if(GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA") == 0.0)
+//         terminate;
+
+//     if(CheckActorInventory(cam, "UIX_NoWeaponBar") > 0)
+//         terminate;
+
+//     bool mirrored = GetUserCvar(cpn, "UIX_CL_WEAPBARMIRROR");
+//     bool horizontal = GetUserCvar(cpn, "UIX_CL_WEAPBARDIR");
+//     int userAlpha = GetUserCvar(cpn, "UIX_CL_WEAPBARALPHA");
+//     bool drawSlot = GetUserCvar(cpn, "UIX_CL_WEAPBARSHOWSLOTS");
+//     int barWidth, barHeight;
+    
+//     SetActivator(cam);
+//     int pln = PlayerNumber();
+//     if(pln == -1)
+//         terminate;
+//     str curWeap = GetWeapon();
+
+//     SetActivator(-1);
+
+//     int scaleX = GetUserCvar(cpn, "UIX_CL_WEAPBARSCALE"); // 2.5;
+//     int scaleY = scaleX;
+
+//     int slotCounts[10];
+//     int slotDrawn[10];
+
+//     int xStart = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX"); // 500;
+//     int yStart = -GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY"); // 500;
+
+//     str barFontCyan, barFontBlue, barFontEmpt, bart, barb;
+
+//     if(!horizontal) {
+//         barFontCyan = "UIXWVC";
+//         barFontBlue = "UIXWVB";
+//         barFontEmpt = "UIXVHEMP";
+//         bart = STR_WEP_V;
+//         barb = STR_WEP_V2;
+//         barWidth = WEPBAR_BAR_WIDTH * 10;
+//         barHeight = WEPBAR_ICON_WIDTH * 10;
+//     } else {
+//         barFontCyan = "UIXWHC";
+//         barFontBlue = "UIXWHB";
+//         barFontEmpt = "UIXWHEMP";
+//         bart = STR_WEP_H;
+//         barb = STR_WEP_H2;
+//         barWidth = WEPBAR_ICON_WIDTH * 10;
+//         barHeight = WEPBAR_BAR_WIDTH * 10;
+//     }
+
+//     int icWep, alpha;
+
+//     // if(getUserCvar(cpn, );
+
+//     for(int fakeId = 0; fakeId < MAX_BUSTERUPGRADES + MAX_WEAPONS_GLOBAL; fakeId++) {
+        
+//         int i;
+//         bool isBuster;
+//         if(fakeId < MAX_BUSTERUPGRADES) {
+//             i = fakeId;
+//             isBuster = true;
+//         } else {
+//             i = fakeId - MAX_BUSTERUPGRADES;
+//             isBuster = false;
+//         }
+
+//         if(isBuster)
+//             icWep = getBusterActor(i);
+//         else
+//             icWep = getWeaponActor(i);
+        
+//         if(CheckActorInventory(cam, icWep)) {
+
+//                 str ico, amo1, amo2, amo1blue, amo1cyan, amo2blue, amo2cyan;
+//                 int amt1, amt2, amx1, amx2, slot;
+
+//                 int icox, icoy, bar1x, bar1y, bar2x, bar2y, slotx, sloty;
+
+//                 stageWeaponData(i, icWep, isBuster, cam);
+
+//                 if(isBuster) {
+//                     ico = getBusterIcon(i);
+//                     amo1 = bustBarData[i][BARDATA_AMMOTYPE1];
+//                     amo2 = bustBarData[i][BARDATA_AMMOTYPE2];
+//                     slot = bustBarData[i][BARDATA_SLOT];
+//                     amo1cyan = bustBarData[i][BARDATA_CYAN1];
+//                     amo1blue = bustBarData[i][BARDATA_BLUE1];
+//                     amo2cyan = bustBarData[i][BARDATA_CYAN2];
+//                     amo2blue = bustBarData[i][BARDATA_BLUE2];
+//                 } else {
+//                     ico = getWeaponIcon(i);
+//                     amo1 = wepBarData[i][BARDATA_AMMOTYPE1];
+//                     amo2 = wepBarData[i][BARDATA_AMMOTYPE2];
+//                     slot = wepBarData[i][BARDATA_SLOT];
+//                     amo1cyan = wepBarData[i][BARDATA_CYAN1];
+//                     amo1blue = wepBarData[i][BARDATA_BLUE1];
+//                     amo2cyan = wepBarData[i][BARDATA_CYAN2];
+//                     amo2blue = wepBarData[i][BARDATA_BLUE2];
+//                 }
+
+//                 if(StrLen(amo1) > 0) {
+//                     amt1 = CheckActorInventory(cam, amo1);
+//                     amx1 = getPlayerAmmoCapacity(cpn, amo1);
+//                 } else {
+//                     amt1 = 0;
+//                     amx1 = 0;
+//                 }
+
+//                 if(StrLen(amo2) > 0) {
+//                     amt2 = CheckActorInventory(cam, amo2);
+//                     amx2 = getPlayerAmmoCapacity(cpn, amo2);
+//                 } else {
+//                     amt2 = 0;
+//                     amx2 = 0;
+//                 }
+
+//                 str slotKey = -1;
+//                 int count = slotCounts[slot];
+//                 int slotPos = slot;
+//                 if(slotPos == 0) {
+//                     slotPos = 9;
+//                 } else {
+//                     slotPos--;
+//                 }
+
+//                 str slotCol = "\cq";
+
+//                 if(StrMatches(curWeap, icWep)) {
+//                     if(!horizontal) {
+//                         if(!mirrored) {
+//                             icox = xStart - FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleX);
+//                             icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos;
+//                         } else {
+//                             icox = xStart + FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleX);
+//                             icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos;
+//                         }
+//                     } else {
+//                         if(!mirrored) {
+//                             icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos;
+//                             icoy = yStart + FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleY);
+//                         } else {
+//                             icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos;
+//                             icoy = yStart - FixedMul(WEPBAR_X_OFFS/2 + WEPBAR_X_OFFS, scaleY);
+//                         }
+//                     }
+//                     alpha = FixedMul(1.0, userAlpha);
+
+//                     // hard override, even if the slot is drawn, it needs to be redrawn
+//                     slotDrawn[slot] = false;
+//                     slotCol = "\cf";
+//                 } else {
+//                     if(!horizontal) {
+//                         if(!mirrored) {
+//                             icox = xStart + FixedMul(WEPBAR_X_OFFS, scaleX) * count;
+//                             icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos + FixedMul(slotCounts[slot], scaleY);
+//                         } else {
+//                             icox = xStart - FixedMul(WEPBAR_X_OFFS, scaleX) * count;
+//                             icoy = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY) * slotPos + FixedMul(slotCounts[slot], scaleY);
+//                         }
+//                     } else {
+//                         if(!mirrored) {
+//                             icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos + FixedMul(slotCounts[slot], scaleX);
+//                             icoy = yStart - FixedMul(WEPBAR_X_OFFS, scaleY) * count;
+//                         } else {
+//                             icox = xStart + FixedMul(WEPBAR_Y_OFFS, scaleX) * slotPos + FixedMul(slotCounts[slot], scaleX);
+//                             icoy = yStart + FixedMul(WEPBAR_X_OFFS, scaleY) * count;
+//                         }
+//                     }
+//                     alpha = FixedMul(0.5, userAlpha);
+
+//                     slotCounts[slot]++;
+//                 }
+
+//                 if(!horizontal) {
+//                     if(!mirrored) {
+//                         bar1x = icox;
+//                         bar1y = icoy - FixedMul(WEPBAR_ICON_WIDTH + WEPBAR_ICON_WIDTH/2, scaleY);
+//                         bar2x = bar1x + FixedMul(WEPBAR_BAR_WIDTH, scaleY);
+//                         bar2y = bar1y;
+//                         slotx = xStart - FixedMul(3 * WEPBAR_X_OFFS, scaleX);
+//                         sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
+//                     } else {
+//                         bar1x = icox - FixedMul(WEPBAR_X_OFFS + WEPBAR_BAR_WIDTH, ScaleX);
+//                         bar1y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
+//                         bar2x = bar1x - FixedMul(WEPBAR_BAR_WIDTH, ScaleX);
+//                         bar2y = icoy - FixedMul(WEPBAR_Y_OFFS, scaleY);
+//                         slotx = xStart + FixedMul(2 * WEPBAR_X_OFFS, scaleX);
+//                         sloty = icoy - FixedMul(WEPBAR_X_OFFS+4, scaleY);
+//                     }
+//                 } else {
+//                     if(!mirrored) {
+//                         bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
+//                         bar1y = icoy - FixedMul(WEPBAR_Y_OFFS + WEPBAR_BAR_WIDTH, scaleX);
+//                         bar2x = bar1x;
+//                         bar2y = bar1y - FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
+//                         slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
+//                         sloty = yStart + FixedMul(WEPBAR_Y_OFFS, scaleY);
+//                     } else {
+//                         bar1x = icox - FixedMul(WEPBAR_ICON_WIDTH, scaleX);
+//                         bar1y = icoy - FixedMul(WEPBAR_BAR_WIDTH*2, scaleY);
+//                         bar2x = bar1x;
+//                         bar2y = bar1y + FixedMul(WEPBAR_BAR_WIDTH, ScaleY);
+//                         slotx = icox - FixedMul(WEPBAR_X_OFFS >> 1, scaleX);
+//                         sloty = yStart - FixedMul(4 * WEPBAR_ICON_WIDTH - WEPBAR_BAR_WIDTH, scaleY);
+//                     }
+//                 }
+
+//                 displayIcon(ico, getNewUIId(), icox, icoy, scaleX, scaleY, alpha);
+//                 displayIcon("UXICA0", getNewUIId(), icox, icoy, scaleX, scaleY, userAlpha);
+
+//                 // format: UXWFT#XX
+
+//                 if(amx1) {
+//                     drawLayeredBar(StrParam(s:barFontCyan, s:amo1cyan), StrParam(s:barFontBlue, s:amo1blue), barFontEmpt, bar1X, bar1Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt1, amx1, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+//                 }
+
+//                 if(amx2) {
+//                     drawLayeredBar(StrParam(s:barFontCyan, s:amo2cyan), StrParam(s:barFontBlue, s:amo2blue), barFontEmpt, bar2X, bar2Y, barWidth, barHeight, FixedMul(scaleX, 0.1), FixedMul(scaleY, 0.1), userAlpha, amt2, amx2, horizontal+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+//                 }
+
+//                 if(drawSlot && !slotDrawn[slot]) {
+//                     slotDrawn[slot] = true;
+//                     slotKey = StrParam(s:slotCol, k:StrParam(s:"slot ", i:slot));
+//                     SetFont("SMALLFONT");
+//                     if(!horizontal) {
+//                         if(!mirrored) {
+//                             displayMessageR(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
+//                         } else {
+//                             displayMessageL(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha);
+//                         }
+//                     } else {
+//                         displayMessage(slotKey, getNewUIId(), slotx, sloty, scaleX, scaleY, userAlpha, 0, 0);
+//                     }
+//                 }
+//         }
+//     }
+// }
+
+// function void stageWeaponData(int idx, str weap, int isBuster, int cam) {
+//     int blue1, cyan1, blue2, cyan2, obj, weapIdx;
+
+//     if(isBuster) {
+//         weapIdx = findWeaponByActor(weap);
+//         if(bustBarData[idx][BARDATA_CHECKED])
+//             return;
+//         bustBarData[idx][BARDATA_CHECKED] = true;
+//         drawBusters[buster_count++] = weap;
+
+//         bool escape = false;
+
+//         if(!escape)
+//             escape = (weapIdx == -1);
+//         if(!escape)
+//             escape = (StrCmp("", getWeaponAmmoType(weapIdx)) == 0);
+
+//         if(escape) { // early escape if there's no ammo here
+//             bustBarData[idx][BARDATA_CYAN1] = "";
+//             bustBarData[idx][BARDATA_BLUE1] = "";
+//             bustBarData[idx][BARDATA_CYAN2] = "";
+//             bustBarData[idx][BARDATA_BLUE2] = "";
+//             bustBarData[idx][BARDATA_AMMOTYPE1] = "";
+//             bustBarData[idx][BARDATA_AMMOTYPE2] = "";
+//             bustBarData[idx][BARDATA_SLOT] = 1;
+//             return;
+//         }
+//     } else {
+//         if(wepBarData[idx][BARDATA_CHECKED])
+//             return;
+//         wepBarData[idx][BARDATA_CHECKED] = true;
+//     }
+
+//     obj = new(StrParam(s:weap, s:"_NormalBar"));
+//     if(obj) {
+//         cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+//         blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+//         destroy(obj);
+//     } else { // ScriptBar attempted contingencies
+//         obj = new(StrParam(s:weap, s:"_MugshotColor"));
+
+//         if(obj) {
+//             cyan1 = Dec2Hex(GetActorArg(obj, 0), 2);
+//             blue1 = Dec2Hex(GetActorArg(obj, 1), 2);
+//         } else { // ScriptBar final contingency
+//             obj = new(StrParam(s:weap, s:"_ScriptBar"));
+
+//             if(obj) {
+//                 this feels like danger tbh
+//                 SetActivator(cam);
+//                 CallACS0(StrParam(s:"DrawBar_", s:weap));
+//                 bool success = false;
+//                 if(!success) {
+//                     cyan1 = CheckInventory("SBARCyan")-1;
+//                     blue1 = CheckInventory("SBARBlue")-1;
+//                     cyan2 = CheckInventory("SBARCyan2")-1;
+//                     blue2 = CheckInventory("SBARBlue2")-1;
+//                     success = (cyan1 != -1 && blue1 != -1);
+//                 }
+
+//                 if(!success) {
+//                     cyan1 = CheckInventory("SBARMugshotCyan")-1;
+//                     blue1 = CheckInventory("SBARMugshotBlue")-1;
+//                     success = (cyan1 != -1 && blue1 != -1);
+//                 }
+
+//                 if(!success) { // :RussOof:
+//                     cyan1 = Dec2Hex(192, 2);
+//                     blue1 = Dec2Hex(198, 2);
+//                 } else {
+//                     cyan1 = Dec2Hex(cyan1, 2);
+//                     blue1 = Dec2Hex(blue1, 2);
+//                 }
+
+//                 if(cyan2 == -1 || blue2 == -1) {
+//                     cyan2 = 0;
+//                     blue2 = 0;
+//                 } else {
+//                     cyan2 = Dec2Hex(cyan2, 2);
+//                     blue2 = Dec2Hex(blue2, 2);
+//                 }
+
+//                 SetActivator(-1);
+//                 CallACS1("core_DrawBar_Clear", cam);
+//                 destroy(obj);
+//             } else {
+//                 cyan1 = Dec2Hex(192, 2);
+//                 blue1 = Dec2Hex(198, 2);
+//             }
+//             destroy(obj);
+//         }
+//         destroy(obj);
+//     }
+
+//     obj = new(StrParam(s:weap, s:"_SecondBar"));
+
+//     if(obj) {
+//         cyan2 = Dec2Hex(GetActorArg(obj, 0), 2);
+//         blue2 = Dec2Hex(GetActorArg(obj, 1), 2);
+//         destroy(obj);
+//     } else { // use the base color for secondbar if secondbar doesn't exist
+//         if(cyan2 == 0) cyan2 = cyan1;
+//         if(blue2 == 0) blue2 = blue1;
+//     }
+        
+//     if(isBuster) {
+//         bustBarData[idx][BARDATA_CYAN1] = cyan1;
+//         bustBarData[idx][BARDATA_BLUE1] = blue1;
+//         bustBarData[idx][BARDATA_CYAN2] = cyan2;
+//         bustBarData[idx][BARDATA_BLUE2] = blue2;
+//         bustBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(weapIdx);
+//         bustBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(weapIdx);
+//         bustBarData[idx][BARDATA_SLOT] = getWeaponSlot(weapIdx);
+//     } else {
+//         wepBarData[idx][BARDATA_CYAN1] = cyan1;
+//         wepBarData[idx][BARDATA_BLUE1] = blue1;
+//         wepBarData[idx][BARDATA_CYAN2] = cyan2;
+//         wepBarData[idx][BARDATA_BLUE2] = blue2;
+//         wepBarData[idx][BARDATA_AMMOTYPE1] = getWeaponAmmoType(idx);
+//         wepBarData[idx][BARDATA_AMMOTYPE2] = getWeaponAmmo2Type(idx);
+//         wepBarData[idx][BARDATA_SLOT] = getWeaponSlot(idx);
+//     }
+// }
+
+// function bool isBusterDrawn(str which) {
+//     for(int i = 0; i < buster_count; i++) {
+//         if(StrMatches(which, drawBusters[i]))
+//             return true;
+//     }
+//     return false;
+// }

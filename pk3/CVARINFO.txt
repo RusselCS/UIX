@@ -16,9 +16,10 @@ user int UIX_CL_WEAPBAROFFSX = 500;
 user int UIX_CL_WEAPBAROFFSY = 250;
 user float UIX_CL_WEAPBARSCALE = 2.5;
 user bool UIX_CL_WEAPBARMIRROR = false;
-user bool UIX_CL_WEAPBARDIR = false; // false = vertical, true = horizontal
+user bool UIX_CL_WEAPBARDIR = true; // false = horizontal, true = vertical
 user float UIX_CL_WEAPBARALPHA = 1.0;
 user bool UIX_CL_WEAPBARSHOWSLOTS = true;
+user int UIX_CL_WEAPBARROWMAX = 5;
 
 server noarchive bool UIX_SV_TEAMINFO = true;
 user bool UIX_CL_TEAMINFO = true;

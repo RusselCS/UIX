@@ -1,0 +1,34 @@
+actor UIXColorStore
+{
+    renderstyle "none"
+    +NOINTERACTION
+    +CLIENTSIDEONLY
+    args 192, 198
+    States
+    {
+    Spawn:
+        TNT1 AA 0
+        stop
+    }
+}
+
+actor ArsenalBar : UIXColorStore {}
+actor SecondArsenalBar : UIXColorStore {}
+actor ArsenalAmmo : UIXColorStore {}
+actor SecondArsenalAmmo : UIXColorStore {}
+
+actor ProtoBuster_ArsenalBar : ArsenalBar { args 87,42 }
+actor ArrowBuster_ArsenalBar : ArsenalBar { args 192,198 }
+actor LaserBuster_ArsenalBar : ArsenalBar { args 192,198 }
+actor DuoFist_Campaign_ArsenalBar : ArsenalBar { args 220,195 }
+actor DuoFist_ArsenalBar : ArsenalBar { args 220,195 }
+actor SuperAdaptorWep_ArsenalBar : ArsenalBar { args 4,42 }
+actor MegaArm_ArsenalBar : ArsenalBar { args 192,198 }
+actor AtomicFireWep_ArsenalBar : ArsenalBar { args 229,41 }
+actor NoiseCrushWep_ArsenalBar : ArsenalBar { args 204,61 }
+actor WildCoilWep_ArsenalBar : ArsenalBar { args 106,251 }
+actor HomingSniperWep_ArsenalBar : ArsenalBar { args 192,230 }
+actor MagmaBazookaWep_ArsenalBar : ArsenalBar { args 216,41 }
+actor BreakDashWep_ArsenalBar : ArsenalBar { args 4,63 }
+actor MirrorBusterWep_ArsenalBar : ArsenalBar { args 229,76 }
+actor DawnBreakerWep_ArsenalBar : ArsenalBar { args 196,70 }
