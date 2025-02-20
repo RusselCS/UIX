@@ -34,8 +34,10 @@ Done:
 - Check BluemanBlaster
 
 == V1F TO DO ==
+- Cleanup: Remove constants unused
+- Cleanup: Move "bloat" tables into separate include files
+- Teaminfo: Weapon bar still broken
 - Teaminfo: Add number toggles for everything
-- Frag messages: Add mugshot on frag message
 - Assist message?
 
 Done:
@@ -44,6 +46,7 @@ Done:
 - Teaminfo: Stock pips over mugshots
 - Teaminfo: Add location back
 - Missed a "scuttlerun" in the menu somewhere. Squash that.
+- Frag messages: Add mugshot on frag message
 
 == V2A TO DO ==
 - Team ammo bar (most requested feature)

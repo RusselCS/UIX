@@ -12,6 +12,7 @@ Addon that implements additional UI elements:
 
 Asset Credits:
 - SR50 Tailwind graphics adapted from SRB2.
+- Killfeed skull icon edited from Mega Man 2.
 
 Modder notes:
 - Currently only works with v6b.
@@ -56,6 +57,27 @@ v1d changelog:
 NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Versions following should contain them.
 - Removed VileWeps and Encore from supported mods (they support themselves now!)
 - Renamed "ScuttleRun" to "SR50" in the menus because people complained
+
+v2a changelog:
+- Replaced font with the one used in Unholy.
+- CVars reset to defaults for all users.
+--- There reasons for this are many, but the primary ones are simply 
+--- (1) folks needed to turn the whole thing off due to bad performance, and
+--- (2) the way some of the cvars were handled was inconsistent across widgets
+- TeamInfo:
+--- Recoded from the ground up. CPU footprint reduced by roughly 50%.
+--- Reworked the widget to be 4 rows of data: Name, Location, Health, Ammo/Lives.
+--- Ammo info outsourced to "UIXDB.acs", which can be replaced by other mods for their specific purposes.
+--- Removed the directional compass for ally positions. It was too much information to obtain at a glance.
+- Weapon Bar: Recoded from the ground up. CPU footprint reduced by roughly 40%.
+--- Widget is now more concisely structured, icons are closer together.
+--- Each weapon slot's row/column now caps out at 5 weapons (changeable by player).
+--- Weapon order scrolls based on which weapon is selected now.
+--- Scroll order on the bar now matches the default scroll order for vanilla weapons.
+--- Known issue: Due to an inheritance chain in vanilla, Laser Buster and Arrow Buster have to have an inverse order. It looks weird but only affects a cheat scenario.
+--- Removed the automated fetching of bar colors from ScriptBars.
+----- Previously this method result in bars being colored incorrectly, but this change keeps the weapon bar from stepping on the toes of any actual bar scripts running.
+----- ScriptBars can manually define bar colors by inheriting from ArsenalBar and ArsenalSecondBar and filling args in as normal.
 
 FAQs:
 - Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
