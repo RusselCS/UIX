@@ -13,8 +13,8 @@ texture UXTEMHV_, 8, 1 {patch UXTEMHP_, 0, 0 {Rotate 270}}
 texture UXTEMHVB, 8, 96 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0}
 texture UXTEMHV1, 8, 96 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0}
 
-texture UXTEMHHB, 96, 8 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0 {Rotate 90 flipy}}
-texture UXTEMHH1, 96, 8 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0 {Rotate 90 flipy}}
+texture UXTEMHHB, 96, 8 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0 {Rotate 90}}
+texture UXTEMHH1, 96, 8 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0 {Rotate 90}}
 
 // Lives icons
 texture UXTLVB00, 16, 16 {patch UXTLVB, 0, 0 {Translation "198:198=0:0"}}
