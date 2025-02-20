@@ -1,6 +1,18 @@
+
+actor UIXCurrWeap : Inventory
+{
+    inventory.amount 1
+    inventory.maxamount 1000
+}
+actor UIXCurrBuster : UIXCurrWeap {}
+
+actor UIXAmmoAmt1 : UIXCurrWeap { inventory.maxamount 9999 }
+actor UIXAmmoMax1 : UIXAmmoAmt1 {} 
+actor UIXAmmoAmt2 : UIXAmmoAmt1 {} 
+actor UIXAmmoMax2 : UIXAmmoAmt1 {} 
+
 // Making my own ColorStore here because I plan on having v6a support for
 // specifically gondola, so any actors need to be original
-
 actor UIXColorStore
 {
     renderstyle "none"

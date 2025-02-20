@@ -2,7 +2,10 @@
 
 #include "zcommon.acs"
 
+#import "8BDT.acs"
+
 #include "SHRTFUNC.acs"
+#include "UXTBWBAR.acs"
 
 #define horizontal 0
 #define vertical 1
@@ -448,17 +451,101 @@ int weaponBar2Bottom;
 
 int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
-#define UIX_WeapProp_Actor 0
-#define UIX_WeapProp_Tag 1
-#define UIX_WeapProp_Icon 2
-#define UIX_WeapProp_Ammo 3
-#define UIX_WeapProp_Ammo2 4
+// 0: init
+// 1: cyan1
+// 2: blue1
+// 3: cyan2
+// 4: blue2
+//
+int barColors[MAX_WEAPONS_GLOBAL_LIMIT][5];
 
-#define UIX_WeapProp_Slot 5
-#define UIX_WeapProp_Cyan 6
-#define UIX_WeapProp_Blue 7
-#define UIX_WeapProp_Cyan2 8
-#define UIX_WeapProp_Blue2 9
+int readBlue1, readCyan1, readBlue2, readCyan2;
+
+function void readWeaponBars(str weap) {
+    // Log(s:"Called read weapon bars for weapon: ", s:weap);
+    readCyan1 = -1;
+    readBlue1 = -1;
+    readCyan2 = -1;
+    readBlue2 = -1;
+
+    int obj;
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
+    }
+
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan1 = GetActorArg(obj, 0);
+        readBlue1 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+
+    obj = new(StrParam(s:weap, s:"_SecondBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan2 = GetActorArg(obj, 0);
+        readBlue2 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
+}
+
+#define SYNC_TIME 3
+str currWeap[64];
+
+script "UIXTeam_WeaponSync" ENTER
+{
+    int idx;
+    int pln = PlayerNumber();
+    bool bar1, bar2;
+    str ammo1, ammo2;
+    while(GetActorProperty(0, APROP_Health) > 0) {
+        if(!CheckWeapon(currWeap[pln])) {
+            currWeap[pln] = GetWeapon();
+            idx = findWeaponByActor(currWeap[pln]);
+
+            if(idx != -1) {
+                SetInventory("UIXCurrWeap", idx+1);
+                ammo1 = getWeaponAmmoType(idx);
+                ammo2 = getWeaponAmmo2Type(idx);
+
+                bar1 = StrLen(ammo1) > 0;
+                bar2 = StrLen(ammo2) > 0;
+            } else {
+                idx = findBusterUpgradeByActor(currWeap[pln]);
+                if(idx != -1) {
+                    SetInventory("UIXCurrBuster", idx+1);
+                } else {
+                    SetInventory("UIXCurrBuster", 0);
+                }
+            }
+        }
+
+        if(bar1) {
+            SetInventory("UIXAmmoAmt1", CheckInventory(ammo1));
+            SetInventory("UIXAmmoMax1", GetAmmoCapacity(ammo1));
+        } else {
+            SetInventory("UIXAmmoMax1", 0);
+        }
+
+        if(bar2) {
+            SetInventory("UIXAmmoAmt2", CheckInventory(ammo2));
+            SetInventory("UIXAmmoMax2", GetAmmoCapacity(ammo2));
+        } else {
+            SetInventory("UIXAmmoMax2", 0);
+        }
+        delay(SYNC_TIME);
+    }
+}
+
+script "UIXTeam_WeaponSync_R" RESPAWN { ACS_NamedExecuteWithResult("UIXTeam_WeaponSync"); }
 
 function void drawWeapon(int pln, int x, int y)
 {
@@ -493,33 +580,79 @@ function void drawWeapon(int pln, int x, int y)
         weaponBarHeight = weaponBarDimensions[!cvDir];
     }
 
-    str icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Icon);
+    int tid = pln+PLN_TID_SHRT;
 
-    int amt1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 0);
+    int idx = CheckActorInventory(tid, "UIXCurrWeap");
+    if(idx == 0)
+        idx = -CheckActorInventory(tid, "UIXCurrBuster");
+    
+    if(idx == 0)
+        return;
+    
+    int amx1, amx2;
+    str icon, black;    
 
-    if(amt1 != -1) {
-        int amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 1);
+    amx1 = CheckActorInventory(tid, "UIXAmmoMax1");
+    amx2 = CheckActorInventory(tid, "UIXAmmoMax2");
 
-        str cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-        str blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+    if(idx > 0) {
+        idx = idx-1;
 
-        str black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+        icon = getWeaponIcon(idx);
 
-        int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
+        if(amx1 > 0) {
+            if(!barColors[idx][0]) {
+                readWeaponBars(getWeaponActor(idx));
+    
+                barColors[idx][0] = true;
+                barColors[idx][1] = readCyan1;
+                barColors[idx][2] = readBlue1;
+                barColors[idx][3] = readCyan2;
+                barColors[idx][4] = readBlue2;
+            }
 
-        if(amt2 != -1) {
-            int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
-            str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
-            str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
-
-            drawLayeredBar(cyan, blue, black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-            drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-        } else {
-            drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            if(amx2 > 0) {
+                drawLayeredBar(UIXAmmoBars[2+cvDir][0][barColors[idx][1]], UIXAmmoBars[2+cvDir][1][barColors[idx][2]], black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, CheckActorInventory(tid, "UIXAmmoAmt1"), amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+                drawLayeredBar(UIXAmmoBars[2+cvDir][0][barColors[idx][3]], UIXAmmoBars[2+cvDir][1][barColors[idx][4]], black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, CheckActorInventory(tid, "UIXAmmoAmt2"), amx2, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            } else {
+                drawLayeredBar(UIXAmmoBars[2+cvDir][0][barColors[idx][1]], UIXAmmoBars[2+cvDir][1][barColors[idx][2]], black, X+weaponBarX, Y+weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, CheckActorInventory(tid, "UIXAmmoAmt1"), amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            }
         }
-    }
+        black = UIXAmmoBars[2+cvDir][2][0];
+    } else {
+        idx = (-idx)-1;
 
+        icon = getBusterIcon(idx);
+    }
     displayIcon(icon, getNewUIId(), x+weaponIconX, y+weaponIconY, weaponIconScale, weaponIconScale, cvAlpha);
+
+    // str icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Icon);
+
+    // int amt1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 0);
+
+    // if(amt1 != -1) {
+    //     int amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 1);
+
+    //     str cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+    //     str blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+
+    //     str black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+
+    //     int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
+
+    //     if(amt2 != -1) {
+    //         int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
+    //         str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
+    //         str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
+
+    //         drawLayeredBar(cyan, blue, black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //         drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //     } else {
+    //         drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    //     }
+    // }
+
+    // displayIcon(icon, getNewUIId(), x+weaponIconX, y+weaponIconY, weaponIconScale, weaponIconScale, cvAlpha);
 }
 
 // Draw Lives =======================================================================================================================================
