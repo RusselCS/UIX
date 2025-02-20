@@ -10,9 +10,10 @@ UIX_UNKNOWN_LOC_2 = "Node Graph out of Date. Rebuilding...";
 UIX_UNKNOWN_LOC_3 = "A bomb's a bad choice for close-range combat.";
 UIX_UNKNOWN_LOC_4 = "ONE THIRD OF THE PUZZLE HAS BEEN SOLVED.";
 
+UIX_MENU_TEXT = "\c--\cdUI Extensions\c--";
+
 // "bloat" implies something is useless
 // this is not useless. stop calling "large amounts of code" as bloat.
-
 UI_SMALLFONT_P32 = "4";
 UI_SMALLFONT_P33 = "8";
 UI_SMALLFONT_P34 = "5";

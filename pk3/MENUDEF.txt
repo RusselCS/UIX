@@ -1,3 +1,38 @@
+OptionMenu "8BDM_UISettings"
+{
+	Title "UI SETTINGS"
+
+	Submenu "$UIX_MENU_TEXT", "UIXOptions"
+	StaticText " "
+	
+	Submenu "Customize Crosshair", "8BDM_CrosshairSettings"
+	Submenu "HUD Settings", "8BDM_HUDSettings"
+	Submenu "Automap Settings", "8BDM_AutomapSettings"
+	Submenu "Message Settings", "8BDM_MessageSettings"
+	
+	StaticText " "
+	Option "Weapon Redirect Sights",		"mm8bdm_redirectsights", 	"OnOff"
+	Option "Show weapon sprites",			"r_drawplayersprites", 		"YesNo"
+	Option "Show player spawns",			"cl_showspawns",			"YesNo"
+	Option "Show item respawn timers",		"mm8bdm_showitemrespawns", 	"YesNo"
+	StaticText " "
+	Option "Show tag on swap",				"displaynametags", 			"DisplayTagsTypes"
+	Option "Show teammate info",			"cl_drawcoopinfo", 			"YesNo"
+	Option "Show spectating indicator",		"r_drawspectatingstring",	"YesNo"
+	Option "Identify players",				"cl_identifytarget",		"ZA_IdentifyTargetLevels"
+	Option "Show LMS weapon loadout",		"mm8bdm_drawlmsweapons", 	"YesNo"
+	Option "Objective Compass",				"mm8bdm_noctfradar", 		"OffOn"
+	StaticText " "
+	Option "Large frag messages",			"cl_showlargefragmessages",	"OnOff" 
+	Option "Voting display",				"cl_showfullscreenvote", 	"ZA_VotingDisplay"
+	Option "Hide vote screen after vote",	"cl_hidevotescreen", 		"YesNo"
+	Option "Show map cards",				"mm8bdm_mapcards", 			"8BDM_MapCards"
+	StaticText " "
+	Option "Show intermission timer",		"cl_intermissiontimer",		"YesNo"
+	Option "Intermission auto-ready",		"cl_autoready",				"OnOff"
+	StaticText " "
+}
+
 OptionMenu "UIXOptions"
 {
 	Title "UI Extensions"
@@ -5,30 +40,43 @@ OptionMenu "UIXOptions"
 	StaticText " "
 	StaticText "Notification Option", 1
 	Option "UI Extensions Notification", "uix_cl_notification", "OnOff"
-	
-	StaticText " "
-	StaticText "Clashing Items", 1
-	StaticText "$UIX_MNU_CLASHES", 1
-	Option "Default Coop Info", "cl_drawcoopinfo", "OnOff"
-	
 	StaticText " "
 	StaticText "Global Toggle", 1
 	Option "UI Extensions", "UIX_CL_Enable", "OnOff"
 	StaticText " "
-	StaticText "SR50", 1
+	StaticText "Widgets", 1
+	Submenu "SR50 Options", "UIXOptions_SR50"
+	Submenu "Team Info Options", "UIXOptions_TeamInfo"
+	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
+	
+	StaticText " "
+}
+
+OptionMenu "UIXOptions_SR50"
+{
+	Title "SR50 SETTINGS"
+	StaticText " "
 	StaticText "$UIX_MNU_SR50_1", 1
 	Option "Enable SR50", "UIX_CL_UsingSR50", "OnOff"
-	Control "Activate SR50", "+sr"
 	StaticText " "
 	StaticText "$UIX_MNU_SR50_2", 1
 	Control "Strafe Left (SR50)", "+left2"
 	Control "Strafe Right (SR50)", "+right2"
+	Control "Activate SR50", "+sr"
 	StaticText " "
 	Option "SR Tailwind Visual", "UIX_CL_SR50Visual", "OnOff"
 	Slider "SR Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
-	
+}
+
+OptionMenu "UIXOptions_TeamInfo"
+{
+	Title "TEAM INFO SETTINGS"
 	StaticText " "
-	StaticText  "Team Info", 1
+	StaticText "Clashing Items", 1
+	StaticText "$UIX_MNU_CLASHES", 1
+	Option "Default Coop Info", "cl_drawcoopinfo", "OnOff"
+	StaticText " "
+	StaticText "Team Info Settings", 1
 	Option "Team Info Enabled", "UIX_CL_TEAMINFO", "OnOff"
 	StaticText " "
 	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
@@ -49,12 +97,16 @@ OptionMenu "UIXOptions"
 	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
 	Option "Show Lives", "UIX_CL_TEAMINFOSHOWLIVES", "OnOff"
 	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
+}
+
+OptionMenu "UIXOptions_WeaponBar"
+{
+	Title "WEAPON BAR SETTINGS"
 	StaticText " "
-	StaticText  "Weapon Bar", 1
 	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
 	StaticText " "
 	Option "Mirror Orientation", "UIX_CL_WEAPBARMIRROR", "OnOff"
-	Option "Bar Orientation", "UIX_CL_WEAPBARDIR", "WeapOrientation"
+	Option "Bar Orientation", "UIX_CL_WEAPBARDIR", "TeamOrientation"
 	StaticText " "
 	Slider "Weapon Bar X", "UIX_CL_WEAPBAROFFSX", -640, 640, 10
 	Slider "Weapon Bar Y", "UIX_CL_WEAPBAROFFSY", -640, 640, 10
@@ -63,7 +115,6 @@ OptionMenu "UIXOptions"
 	Slider "Weapon Bar Alpha", "UIX_CL_WEAPBARALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
 	Option "Show Slots", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
-	StaticText " "
 }
 
 OptionValue "WeapOrientation"
