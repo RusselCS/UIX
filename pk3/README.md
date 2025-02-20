@@ -78,6 +78,10 @@ v2a changelog:
 --- Removed the automated fetching of bar colors from ScriptBars.
 ----- Previously this method result in bars being colored incorrectly, but this change keeps the weapon bar from stepping on the toes of any actual bar scripts running.
 ----- ScriptBars can manually define bar colors by inheriting from ArsenalBar and ArsenalSecondBar and filling args in as normal.
+- SR50 Tailwind: Few smaller changes
+--- Now wooshes in the opposite direction (better matching SRB2)
+--- Transparency now matches the SR50 user's transparency
+--- Now properly disables if user disables all of UI Extensions
 
 FAQs:
 - Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
