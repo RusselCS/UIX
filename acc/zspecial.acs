@@ -277,7 +277,6 @@ special
 	280:Ceiling_MoveToValueAndCrush(4, 5),
 	281:Line_SetAutomapFlags(3),
 	282:Line_SetAutomapStyle(2),
-	283:Polyobj_StopSound(1),
 	
 	// new to Eternity
 //	300:Portal_Define(5),
@@ -361,7 +360,7 @@ special
 	-73:CheckFont(1),
 	-74:DropItem(2,4),
 	-75:CheckFlag(2),
-	-76:SetLineActivation(2, 3),
+	-76:SetLineActivation(2),
 	-77:GetLineActivation(1),
 	-78:GetActorPowerupTics(2),
 	-79:ChangeActorAngle(2,3),
@@ -376,7 +375,7 @@ special
 	-88:SetActorRoll(2),
 	-89:ChangeActorRoll(2,3),
 	-90:GetActorRoll(1),
-	-91:QuakeEx(8,19),
+	-91:QuakeEx(8,16),
 	-92:Warp(6,11),
 	-93:GetMaxInventory(2),
 	-94:SetSectorDamage(2,5),
@@ -435,7 +434,7 @@ special
 	-148:GetChatMessage(2),
 	-149:GetMapRotationSize(0),
 	-150:GetMapRotationInfo(2),
-	-151:GetCurrentMapPosition(0),
+	-151:GetMapPosition(1),
 	-152:GetEventResult(0),
 	-153:GetActorSectorLocation(2),
 	-154:ChangeTeamScore(3,4),
@@ -460,6 +459,13 @@ special
 	-175:SetPlayerSkin(2, 3),
 	-176:GetPlayerSkin(2),
 	-177:GetPlayerCountry(2),
+	-178:SetNextMapPosition(2),
+	-179:GivePlayerMedal(3),
+	-180:GetPlayerJoinQueuePosition(1),
+	-181:SkipJoinQueue(1),
+	-182:GetControlPointInfo(2),
+	-183:SetControlPointInfo(3),
+	-184:GetSkinProperty(2, 4),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
@@ -476,7 +482,6 @@ special
 	-211:StartSlideshow(1),
 	-212:GetSectorHealth(2),
 	-213:GetLineHealth(1),
-	-214:SetSubtitleNumber(2),
 	
 	
 	// Eternity's
@@ -493,3 +498,4 @@ special
 	-19621:SetTeamScore(2),
 	
 	-100000:__EndOfList__(10);
+	

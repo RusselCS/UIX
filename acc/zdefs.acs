@@ -166,7 +166,6 @@
 #define BT_MOVEUP				262144
 #define BT_MOVEDOWN				524288
 #define BT_SHOWSCORES			1048576
-#define BT_RUN					33554432
 
 // Do whatever you want with these.
 #define BT_USER1				2097152
@@ -305,9 +304,6 @@
 #define APROP_MaxStepHeight 44
 #define APROP_MaxDropOffHeight 45
 #define APROP_DamageType	46
-#define APROP_SoundClass	47
-#define APROP_FriendlySeeBlocks 48
-#define APROP_WaterDepth 49
 
 // New to Eternity
 #define APROP_Counter0      100
@@ -361,7 +357,6 @@
 #define PLAYERINFO_PLAYERCLASS	7
 #define PLAYERINFO_FOV			8
 #define PLAYERINFO_DESIREDFOV	9
-#define PLAYERINFO_FVIEWBOB		10
 
 
 // Flags for ReplaceTextures ------------------------------------------------
@@ -757,8 +752,6 @@
 
 #define SDF_ABSANGLE			1
 #define SDF_PERMANENT			2
-#define SDF_FIXED_ZOFF			4
-#define SDF_FIXED_DISTANCE		8
 
 // Actor pointer selectors
 
@@ -782,7 +775,6 @@
 
 #DEFINE AAPTR_FRIENDPLAYER 0x4000
 #DEFINE AAPTR_GET_LINETARGET 0x8000
-
 #DEFINE AAPTR_PLAYER_GETCAMERA 0x8000000
 
 // [AK] Actor pointers used exclusively for GAMEEVENT_ACTOR_DAMAGED
@@ -917,16 +909,23 @@
 #define DB_ORDER_ASC			0
 #define DB_ORDER_DESC			1
 
+// Zandronum gamemode states ------------------------------------------------
+#define GAMESTATE_UNSPECIFIED		-1
+#define GAMESTATE_WAITFORPLAYERS	0
+#define GAMESTATE_COUNTDOWN		1
+#define GAMESTATE_INPROGRESS		2
+#define GAMESTATE_INRESULTSEQUENCE	3
+
 // Zandronum EVENT script types ---------------------------------------------
 #define GAMEEVENT_PLAYERFRAGS		0
-#define GAMEEVENT_MEDALS    		1
-#define GAMEEVENT_CAPTURES  		2
-#define GAMEEVENT_TOUCHES   		3
-#define GAMEEVENT_RETURNS   		4
+#define GAMEEVENT_MEDALS		1
+#define GAMEEVENT_CAPTURES		2
+#define GAMEEVENT_TOUCHES		3
+#define GAMEEVENT_RETURNS		4
 #define GAMEEVENT_ROUND_STARTS		5
 #define GAMEEVENT_ROUND_ENDS		6
 #define GAMEEVENT_ROUND_ABORTED		7
-#define GAMEEVENT_CHAT	    		8
+#define GAMEEVENT_CHAT			8
 #define GAMEEVENT_PLAYERCONNECT		9
 #define GAMEEVENT_ACTOR_SPAWNED		10
 #define GAMEEVENT_ACTOR_DAMAGED		11
@@ -934,7 +933,10 @@
 #define GAMEEVENT_DOMINATION_CONTROL		13
 #define GAMEEVENT_DOMINATION_POINT		14
 #define GAMEEVENT_PLAYERLEAVESSERVER	15
-#define GAMEEVENT_LEVEL_INIT            16
+#define GAMEEVENT_LEVEL_INIT		16
+#define GAMEEVENT_JOINQUEUECHANGED	17
+#define GAMEEVENT_DOMINATION_PRECONTROL	18
+#define GAMEEVENT_DOMINATION_CONTEST	19
 
 // Events when you have input grabbed
 
@@ -954,13 +956,6 @@
 #define EV_RButtonDblClick		14
 #define EV_WheelDown			15
 #define EV_WheelUp				16
-
-// Zandronum gamemode states ------------------------------------------------
-#define GAMESTATE_UNSPECIFIED        -1
-#define GAMESTATE_WAITFORPLAYERS    0
-#define GAMESTATE_COUNTDOWN            1
-#define GAMESTATE_INPROGRESS        2
-#define GAMESTATE_INRESULTSEQUENCE    3
 
 // Key modifiers (or'd with event type)
 
@@ -1017,7 +1012,6 @@
 #define CHANGELEVEL_NOINTERMISSION 16
 #define CHANGELEVEL_RESETHEALTH	32
 #define CHANGELEVEL_PRERAISEWEAPON 64
-#define CHANGELEVEL_NOAUTOSAVE 128 // VKDoom
 
 #define NO_CHANGE 32767.0
 
@@ -1044,7 +1038,6 @@
 #define BLOCKF_SIGHT 256
 #define BLOCKF_HITSCAN 512
 #define BLOCKF_SOUND 1024
-#define BLOCKF_LANDMONSTERS 2048
 
 #define FOGP_DENSITY 0
 #define FOGP_OUTSIDEDENSITY 1
@@ -1139,11 +1132,6 @@
 #define QF_MAX			1 << 3
 #define QF_FULLINTENSITY	1 << 4
 #define QF_WAVE			1 << 5
-#define QF_3D			1 << 6
-#define QF_GROUNDONLY		1 << 7
-#define QF_AFFECTACTORS 	1 << 8
-#define QF_SHAKEONLY		1 << 9
-#define QF_DAMAGEFALLOFF	1 << 10
 
 #define WARPF_ABSOLUTEOFFSET 0x1
 #define WARPF_ABSOLUTEANGLE 0x2
@@ -1202,6 +1190,19 @@
 #define AMLS_UnexploredSecret	12
 #define AMLS_Portal		13
 
+// Lump reading stuff.
+#define LUMP_OPEN_FULLPATH 1
+
+#define LUMP_READ_BYTE 0
+#define LUMP_READ_UBYTE 1
+#define LUMP_READ_SHORT 2
+#define LUMP_READ_USHORT 3
+#define LUMP_READ_INT 4
+#define LUMP_READ_FLOAT 5
+                
+#define LUMP_INFO_SIZE 0
+#define LUMP_INFO_NAME 1
+
 // [TP] For GetTimeProperty
 #define TM_SECOND 0
 #define TM_MINUTE 1
@@ -1237,18 +1238,9 @@
 #define MAPROTATION_MinPlayers 3
 #define MAPROTATION_MaxPlayers 4
 
-// Lump reading stuff.
-#define LUMP_OPEN_FULLPATH 1
-
-#define LUMP_READ_BYTE 0
-#define LUMP_READ_UBYTE 1
-#define LUMP_READ_SHORT 2
-#define LUMP_READ_USHORT 3
-#define LUMP_READ_INT 4
-#define LUMP_READ_FLOAT 5
-                
-#define LUMP_INFO_SIZE 0
-#define LUMP_INFO_NAME 1
+// [AK] For GetMapPosition
+#define MAPPOSITION_CURRENT 0
+#define MAPPOSITION_NEXT 1
 
 // [SB] Disconnect reasons for GAMEEVENT_PLAYERLEAVESSERVER.
 #define LEAVEREASON_LEFT 0
@@ -1256,3 +1248,21 @@
 #define LEAVEREASON_ERROR 2
 #define LEAVEREASON_TIMEOUT 3
 #define LEAVEREASON_RECONNECT 4
+
+// GetPlayerSkin ------------------------------------------------------------
+#define PLAYERSKIN_USERINFO 0
+#define PLAYERSKIN_WEAPON 1
+#define PLAYERSKIN_ACS 2
+#define PLAYERSKIN_VISIBLE 3
+
+// [TRSR] GetControlPointInfo and SetControlPointInfo
+#define POINTINFO_NAME 0
+#define POINTINFO_OWNER 1
+#define POINTINFO_DISABLED 2
+
+// [TRSR] GetSkinProperty
+#define SPROP_TYPE_UNKNOWN 0
+#define SPROP_TYPE_INT 1
+#define SPROP_TYPE_BOOL 2
+#define SPROP_TYPE_FLOAT 3
+#define SPROP_TYPE_STRING 4
