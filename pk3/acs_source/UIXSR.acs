@@ -102,6 +102,10 @@ function bool kindaCloseTo(int n, int x, int range) {
 //
 script "UIXSR_SRParticles" (void) CLIENTSIDE
 {
+    if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_Enable")) {
+        Thing_Remove(0);
+        terminate;
+    }
     if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50Visual")) {
         Thing_Remove(0);
         terminate;
@@ -111,7 +115,7 @@ script "UIXSR_SRParticles" (void) CLIENTSIDE
         terminate;
     }
 
-    int alp = GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50VisualAlpha");
+    int alp = FixedMul(GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50VisualAlpha"), GetActorProperty(ACS_NamedExecuteWithResult("core_getptrtid", AAPTR_TARGET), AProp_Alpha));
     SetActorProperty(0, AProp_Alpha, alp);
 }
 

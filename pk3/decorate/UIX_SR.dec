@@ -50,10 +50,10 @@ actor UIXSREffect_P : CustomInventory
     {
     Pickup:
         TNT1 A 0 A_SpawnItemEx("UIXSREffect",
-                -(40*2.5),//+frandom(-UIXSR_HORZ, UIXSR_HORZ),
+                (2.5),//+frandom(-UIXSR_HORZ, UIXSR_HORZ),
                 frandom(-UIXSR_HORZ, UIXSR_HORZ),
                 -(2*momz)+frandom(0, UIXSR_VERT),
-                0, 0, 0, CallACS("UIXSR_MOMVEC"),
+                0, 0, 0, CallACS("UIXSR_MOMVEC")+180,
                 SXF_ABSOLUTEANGLE|SXF_TRANSFERTRANSLATION)
         // TNT1 A 0 A_GiveInventory("UIXSREffect_PU", 1)
         stop
