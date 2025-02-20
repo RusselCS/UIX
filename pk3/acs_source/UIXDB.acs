@@ -7,44 +7,6 @@
 #include "SHRTFUNC.acs"
 #include "UXTBWBAR.acs"
 
-int lastWeapon_init[64];
-str lastWeapon_str[64][5];
-int lastWeapon_int[64][7];
-
-#define UIX_WeapProp_Actor 0
-#define UIX_WeapProp_Tag 1
-#define UIX_WeapProp_Icon 2
-#define UIX_WeapProp_Ammo 3
-#define UIX_WeapProp_Ammo2 4
-
-#define UIX_WeapProp_Slot 5
-#define UIX_WeapProp_Cyan 6
-#define UIX_WeapProp_Blue 7
-#define UIX_WeapProp_Cyan2 8
-#define UIX_WeapProp_Blue2 9
-
-#define UIX_StrPropCount 5
-
-function void setWeaponProperty(int pln, int prop, int val)
-{
-    if(prop < UIX_StrPropCount)
-    {
-        lastWeapon_str[pln][prop] = val;
-        return;
-    }
-    lastWeapon_int[pln][prop-UIX_StrPropCount] = val;
-}
-
-function str getWeaponProperty(int pln, int prop)
-{
-    if(prop < UIX_StrPropCount)
-    {
-        return lastWeapon_str[pln][prop];
-    }
-
-    return lastWeapon_int[pln][prop-UIX_StrPropCount];
-}
-
 int readBlue1, readCyan1, readBlue2, readCyan2;
 
 function void readWeaponBars(str weap) {
@@ -83,99 +45,94 @@ function void readWeaponBars(str weap) {
     // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
 }
 
-script "UIX_GetCurrentWeapon" (int pln) {
-    SetActivatorToPlayer(pln);
-    SetResultValue(GetWeapon());
-}
+script "UIXDB_GetWeaponProperty" (int weap, int prop) { SetResultValue(UIXDB_GetWeaponProperty_F(weap, prop)); }
 
-script "UIXDB_GetPlayerWeaponProperty" (int pln, int prop)
+#define DB_STORE 34
+#define DB_STORE_2 35
+#define DB_STORE_3 36
+world int DB_STORE: ACCESSED_WEAPONS[];
+world int DB_STORE_2: accessedWeapons[];
+world int DB_STORE_3: accessCount;
+
+#define UIX_WeapProp_Actor 0
+#define UIX_WeapProp_Tag 1
+#define UIX_WeapProp_Icon 2
+#define UIX_WeapProp_Ammo 3
+#define UIX_WeapProp_Ammo2 4
+#define UIX_WeapProp_Slot 5
+#define UIX_WeapProp_Cyan 6
+#define UIX_WeapProp_Blue 7
+#define UIX_WeapProp_Cyan2 8
+#define UIX_WeapProp_Blue2 9
+
+#define PROP_MAX 10
+
+str busterProps[MAX_BUSTER_LIMIT][PROP_MAX];
+str copyWepProps[MAX_WEAPONS_GLOBAL_LIMIT][PROP_MAX];
+
+script "UIXDB_ClearDB" OPEN
 {
-    SetResultValue(GetWeaponProperty_S(pln, prop));
+    for(int i = 0; i < accessCount; i++) {
+        int weap = accessedWeapons[i];
+        int idx = ACCESSED_WEAPONS[weap];
+        Log(s:"Clearing slot ", i:i, s:": ", s:weap);
+        ACCESSED_WEAPONS[weap] = 0;
+        accessedWeapons[i] = 0;
+    }
+    accessCount = 0;
 }
 
-function str GetWeaponProperty_S(int pln, int prop) {
-    str newWep = ACS_NamedExecuteWithResult("UIX_GetCurrentWeapon", pln);
-    
-    if(lastWeapon_init[pln])
-        if(newWep == lastWeapon_str[pln][0])
-            return getWeaponProperty(pln, prop);
-    
-    lastWeapon_init[pln] = 1;
-    
-    setWeaponProperty(pln, UIX_WeapProp_Actor, newWep);
+function str UIXDB_GetWeaponProperty_F(str weap, int prop)
+{
+    int idx = ACCESSED_WEAPONS[weap];
 
-    // [Russ] Assume the weapon will be found by the weapon table, go ahead and populate the bar colors
-    readWeaponBars(newWep);
-    setWeaponProperty(pln, UIX_WeapProp_Cyan, readCyan1);
-    setWeaponProperty(pln, UIX_WeapProp_Blue, readBlue1);
-    setWeaponProperty(pln, UIX_WeapProp_Cyan2, readCyan2);
-    setWeaponProperty(pln, UIX_WeapProp_Blue2, readBlue2);
+    if(idx != 0) {
+        if(idx < 0) { // busters
+            idx = (-idx)-1;
+            return busterProps[idx][prop];
+        } else { // copyweps
+            idx = idx-1;
+            return copyWepProps[idx][prop];
+        }
+    }
 
-    int idx = findWeaponByActor(newWep);
-
+    idx = findWeaponByActor(weap);
     if(idx != -1) {
-        setWeaponProperty(pln, UIX_WeapProp_Tag, getWeaponTag(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Icon, getWeaponIcon(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Ammo, getWeaponAmmoType(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Slot, getWeaponSlot(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Ammo2, getWeaponAmmo2Type(idx));
+        copyWepProps[idx][UIX_WeapProp_Actor] = weap;
+        copyWepProps[idx][UIX_WeapProp_Tag] = getWeaponTag(idx);
+        copyWepProps[idx][UIX_WeapProp_Icon] = getWeaponIcon(idx);
+        copyWepProps[idx][UIX_WeapProp_Ammo] = getWeaponAmmoType(idx);
+        copyWepProps[idx][UIX_WeapProp_Ammo2] = getWeaponAmmo2Type(idx);
+        copyWepProps[idx][UIX_WeapProp_Slot] = getWeaponSlot(idx);
 
-        return getWeaponProperty(pln, prop);
+        readWeaponBars(weap);
+        copyWepProps[idx][UIX_WeapProp_Cyan] = readCyan1;
+        copyWepProps[idx][UIX_WeapProp_Blue] = readBlue2;
+        copyWepProps[idx][UIX_WeapProp_Cyan2] = readCyan2;
+        copyWepProps[idx][UIX_WeapProp_Blue2] = readBlue2;
+
+        ACCESSED_WEAPONS[weap] = idx+1;
+        accessedWeapons[accessCount++] = weap;
+        return copyWepProps[idx][prop];
     }
 
-    idx = findBusterUpgradeByActor(newWep);
-
+    idx = findBusterUpgradeByActor(weap);
     if(idx != -1) {
-        setWeaponProperty(pln, UIX_WeapProp_Tag, getBusterTag(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Icon, getBusterIcon(idx));
-        setWeaponProperty(pln, UIX_WeapProp_Ammo, "");
-        setWeaponProperty(pln, UIX_WeapProp_Ammo2, "");
+        copyWepProps[idx][UIX_WeapProp_Actor] = weap;
+        copyWepProps[idx][UIX_WeapProp_Tag] = getBusterTag(idx);
+        copyWepProps[idx][UIX_WeapProp_Icon] = getBusterIcon(idx);
+        copyWepProps[idx][UIX_WeapProp_Ammo] = "";
+        copyWepProps[idx][UIX_WeapProp_Ammo2] = "";
+        copyWepProps[idx][UIX_WeapProp_Slot] = 1;
+        copyWepProps[idx][UIX_WeapProp_Cyan] = -1;
+        copyWepProps[idx][UIX_WeapProp_Blue] = -1;
+        copyWepProps[idx][UIX_WeapProp_Cyan2] = -1;
+        copyWepProps[idx][UIX_WeapProp_Blue2] = -1;
 
-        setWeaponProperty(pln, UIX_WeapProp_Slot, 1);
-
-        return getWeaponProperty(pln, prop);
+        ACCESSED_WEAPONS[weap] = -(idx+1);
+        accessedWeapons[accessCount++] = weap;
+        return copyWepProps[idx][prop];
     }
 
-    setWeaponProperty(pln, UIX_WeapProp_Tag, "");
-    setWeaponProperty(pln, UIX_WeapProp_Icon, "");
-    setWeaponProperty(pln, UIX_WeapProp_Ammo, "");
-    setWeaponProperty(pln, UIX_WeapProp_Ammo2, "");
-
-    setWeaponProperty(pln, UIX_WeapProp_Slot, -1);
-
-    return getWeaponProperty(pln, prop);
-}
-
-script "UIXDB_GetPlayerAmmo" (int pln, int type, int mode)
-{
-    SetResultValue(GetPlayerAmmo_S(pln, type, mode));
-}
-
-function int GetPlayerAmmo_S(int pln, int type, int mode)
-{
-    str ammoType;
-    if(type > 0) {
-        ammoType = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Ammo2);
-    } else {
-        ammoType = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Ammo);
-    }
-
-    if(ammoType == -1)
-        return -1;
-    if(StrLen(ammoType) == 0)
-        return -1;
-
-    SetActivatorToPlayer(pln);
-
-    if(!mode)
-        return CheckInventory(ammoType);
-
-    return GetAmmoCapacity(ammoType);
-}
-
-
-
-script "UIXDB_GetAmmoBar" (int orientation, int layer, int color)
-{
-    SetResultValue(getAmmoBar(orientation, layer, color));
+    return copyWepProps[idx][prop];
 }
