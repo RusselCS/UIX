@@ -3,7 +3,7 @@
 user bool UIX2_CL_notification = true;
 
 user bool UIX2_CL_Enable = true;
-user int UIX2_CL_LATESTVERSION = 2.0;
+user float UIX2_CL_LATESTVERSION = 2.0;
 
 user bool UIX2_CL_UsingSR50 = true;
 user noarchive bool UIX_TempStore_SR50Checked = false;
