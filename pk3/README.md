@@ -65,7 +65,8 @@ v2a changelog:
 --- (1) folks needed to turn the whole thing off due to bad performance, and
 --- (2) the way some of the cvars were handled was inconsistent across widgets
 - TeamInfo:
---- Recoded from the ground up. CPU footprint reduced by roughly 50%.
+--- Recoded from the ground up.
+--- Removed layer health bars.
 --- Reworked the widget to be 4 rows of data: Name, Location, Health, Ammo/Lives.
 --- Ammo info outsourced to "UIXDB.acs", which can be replaced by other mods for their specific purposes.
 --- Removed the directional compass for ally positions. It was too much information to obtain at a glance.
@@ -73,17 +74,12 @@ v2a changelog:
 --- Widget is now more concisely structured, icons are closer together.
 --- Each weapon slot's row/column now caps out at 5 weapons (changeable by player).
 --- Weapon order scrolls based on which weapon is selected now.
---- Scroll order on the bar now matches the default scroll order for vanilla weapons.
+--- Scroll order on the bar now matches the default scroll order for vanilla weapons. (Mod weapons will need to have their include and ACS order synced).
 --- Known issue: Due to an inheritance chain in vanilla, Laser Buster and Arrow Buster have to have an inverse order. It looks weird but only affects a cheat scenario.
 --- Removed the automated fetching of bar colors from ScriptBars.
 ----- Previously this method result in bars being colored incorrectly, but this change keeps the weapon bar from stepping on the toes of any actual bar scripts running.
------ ScriptBars can manually define bar colors by inheriting from ArsenalBar and ArsenalSecondBar and filling args in as normal.
+----- ScriptBars can manually define bar colors by inheriting from NormalBar and SecondBar and filling args in as normal.
 - SR50 Tailwind: Few smaller changes
 --- Now wooshes in the opposite direction (better matching SRB2)
 --- Transparency now matches the SR50 user's transparency
 --- Now properly disables if user disables all of UI Extensions
-
-FAQs:
-- Can you draw ammo on the teaminfo? (more specifically, "can you draw healer ammo on the team display?")
---- No. Or rather, not in a way that keeps this mod as generally applicable as possible.
---- The infrastructure isn't yet there to facilitate something like this. Maybe in the future.
