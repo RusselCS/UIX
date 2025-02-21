@@ -15,7 +15,7 @@ script "UIXSR_SRINIT" OPEN CLIENTSIDE
     if(!GetUserCvar(cln, "UIX_TempStore_SR50Checked")) {
         SetUserCvar(cln, "UIX_TempStore_SR50Checked", true);
 
-        if(GetUserCvar(cln, "UIX2_CL_UsingSR50")) {
+        if(GetUserCvar(cln, "UIX_CL_UsingSR50")) {
             ConsoleCommand("turnspeeds 0");
         }
     }
@@ -102,11 +102,11 @@ function bool kindaCloseTo(int n, int x, int range) {
 //
 script "UIXSR_SRParticles" (void) CLIENTSIDE
 {
-    if(!GetUserCvar(ConsolePlayerNumber(), "UIX2_CL_Enable")) {
+    if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_Enable")) {
         Thing_Remove(0);
         terminate;
     }
-    if(!GetUserCvar(ConsolePlayerNumber(), "UIX2_CL_SR50Visual")) {
+    if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50Visual")) {
         Thing_Remove(0);
         terminate;
     }
@@ -115,7 +115,7 @@ script "UIXSR_SRParticles" (void) CLIENTSIDE
         terminate;
     }
 
-    int alp = FixedMul(GetUserCvar(ConsolePlayerNumber(), "UIX2_CL_SR50VisualAlpha"), GetActorProperty(ACS_NamedExecuteWithResult("core_getptrtid", AAPTR_TARGET), AProp_Alpha));
+    int alp = FixedMul(GetUserCvar(ConsolePlayerNumber(), "UIX_CL_SR50VisualAlpha"), GetActorProperty(ACS_NamedExecuteWithResult("core_getptrtid", AAPTR_TARGET), AProp_Alpha));
     SetActorProperty(0, AProp_Alpha, alp);
 }
 

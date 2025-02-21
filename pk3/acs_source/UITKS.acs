@@ -9,7 +9,7 @@
 
 script "UIX_Notifier" OPEN CLIENTSIDE {
 	int cpn = ConsolePlayerNumber();
-	if(GetUserCvar(cpn,"UIX2_CL_notification")) {
+	if(GetUserCvar(cpn,"UIX_CL_notification")) {
 		Log(s:"\cfUI Extensions \cjenabled. Type \cgUIEXOptions\cj in console for available options.");
 	}
 }
@@ -34,14 +34,14 @@ script "UITweaks_Register_Server" OPEN
 
 #define UIT_MAX 2
 str UI_Scripts[UIT_MAX][3] = {
-    {"UITweaks_TeamInfo", "UIX2_CL_TEAMINFO", "6A"},
-    {"UIX_WeapBar", "UIX2_CL_WEAPBAR", "6B"},
+    {"UITweaks_TeamInfo", "UIX_CL_TEAMINFO", "6A"},
+    {"UIX_WeapBar", "UIX_CL_WEAPBAR", "6B"},
 };
 
 script "UITweaks_Runner" (int cam) CLIENTSIDE
 {
     int cpn = ConsolePlayerNumber();
-    if(!GetUserCvar(cpn, "UIX2_CL_Enable"))
+    if(!GetUserCvar(cpn, "UIX_CL_Enable"))
         terminate;
 
     for(int i = 0; i < UIT_MAX; i++) {
@@ -72,7 +72,7 @@ Script "UIX6A_Runner" OPEN CLIENTSIDE {
 
 function int AssistDisplayFunc(int cpn, int validCam) {
 
-    if(!GetUserCvar(cpn, "UIX2_CL_Enable"))
+    if(!GetUserCvar(cpn, "UIX_CL_Enable"))
         return 0;
     
 	int cam = CheckPlayerCamera(cpn);
