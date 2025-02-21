@@ -121,5 +121,6 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
         {
             SetUserCvar(cpn, TeamInfo_Cvars[i], TeamInfo_Presets[0][i]);
         }
+        Log(s:"\c[gold]UI Extensions settings updated!");
     }
 }
