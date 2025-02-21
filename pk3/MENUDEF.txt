@@ -1,3 +1,8 @@
+OptionMenuSettings
+{
+    Linespacing 10 //8 //Changed smallfnt is slightly taller/spaced
+}
+
 OptionMenu "8BDM_UISettings"
 {
 	Title "UI SETTINGS"
