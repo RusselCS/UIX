@@ -21,13 +21,6 @@ actor ArsenalAmmo : UIXColorStore {}
 actor SecondArsenalAmmo : UIXColorStore {}
 
 // V6B Bars
-actor ProtoBuster_ArsenalBar : ArsenalBar { args 87,42 }
-actor ArrowBuster_ArsenalBar : ArsenalBar { args 192,198 }
-actor LaserBuster_ArsenalBar : ArsenalBar { args 192,198 }
-actor DuoFist_Campaign_ArsenalBar : ArsenalBar { args 220,195 }
-actor DuoFist_ArsenalBar : ArsenalBar { args 220,195 }
-actor SuperAdaptorWep_ArsenalBar : ArsenalBar { args 4,42 }
-actor MegaArm_ArsenalBar : ArsenalBar { args 192,198 }
 actor AtomicFireWep_ArsenalBar : ArsenalBar { args 229,41 }
 actor NoiseCrushWep_ArsenalBar : ArsenalBar { args 204,61 }
 actor WildCoilWep_ArsenalBar : ArsenalBar { args 106,251 }
@@ -37,5 +30,68 @@ actor BreakDashWep_ArsenalBar : ArsenalBar { args 4,63 }
 actor MirrorBusterWep_ArsenalBar : ArsenalBar { args 229,76 }
 actor DawnBreakerWep_ArsenalBar : ArsenalBar { args 196,70 }
 
-// Mod support. If you make these for your own mod, please just inherit from NormalBar.
-// [to do]
+// Mod support. If you make these for your own mod, please just inherit from NormalBar and call them NormalBar/SecondBar.
+// ArsenalBar terminology is so mods can retread this ground without worry of conflict.
+// If NormalBar/SecondBar does not exist in your mod, please define them as needed for the teaminfo and weapon bar widgets.
+// These are fallbacks for existing mods.
+
+// order of the below weapons is honestly sorted in "whatever way VSCode decided to do it when I did a mass file search"
+// so it's a bit incomprehensible. not sorry.
+
+// 8bdm-bubblegunmod-v1.pk3
+// actor BubbleGunIGWep_ArsenalBar : ArsenalBar {} // unsure how to support this one
+
+// touhougensokyoweps_eternalv7earlyaccess_h.pk3
+actor KillingDollWep_ArsenalBar : ArsenalBar { args 64, 245 } // luna nights is a fun game, kinda wish it was more "metroid-like" rather than being stage-based tho
+actor PerfectFreezeWep_ArsenalBar : ArsenalBar { args 4, 204 }
+
+// mmd-weps-v2c.pk3
+actor PlasmaCutterWep_ArsenalBar : ArsenalBar { args 104, 117 }
+
+// experimentalweaponsv2d.pk3
+// HorsemansHeadtaker - buster
+
+// encore-weps-v2ah6.pk3
+// MaestroBusterEnc - buster
+
+// vileweps-v2ah5.pk3
+// StarSpur - buster
+// RhythmBuster - buster
+actor ElementSuperchargeWep_ArsenalBar : ArsenalBar { args 100,70 }
+actor HazardTrapperWep_ArsenalBar : ArsenalBar { args 229,93 }
+// HyperBuster - buster
+actor PowerParcelWep_ArsenalBar : ArsenalBar { args 84,229 }
+actor ArrowLaserWep_ArsenalBar : ArsenalBar { args 42,242 }
+actor FlameBargeWep_ArsenalBar : ArsenalBar { args 210,41 }
+actor SonicSpinWep_ArsenalBar : ArsenalBar { args 196,199 }
+actor TenorBlasterWep_ArsenalBar : ArsenalBar { args 228,69 }
+
+// rnc-weps-v4d.pk3
+actor ProtoChargeWep_ArsenalBar : ArsenalBar { args 201, 76 }
+
+// mmu-weps-v2a-h2.pk3
+actor CometDashWep_J_ArsenalBar : ArsenalBar { args 4,193 }
+actor JetMissileWep_J_ArsenalBar : ArsenalBar { args 67,41 }
+
+// inspiredburst-v1ah2.pk3
+actor RocketGrabWep_ArsenalBar : ArsenalBar { args 230, 234 }
+actor SnakeWhipWep_ArsenalBar : ArsenalBar { args 104, 216 }
+actor YoukaiBusterWep_ArsenalBar : ArsenalBar { args 250,251 }
+// ZangetsutoWep - buster
+
+// allanxweps-v3c.pk3
+actor GoddessArrowsWep_ArsenalBar : ArsenalBar { args 229,76 }
+actor RainbowLasersWep_ArsenalBar : ArsenalBar { args 4, 93 } // cheeky
+// NovaBlaster - buster
+
+// ukiwepsv4a-h1.pk3
+actor BalefulStrikeWep_ArsenalBar : ArsenalBar { args 57, 75 }
+actor GlassBallWep_ArsenalBar : ArsenalBar { args 4, 116 }
+actor MagnetMineWep_ArsenalBar : ArsenalBar { args 4, 62 }
+actor YammarOptionWep_ArsenalBar : ArsenalBar { args 217, 130 }
+actor AssaultRifleWep_ArsenalBar : ArsenalBar { args 89, 110 }
+actor AssaultRifleWep_SecondArsenalBar : SecondArsenalBar { args 4, 221 }
+actor DualAssaultRifleWep_ArsenalBar : ArsenalBar { args 89, 110 }
+actor DualAssaultRifleWep_SecondArsenalBar : SecondArsenalBar { args 4, 221 }
+actor BioRifleWep_ArsenalBar : ArsenalBar { args 104, 111 }
+actor ShieldGunWep_ArsenalBar : ArsenalBar { args 4, 128 }

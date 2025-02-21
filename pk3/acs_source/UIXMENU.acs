@@ -2,6 +2,8 @@
 
 #include "zcommon.acs"
 
+#include "SHRTFUNC.acs"
+
 // version checker/resetter
 
 // #define VERSIONNUM 1.00 // v1a
@@ -61,8 +63,8 @@ str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
 // 2 - bottom right
 int TeamInfo_Presets[3][TEAMINFO_CVARS_MAX] = {
     {true,true,true,true,true,false,false,true,false,96,1.0,1.5,-440,-416},
-    {true,true,true,true,true,true,false,false,false,96,1.0,2.0,370,-540},
-    {true,true,true,true,true,true,false,false,true,96,1.0,2.0,370,600},
+    {true,true,true,true,true,true,false,false,false,96,1.0,2.0,240,-540},
+    {true,true,true,true,true,true,false,false,true,96,1.0,2.0,240,600},
 };
 
 script "UITweaks_TeaminfoPreset" (int which, int callback) NET CLIENTSIDE {

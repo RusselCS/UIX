@@ -515,7 +515,7 @@ function void drawWeapon(int pln, int x, int y)
             str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
 
             drawLayeredBar(cyan, blue, black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-            drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt2, amx2, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         } else {
             drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         }
