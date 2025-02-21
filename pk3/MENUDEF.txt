@@ -46,13 +46,17 @@ OptionMenu "UIXOptions"
 	StaticText "Notification Option", 1
 	Option "UI Extensions Notification", "UIX2_CL_notification", "OnOff"
 	StaticText " "
-	StaticText "Global Toggle", 1
-	Option "UI Extensions", "UIX2_CL_Enable", "OnOff"
+	StaticText "If lagging, turn these off first", 1
+	Option "Team Info: Show Ally Weapons", "UIX2_CL_TEAMINFOSHOWWEAPON", "OnOff"
+	Option "Team Info Enabled", "UIX2_CL_TEAMINFO", "OnOff"
 	StaticText " "
 	StaticText "Widgets", 1
 	Submenu "SR50 Options", "UIXOptions_SR50"
 	Submenu "Team Info Options", "UIXOptions_TeamInfo"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
+	StaticText " "
+	StaticText "Global Toggle", 1
+	Option "Toggle All UI Extensions", "UIX2_CL_Enable", "OnOff"
 	StaticText " "
 	SafeCommand "Reset to Defaults", "uix_default_presets"
 }

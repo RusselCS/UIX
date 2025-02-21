@@ -36,9 +36,9 @@ Done:
 == V1F TO DO ==
 - Cleanup: Remove constants unused
 - Cleanup: Move "bloat" tables into separate include files
-- Teaminfo: Weapon bar still broken
 - Teaminfo: Add number toggles for everything
 - Assist message?
+- Fix cvars not doing anything.
 - Mod support - from SDM:
 # -file "../../mods/basinofweapons-v1a.pk3" \
 # -file "../../mods/experimentalweaponsv2d.pk3" \
@@ -62,6 +62,8 @@ pinkrobotblaster's snake man new year weapon
 
 
 Done:
+- Version checker
+- Teaminfo: Weapon bar still broken
 - Teaminfo: Fix name caching
 - Teaminfo: Finish setbarcliprect update
 - Teaminfo: Stock pips over mugshots
