@@ -442,7 +442,8 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
         if(slotCounts[slot]) {
             SetFont("SMALLFONT");
-            displayMessage(StrParam(s:col, k:slotBinds[slot]), GetNewUIID(), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
+            if(cvShowSlots)
+                displayMessage(StrParam(s:col, k:slotBinds[slot]), GetNewUIID(), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
 
             if(slotCounts[slot] > cvMaxRow) {
                 displayMessage(UIXWEAP_OverflowNums[slotCounts[slot]-i], GetNewUIID(), baseX + overflowX, baseY + overflowY, overflowScale, overflowScale, cvAlpha, OverflowHAlign, 0);

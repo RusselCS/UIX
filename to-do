@@ -33,35 +33,16 @@ Done:
 - Remove MegaVile and Encore
 - Check BluemanBlaster
 
-== V1F TO DO ==
+== V2A TO DO ==
 - Cleanup: Remove constants unused
 - Cleanup: Move "bloat" tables into separate include files
 - Teaminfo: Add number toggles for everything
 - Assist message?
-- Fix cvars not doing anything.
-- Mod support - from SDM:
-# -file "../../mods/basinofweapons-v1a.pk3" \
-# -file "../../mods/experimentalweaponsv2d.pk3" \
-# -file "../../mods/rnc-weps-v4d.pk3"  \
-# -file "../../mods/mmd-weps-v2c.pk3"  \
-# -file "../../mods/mmu-weps-v2a-h2.pk3"  \
-# -file "../../mods/mmrf-weps-v3e.pk3"  \
-# -file "../../mods/ukiwepsv4a-h1.pk3" \
-# -file "../../mods/encore-weps-v2ah6.pk3" \
-# -file "../../mods/allanxweps-v3c.pk3" \
-# -file "../../mods/vileweps-v2ah5.pk3" \
-# -file "../../mods/inspiredburst-v1ah2.pk3"  \
-# -file "../../mods/touhougensokyoweps_eternalv7earlyaccess_h.pk3"  \
-
-also, optionally
-# -file "../../mods/mmxspv4.1-unoffical.pk3" \ 
-# -file "../../mods/xfuturefury-v2.1.pk3" \
-# -file "../../mods/grandclasses-v2eh5.pk3"  \
-# -file "../../mods/8bdm-bubblegunmod-v1.pk3"  \
-pinkrobotblaster's snake man new year weapon
 
 
 Done:
+- Mod support
+- Fix cvars not doing anything.
 - Version checker
 - Teaminfo: Weapon bar still broken
 - Teaminfo: Fix name caching
@@ -71,7 +52,7 @@ Done:
 - Missed a "scuttlerun" in the menu somewhere. Squash that.
 - Frag messages: Add mugshot on frag message
 
-== V2A TO DO ==
+== V2B TO DO ==
 - Team ammo bar (most requested feature)
 - Bar Rework! Use simplified graphics instead of pieces.
 - Mugshot on frag message
