@@ -93,34 +93,50 @@ script "UITweaks_WeaponBarPreset" (int which) NET CLIENTSIDE {
 
 // version checker/resetter
 
-// #define VERSIONNUM 1.00 // v1a
-// #define VERSIONNUM 1.01 // v1b
-// #define VERSIONNUM 1.02 // v1c
-// #define VERSIONNUM 1.03 // v1ch
-// #define VERSIONNUM 1.04 // v1d
-// #define VERSIONNUM 1.05 // v1e
-#define VERSIONNUM 2.0 // v2a
+#define v1a 1.00
+#define v1b 1.01
+#define v1c 1.02
+#define v1ch 1.03
+#define v1d 1.04
+#define v1e 1.05
+#define v2a 2.0
+#define v2b 2.01
+
+// #define VERSIONNUM v1a
+// #define VERSIONNUM v1b
+// #define VERSIONNUM v1c
+// #define VERSIONNUM v1ch
+// #define VERSIONNUM v1d
+// #define VERSIONNUM v1e
+#define VERSIONNUM v2a
 
 script "UIX_CurrentVersion" OPEN CLIENTSIDE
 {
     delay(1);
     int cpn = ConsolePlayerNumber();
-    if(GetUserCvar(cpn, "UIX_CL_LATESTVERSION") < VERSIONNUM) {
-        SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
+    int oldVersion = GetUserCvar(cpn, "UIX_CL_LATESTVERSION");
+    if(oldVersion < VERSIONNUM) {
+        if(oldVersion < v2a) {
+            SetUserCvar(cpn, "UIX_CL_Enable", true);
+            SetUserCvar(cpn, "UIX_CL_SR50Visual", true);
+            SetUserCvar(cpn, "UIX_CL_WEAPBAR", true);
+            SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
+            
+            for(int i = 0; i < WEAPONBAR_CVARS_MAX; i++)
+            {
+                SetUserCvar(cpn, WeaponBar_Cvars[i], WeaponBar_Presets[0][i]);
+            }
+            for(i = 0; i < TEAMINFO_CVARS_MAX; i++)
+            {
+                SetUserCvar(cpn, TeamInfo_Cvars[i], TeamInfo_Presets[0][i]);
+            }
+        }
 
-        SetUserCvar(cpn, "UIX_CL_Enable", true);
-        SetUserCvar(cpn, "UIX_CL_SR50Visual", true);
-        SetUserCvar(cpn, "UIX_CL_WEAPBAR", true);
-        SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
-        
-        for(int i = 0; i < WEAPONBAR_CVARS_MAX; i++)
-        {
-            SetUserCvar(cpn, WeaponBar_Cvars[i], WeaponBar_Presets[0][i]);
+        if(oldVersion < v2b) {
+
         }
-        for(i = 0; i < TEAMINFO_CVARS_MAX; i++)
-        {
-            SetUserCvar(cpn, TeamInfo_Cvars[i], TeamInfo_Presets[0][i]);
-        }
+
+        SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
         Log(s:"\c[gold]UI Extensions settings updated!");
     }
 }

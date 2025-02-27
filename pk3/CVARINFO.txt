@@ -39,3 +39,6 @@ user bool UIX_CL_TEAMINFOSHOWLOCATION = true;
 user bool UIX_CL_TEAMINFOSHOWLIVES = true;
 user bool UIX_CL_TEAMINFOSHOWWEAPON = true;
 user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
+
+// debug stuff
+user noarchive bool UIX_DEBUG_SHOWSELF = false;

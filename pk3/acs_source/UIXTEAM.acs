@@ -25,6 +25,8 @@ int cvFontIdx;
 int cvReverseText;
 int cvShowWeapon;
 
+int dbShowSelf;
+
 int tiCache_Scale = MIN_INT;
 int tiCache_Stack = MIN_INT;
 
@@ -57,6 +59,8 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     if(team == 255) { // Spectator
 
     } else {
+        dbShowSelf = GetUserCvar(cpn, "UIX_DEBUG_SHOWSELF");
+
         cvOffsx = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
         cvOffsy = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
         cvScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
@@ -92,8 +96,9 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 
         for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
             // Log(i:i, s:" == ", i:pln);
-            if(i == pln)
-                continue;
+            if(!dbShowSelf)
+                if(i == pln)
+                    continue;
 
             // Log(i:i, s:"in game? ", i:PlayerInGame(i));
             if(!PlayerInGame(i))
@@ -119,10 +124,10 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 }
 
 // Generic Draw constants ===========================================================================================================================
-#define ROW_LENGTH 8
+#define ROW_LENGTH 11
 #define TEXT_SCALE 0.7
 
-#define HP_LENGTH 96
+#define HP_LENGTH 64
 #define HP_WIDTH 8
 
 str uiFonts[2] = {
@@ -166,10 +171,10 @@ function str getMugshotGraphicFromTID(int tid) {
 }
 
 // Draw Name ========================================================================================================================================
-#define NAME_X_00 17
-#define NAME_Y_00 -11
+#define NAME_X_00 16 // -18
+#define NAME_Y_00 -16+7
 
-#define NAME_X_01 -17
+#define NAME_X_01 -16
 #define NAME_Y_01 -11
 
 #define NAME_X_10 -8-ROW_LENGTH
@@ -233,11 +238,11 @@ function void drawName(int pln, int x, int y)
 }
 
 // Draw Location ========================================================================================================================================
-#define LOC_X_00 17
-#define LOC_Y_00 -11 + ROW_LENGTH
+#define LOC_X_00 16
+#define LOC_Y_00 -11 + (ROW_LENGTH/2) + 4
 
-#define LOC_X_01 -17
-#define LOC_Y_01 -11 + ROW_LENGTH
+#define LOC_X_01 -16
+#define LOC_Y_01 -11 + (ROW_LENGTH/2)
 
 #define LOC_X_10 -8
 #define LOC_Y_10 13
@@ -305,11 +310,11 @@ function void drawLocation(int pln, int x, int y)
 }
 
 // Draw Health ======================================================================================================================================
-#define HP_X_00 16
-#define HP_Y_00 -20+2*ROW_LENGTH
+#define HP_X_00 120
+#define HP_Y_00 -26-ROW_LENGTH+7
 
 #define HP_X_01 -18-96
-#define HP_Y_01 -20+2*ROW_LENGTH
+#define HP_Y_01 -11+ROW_LENGTH
 
 #define HP_X_10 -1
 #define HP_Y_10 13
@@ -358,9 +363,9 @@ function void drawHealth(int pln, int x, int y)
         healthCache_Mirror = cvMirror;
         healthCache_Dir = cvDir;
 
-        healthX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_X_00 : HP_X_01) : (!cvMirror ? HP_X_10 : HP_X_11)));
-        healthY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? HP_Y_00 : HP_Y_01) : (!cvMirror ? HP_Y_10 : HP_Y_11)));
-        healthScale = FixedMul(FixedMul(cvScale, 1.0), 0.1);
+        healthScale = FixedMul(FixedMul(cvScale, 1.3334), 0.1);
+        healthX = FixedMul(healthScale, (!cvDir ? (!cvMirror ? HP_X_00 : HP_X_01) : (!cvMirror ? HP_X_10 : HP_X_11)));
+        healthY = FixedMul(healthScale, (!cvDir ? (!cvMirror ? HP_Y_00 : HP_Y_01) : (!cvMirror ? HP_Y_10 : HP_Y_11)));
         healthWidth = healthBarDimensions[cvDir];
         healthHeight = healthBarDimensions[!cvDir];
     }
@@ -371,8 +376,8 @@ function void drawHealth(int pln, int x, int y)
 }
 
 // Draw Weapon ======================================================================================================================================
-#define WEP_ICONX_00 24
-#define WEP_ICONY_00 1+2*ROW_LENGTH
+#define WEP_ICONX_00 20
+#define WEP_ICONY_00 8+ROW_LENGTH-2
 
 #define WEP_ICONX_01 -17
 #define WEP_ICONY_01 1+2*ROW_LENGTH
@@ -384,8 +389,8 @@ function void drawHealth(int pln, int x, int y)
 #define WEP_ICONY_11 -15
 
 // Bar is relative to the icon
-#define WEP_BARX_00 0
-#define WEP_BARY_00 -10
+#define WEP_BARX_00 -1
+#define WEP_BARY_00 -12
 
 #define WEP_BARX_01 -36
 #define WEP_BARY_01 -10
@@ -397,8 +402,8 @@ function void drawHealth(int pln, int x, int y)
 #define WEP_BARY_11 -40
 
 // Double bar has a different set of coords
-#define WEP_BAR1X_00 0
-#define WEP_BAR1Y_00 -12
+#define WEP_BAR1X_00 -1
+#define WEP_BAR1Y_00 -8
 
 #define WEP_BAR1X_01 -36
 #define WEP_BAR1Y_01 -12
@@ -409,8 +414,8 @@ function void drawHealth(int pln, int x, int y)
 #define WEP_BAR1X_11 -8
 #define WEP_BAR1Y_11 -40
 
-#define WEP_BAR2X_00 0
-#define WEP_BAR2Y_00 -8
+#define WEP_BAR2X_00 -1
+#define WEP_BAR2Y_00 -12
 
 #define WEP_BAR2X_01 -36
 #define WEP_BAR2Y_01 -8
@@ -443,10 +448,13 @@ int weaponIconScale;
 int weaponBarScale;
 int weaponBarWidth;
 int weaponBarHeight;
+int weaponBarSingleWidth;
+int weaponBarSingleHeight;
 int weaponBar1Top;
 int weaponBar1Bottom;
 int weaponBar2Top;
 int weaponBar2Bottom;
+int weaponScale;
 
 int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
@@ -481,18 +489,29 @@ function void drawWeapon(int pln, int x, int y)
         weaponCache_Mirror = cvMirror;
         weaponCache_Dir = cvDir;
 
-        weaponIconX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_ICONX_00 : WEP_ICONX_01) : (!cvMirror ? WEP_ICONX_10 : WEP_ICONX_11)));
-        weaponIconY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_ICONY_00 : WEP_ICONY_01) : (!cvMirror ? WEP_ICONY_10 : WEP_ICONY_11)));
-        weaponBarX = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BARX_00 : WEP_BARX_01) : (!cvMirror ? WEP_BARX_10 : WEP_BARX_11)));
-        weaponBarY = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BARY_00 : WEP_BARY_01) : (!cvMirror ? WEP_BARY_10 : WEP_BARY_11)));
-        weaponBar1X = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR1X_00 : WEP_BAR1X_01) : (!cvMirror ? WEP_BAR1X_10 : WEP_BAR1X_11)));
-        weaponBar1Y = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR1Y_00 : WEP_BAR1Y_01) : (!cvMirror ? WEP_BAR1Y_10 : WEP_BAR1Y_11)));
-        weaponBar2X = weaponIconX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR2X_00 : WEP_BAR2X_01) : (!cvMirror ? WEP_BAR2X_10 : WEP_BAR2X_11)));
-        weaponBar2Y = weaponIconY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEP_BAR2Y_00 : WEP_BAR2Y_01) : (!cvMirror ? WEP_BAR2Y_10 : WEP_BAR2Y_11)));
-        weaponBarScale = FixedMul(FixedMul(cvScale, 1.0), 0.1);
-        weaponIconScale = FixedMul(WEP_ICON_SCALE, cvScale);
+        weaponScale = FixedMul(cvScale, 1.3334);
+
+        weaponIconX = FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_ICONX_00 : WEP_ICONX_01) : (!cvMirror ? WEP_ICONX_10 : WEP_ICONX_11)));
+        weaponIconY = FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_ICONY_00 : WEP_ICONY_01) : (!cvMirror ? WEP_ICONY_10 : WEP_ICONY_11)));
+        weaponBarX = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BARX_00 : WEP_BARX_01) : (!cvMirror ? WEP_BARX_10 : WEP_BARX_11)));
+        weaponBarY = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BARY_00 : WEP_BARY_01) : (!cvMirror ? WEP_BARY_10 : WEP_BARY_11)));
+        weaponBar1X = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR1X_00 : WEP_BAR1X_01) : (!cvMirror ? WEP_BAR1X_10 : WEP_BAR1X_11)));
+        weaponBar1Y = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR1Y_00 : WEP_BAR1Y_01) : (!cvMirror ? WEP_BAR1Y_10 : WEP_BAR1Y_11)));
+        weaponBar2X = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR2X_00 : WEP_BAR2X_01) : (!cvMirror ? WEP_BAR2X_10 : WEP_BAR2X_11)));
+        weaponBar2Y = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR2Y_00 : WEP_BAR2Y_01) : (!cvMirror ? WEP_BAR2Y_10 : WEP_BAR2Y_11)));
+        weaponBarScale = FixedMul(FixedMul(weaponScale, 1.0), 0.1);
+        weaponIconScale = FixedMul(WEP_ICON_SCALE, weaponScale);
         weaponBarWidth = weaponBarDimensions[cvDir];
         weaponBarHeight = weaponBarDimensions[!cvDir];
+
+        weaponBarSingleWidth = weaponBarWidth;
+        weaponBarSingleHeight = weaponBarHeight;
+
+        if(cvDir) {
+            weaponBarSingleWidth *= 2;
+        } else {
+            weaponBarSingleHeight *= 2;
+        }
     }
 
     str icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Icon);
@@ -502,14 +521,15 @@ function void drawWeapon(int pln, int x, int y)
     if(amt1 != -1) {
         int amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 1);
 
-        str cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-        str blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
-
-        str black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+        str cyan, blue, black;
 
         int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
 
         if(amt2 != -1) {
+            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+
             int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
             str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
             str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
@@ -517,7 +537,10 @@ function void drawWeapon(int pln, int x, int y)
             drawLayeredBar(cyan, blue, black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
             drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt2, amx2, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         } else {
-            drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 2);
+            drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarSingleWidth, weaponBarSingleHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         }
     }
 
