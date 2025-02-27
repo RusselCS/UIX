@@ -15,3 +15,52 @@ UIXArrowDark {
 Console:
     #784000 #784000 0 256
 }
+
+/* Orange
+{
+	#200000  #FF8000
+Console:
+	#200000  #904000    0 127
+	#FF7F00  #FFFEFE  128 256
+Flat:
+	#FFAA00
+} */
+
+/* White
+{
+	#242424  #FFFFFF
+Console:
+	#000000  #7F7F7F    0 127
+	#808080  #FFFFFF  128 256
+Flat:
+	#DFDFDF
+} 
+
+Orange
+{
+	#242424  #FFFFFF
+Console:
+    #200000  #200000    0 127
+    #FF8000  #FF8000  128 191
+    #ac7c00  #ac7c00  192 193
+    #fce0a8  #fce0a8  194 195
+    #FFFFFF  #FFFFFF  196 197
+    #FF8000  #FF8000  198 256
+Flat:
+	#DFDFDF
+}
+
+White
+{
+	#242424  #FFFFFF
+Console:
+    #242424  #242424    0 127
+    #FFFFFF  #FFFFFF  128 191
+    #60606c  #60606c  192 193
+    #8f8f8f  #8f8f8f  194 195
+    #e3e3e3  #e3e3e3  196 197
+    #FFFFFF  #FFFFFF  198 256
+Flat:
+	#DFDFDF
+}
+*/
