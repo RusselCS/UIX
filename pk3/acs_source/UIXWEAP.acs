@@ -83,6 +83,9 @@ int weightOffsY;
 int slotOffsX;
 int slotOffsY;
 
+int barX;
+int barY;
+
 int barX1;
 int barY1;
 
@@ -132,37 +135,50 @@ int OverflowHAlign;
 #define SLOTOFFS_X_11 0
 #define SLOTOFFS_Y_11 20
 
+// Single bar
+#define BAR_X_00 -16
+#define BAR_Y_00 -28
+
+#define BAR_X_01 -16
+#define BAR_Y_01 -9
+
+#define BAR_X_10 -1
+#define BAR_Y_10 -24
+
+#define BAR_X_11 -19
+#define BAR_Y_11 -24
+
 // Bar 1
 #define BAR1_X_00 -16
 #define BAR1_Y_00 -28
 
 #define BAR1_X_01 -16
-#define BAR1_Y_01 -28+16+3
+#define BAR1_Y_01 -5
 
-#define BAR1_X_10 -1
-#define BAR1_Y_10 -25
+#define BAR1_X_10 3
+#define BAR1_Y_10 -24
 
-#define BAR1_X_11 -1-24+5
-#define BAR1_Y_11 -25
+#define BAR1_X_11 -19
+#define BAR1_Y_11 -24
 
 // Bar 2
-#define BAR2_X_00 0
-#define BAR2_Y_00 0
+#define BAR2_X_00 -16
+#define BAR2_Y_00 -32
 
-#define BAR2_X_01 0
-#define BAR2_Y_01 0
+#define BAR2_X_01 -16
+#define BAR2_Y_01 -9
 
-#define BAR2_X_10 3
-#define BAR2_Y_10 -25
+#define BAR2_X_10 -1
+#define BAR2_Y_10 -24
 
-#define BAR2_X_11 3
-#define BAR2_Y_11 -25
+#define BAR2_X_11 -23
+#define BAR2_Y_11 -24
 
 // Slot number
 #define SLOT_X_00 -3
 #define SLOT_Y_00 23
 
-#define SLOT_X_01 -16+4
+#define SLOT_X_01 -12
 #define SLOT_Y_01 -54
 
 #define SLOT_X_10 -40
@@ -189,7 +205,7 @@ int OverflowHAlign;
 #define OVERFLOW_Y_00 -23
 
 #define OVERFLOW_X_01 0
-#define OVERFLOW_Y_01 -23+16
+#define OVERFLOW_Y_01 -7
 
 #define OVERFLOW_X_10 0
 #define OVERFLOW_Y_10 -16
@@ -263,6 +279,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         cacheCvMirror = cvMirror;
         cacheCvDir = cvDir;
         cacheCvScale = cvScale;
+        cacheCvMaxRow = cvMaxRow;
 
         weightOffsX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEIGHTOFFS_X_00 : WEIGHTOFFS_X_01) : (!cvMirror ? WEIGHTOFFS_X_10 : WEIGHTOFFS_X_11)));
         weightOffsY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? WEIGHTOFFS_Y_00 : WEIGHTOFFS_Y_01) : (!cvMirror ? WEIGHTOFFS_Y_10 : WEIGHTOFFS_Y_11)));
@@ -274,6 +291,9 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         barHeight = (cvDir ? BAR_HEIGHT : BAR_WIDTH);
         barScale = FixedMul(cvScale, BAR_SCALE);
         
+        barX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR_X_00 : BAR_X_01) : (!cvMirror ? BAR_X_10 : BAR_X_11)));
+        barY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR_Y_00 : BAR_Y_01) : (!cvMirror ? BAR_Y_10 : BAR_Y_11)));
+
         barX1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_X_00 : BAR1_X_01) : (!cvMirror ? BAR1_X_10 : BAR1_X_11)));
         barY1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_Y_00 : BAR1_Y_01) : (!cvMirror ? BAR1_Y_10 : BAR1_Y_11)));
         
@@ -410,19 +430,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
             } else {
                 icon = getWeaponIcon(slotVals[slot][weap][WEAP_IDX]);
 
-                if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
-                    drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
-                                   slotVals[slot][weap][WEAP_BLUE1],
-                                   UIXAmmoBars[cvDir][2][0],
-                                   iconX + barX1,
-                                   iconY + barY1,
-                                   barWidth, barHeight,
-                                   barScale, barScale, cvAlpha,
-                                   slotVals[slot][weap][WEAP_AMMO1_AMT],
-                                   slotVals[slot][weap][WEAP_AMMO1_MAX],
-                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
-                }
-
                 if(slotVals[slot][weap][WEAP_AMMO2_MAX] > 0) {
                     drawLayeredBar(slotVals[slot][weap][WEAP_CYAN2],
                                    slotVals[slot][weap][WEAP_BLUE2],
@@ -434,8 +441,34 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    slotVals[slot][weap][WEAP_AMMO2_AMT],
                                    slotVals[slot][weap][WEAP_AMMO2_MAX],
                                    !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                    // Draw the bar1 based on whether the bar2 will be drawn.
+                    // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
+                    if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
+                        drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
+                                        slotVals[slot][weap][WEAP_BLUE1],
+                                        UIXAmmoBars[cvDir][2][0],
+                                        iconX + barX1,
+                                        iconY + barY1,
+                                        barWidth, barHeight,
+                                        barScale, barScale, cvAlpha,
+                                        slotVals[slot][weap][WEAP_AMMO1_AMT],
+                                        slotVals[slot][weap][WEAP_AMMO1_MAX],
+                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                    }
+                } else {
+                    if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
+                        drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
+                                        slotVals[slot][weap][WEAP_BLUE1],
+                                        UIXAmmoBars[cvDir][2][0],
+                                        iconX + barX,
+                                        iconY + barY,
+                                        barWidth, barHeight,
+                                        barScale, barScale, cvAlpha,
+                                        slotVals[slot][weap][WEAP_AMMO1_AMT],
+                                        slotVals[slot][weap][WEAP_AMMO1_MAX],
+                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                    }
                 }
-
             }
             displayIcon(icon, GetNewUIID(), iconX, iconY, cvScale, cvScale, cvAlpha);
         }
