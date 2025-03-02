@@ -57,6 +57,10 @@ Done:
 - Teaminfo: Update offsets of everything again
 - Teaminfo: Bottom-left default preset packs up too quick
 - Killfeed: Fix mugshots in self-destruct scenarios.
+- Killfeed: Fix when mugshot is not found.
+- Killfeed: Should work for spectators.
+- Pickup respawn: 1 minute timer
+- Add a compass + location.
 - Assist message?
 
 Done:
