@@ -45,34 +45,34 @@ Done:
 - Teaminfo: Add location back
 - Missed a "scuttlerun" in the menu somewhere. Squash that.
 - Frag messages: Add mugshot on frag message
+- ???????: Move MSGIDs to v6b's data structure???
+- Compress weapon bar
 
 == V2B TO DO ==
 - Cleanup: Remove constants unused
 - Cleanup: Move "bloat" tables into separate include files
-- Teaminfo: Add number toggles for everything
 - Teaminfo: Make it so weapons with no icon offset the bars
 - Teaminfo: Name squish defect for "The Saint of Hope or something"
 - Teaminfo: Add a wrapping function?
-- Teaminfo: Name squish needs adjustment for new health bar
+- Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 - Teaminfo: Update offsets of everything again
 - Teaminfo: Bottom-left default preset packs up too quick
 - Killfeed: Fix mugshots in self-destruct scenarios.
 - Killfeed: Fix when mugshot is not found.
 - Killfeed: Should work for spectators.
+- Teaminfo: Add number toggles for everything
 - Pickup respawn: 1 minute timer
-- Add a compass + location.
-- Assist message?
 
 Done:
 - weaponbar: bug fixes
 - give a full-size weapon bar
 
-== ??? ==
-- ???????: Move MSGIDs to v6b's data structure???
+== Future ==
+- Add a compass + location.
+- Assist message?
 - Look into Hexen's inventory cycler
 - Wire UI element
 - Debuff Icons/Timers
-- Compress weapon bar
 - Map stuff
 - Show how many stocks on the TeamUI
 - Show your own stocks!! on the UI
