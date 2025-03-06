@@ -35,6 +35,10 @@ actor DawnBreakerWep_ArsenalBar : ArsenalBar { args 196,70 }
 // If NormalBar/SecondBar does not exist in your mod, please define them as needed for the teaminfo and weapon bar widgets.
 // These are fallbacks for existing mods.
 
+// Also, if you want a weapon to have a NormalBar or SecondBar on the teaminfo without forcing a NormalBar or SecondBar to display for the user.
+// Call the bar _ArsenalBar or _SecondArsenalBar respectively.
+// Examples below.
+
 // order of the below weapons is honestly sorted in "whatever way VSCode decided to do it when I did a mass file search"
 // so it's a bit incomprehensible. not sorry.
 

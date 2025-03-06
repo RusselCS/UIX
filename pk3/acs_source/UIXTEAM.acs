@@ -4,6 +4,8 @@
 
 #include "SHRTFUNC.acs"
 
+// #include "UXTBWNUM.acs"
+
 #define horizontal 0
 #define vertical 1
 
@@ -172,16 +174,16 @@ function str getMugshotGraphicFromTID(int tid) {
 
 // Draw Name ========================================================================================================================================
 #define NAME_X_00 16 // -18
-#define NAME_Y_00 -16+7
+#define NAME_Y_00 -9
 
-#define NAME_X_01 -16
-#define NAME_Y_01 -11
+#define NAME_X_01 -19
+#define NAME_Y_01 NAME_Y_00
 
-#define NAME_X_10 -8-ROW_LENGTH
-#define NAME_Y_10 13
+#define NAME_X_10 -19
+#define NAME_Y_10 17
 
-#define NAME_X_11 -8-ROW_LENGTH
-#define NAME_Y_11 -20
+#define NAME_X_11 NAME_X_10
+#define NAME_Y_11 -18
 
 int nameCache_Scale;
 int nameCache_Mirror;
@@ -238,17 +240,17 @@ function void drawName(int pln, int x, int y)
 }
 
 // Draw Location ========================================================================================================================================
-#define LOC_X_00 16
-#define LOC_Y_00 -11 + (ROW_LENGTH/2) + 4
+#define LOC_X_00 NAME_X_00
+#define LOC_Y_00 NAME_Y_00 + 7
 
-#define LOC_X_01 -16
-#define LOC_Y_01 -11 + (ROW_LENGTH/2)
+#define LOC_X_01 NAME_X_01
+#define LOC_Y_01 LOC_Y_00
 
-#define LOC_X_10 -8
-#define LOC_Y_10 13
+#define LOC_X_10 NAME_X_10 + 7
+#define LOC_Y_10 NAME_Y_10
 
-#define LOC_X_11 -8
-#define LOC_Y_11 -20
+#define LOC_X_11 LOC_X_10
+#define LOC_Y_11 NAME_Y_11
 
 int locCache_Scale;
 int locCache_Mirror;
@@ -310,17 +312,17 @@ function void drawLocation(int pln, int x, int y)
 }
 
 // Draw Health ======================================================================================================================================
-#define HP_X_00 120
-#define HP_Y_00 -26-ROW_LENGTH+7
+#define HP_X_00 LOC_X_00 +104
+#define HP_Y_00 LOC_Y_00 -28
 
-#define HP_X_01 -18-96
-#define HP_Y_01 -11+ROW_LENGTH
+#define HP_X_01 LOC_X_01 -764
+#define HP_Y_01 HP_Y_00
 
-#define HP_X_10 -1
-#define HP_Y_10 13
+#define HP_X_10 LOC_X_10-28
+#define HP_Y_10 126
 
-#define HP_X_11 -1
-#define HP_Y_11 -116
+#define HP_X_11 HP_X_10
+#define HP_Y_11 -774
 
 #define HP_L_CONST HP_LENGTH * 10
 #define HP_W_CONST HP_WIDTH * 10
@@ -377,54 +379,54 @@ function void drawHealth(int pln, int x, int y)
 
 // Draw Weapon ======================================================================================================================================
 #define WEP_ICONX_00 20
-#define WEP_ICONY_00 8+ROW_LENGTH-2
+#define WEP_ICONY_00 18
 
-#define WEP_ICONX_01 -17
-#define WEP_ICONY_01 1+2*ROW_LENGTH
+#define WEP_ICONX_01 -41
+#define WEP_ICONY_01 WEP_ICONY_00
 
-#define WEP_ICONX_10 -1+2*ROW_LENGTH
-#define WEP_ICONY_10 54
+#define WEP_ICONX_10 12
+#define WEP_ICONY_10 53
 
-#define WEP_ICONX_11 -1+2*ROW_LENGTH
-#define WEP_ICONY_11 -15
+#define WEP_ICONX_11 WEP_ICONX_10
+#define WEP_ICONY_11 -8
 
 // Bar is relative to the icon
 #define WEP_BARX_00 -1
-#define WEP_BARY_00 -12
+#define WEP_BARY_00 -13
 
-#define WEP_BARX_01 -36
-#define WEP_BARY_01 -10
+#define WEP_BARX_01 WEP_BARX_00
+#define WEP_BARY_01 WEP_BARY_00
 
-#define WEP_BARX_10 -6
+#define WEP_BARX_10 -8
 #define WEP_BARY_10 -40
 
-#define WEP_BARX_11 -6
-#define WEP_BARY_11 -40
+#define WEP_BARX_11 WEP_BARX_10
+#define WEP_BARY_11 WEP_BARY_10
 
 // Double bar has a different set of coords
 #define WEP_BAR1X_00 -1
 #define WEP_BAR1Y_00 -8
 
-#define WEP_BAR1X_01 -36
-#define WEP_BAR1Y_01 -12
+#define WEP_BAR1X_01 WEP_BAR1X_00
+#define WEP_BAR1Y_01 WEP_BAR1Y_00
 
-#define WEP_BAR1X_10 -8
+#define WEP_BAR1X_10 -4
 #define WEP_BAR1Y_10 -40
 
-#define WEP_BAR1X_11 -8
-#define WEP_BAR1Y_11 -40
+#define WEP_BAR1X_11 WEP_BAR1X_10
+#define WEP_BAR1Y_11 WEP_BAR1Y_10
 
 #define WEP_BAR2X_00 -1
 #define WEP_BAR2Y_00 -12
 
-#define WEP_BAR2X_01 -36
-#define WEP_BAR2Y_01 -8
+#define WEP_BAR2X_01 WEP_BAR2X_00
+#define WEP_BAR2Y_01 WEP_BAR2Y_00
 
-#define WEP_BAR2X_10 -4
+#define WEP_BAR2X_10 -8
 #define WEP_BAR2Y_10 -40
 
-#define WEP_BAR2X_11 -4
-#define WEP_BAR2Y_11 -40
+#define WEP_BAR2X_11 WEP_BAR2X_10
+#define WEP_BAR2Y_11 WEP_BAR2Y_10
 
 
 #define WEP_L_CONST 28 * 10
@@ -548,22 +550,22 @@ function void drawWeapon(int pln, int x, int y)
 }
 
 // Draw Lives =======================================================================================================================================
-#define LIVES_X_00 117
-#define LIVES_Y_00 5+ROW_LENGTH
+#define LIVES_X_00 105
+#define LIVES_Y_00 16
 
-#define LIVES_X_01 -105
-#define LIVES_Y_01 5+ROW_LENGTH
+#define LIVES_X_01 -96
+#define LIVES_Y_01 LIVES_Y_00
 
-#define LIVES_X_10 -1+2*ROW_LENGTH
-#define LIVES_Y_10 94
+#define LIVES_X_10 13
+#define LIVES_Y_10 86
 
-#define LIVES_X_11 -1+2*ROW_LENGTH
-#define LIVES_Y_11 -92
+#define LIVES_X_11 LIVES_X_10
+#define LIVES_Y_11 -80
 
 #define LIVES_TEXT_X_00 -16
 #define LIVES_TEXT_Y_00 0
 
-#define LIVES_TEXT_X_01 12-4
+#define LIVES_TEXT_X_01 8
 #define LIVES_TEXT_Y_01 0
 
 #define LIVES_TEXT_X_10 -7

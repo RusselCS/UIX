@@ -55,8 +55,8 @@ Done:
 - Teaminfo: Name squish defect for "The Saint of Hope or something"
 - Teaminfo: Add a wrapping function?
 - Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
-- Teaminfo: Update offsets of everything again
 - Teaminfo: Bottom-left default preset packs up too quick
+- WeaponBar: Apparently doubleammo does not depopulate when overwritten
 - Killfeed: Fix mugshots in self-destruct scenarios.
 - Killfeed: Fix when mugshot is not found.
 - Killfeed: Should work for spectators.
@@ -64,6 +64,7 @@ Done:
 - Pickup respawn: 1 minute timer
 
 Done:
+- Teaminfo: Update offsets of everything again
 - weaponbar: bug fixes
 - give a full-size weapon bar
 
