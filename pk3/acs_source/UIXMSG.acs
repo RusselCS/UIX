@@ -75,6 +75,18 @@ function str getMugshotGraphicFromTID(int tid) {
 
 #define FRAGMSG_EXPLODE 40
 
+script "UIT_FREEZEBOTS" (void)
+{
+    for(int i = 0; i < 64; i++) {
+        if(!PlayerInGame(i))
+            continue;
+        if(PlayerIsBot(i)) {
+            SetActivatorToPlayer(i);
+            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
+        }
+    }
+}
+
 script "UITweaks_FragMugshot" (int other, int fragged) CLIENTSIDE
 {
     str mug = getMugshotGraphicFromTid(other + PLN_TID_SHRT);

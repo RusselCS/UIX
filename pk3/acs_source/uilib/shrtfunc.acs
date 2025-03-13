@@ -356,7 +356,7 @@ function int actorExists(str which) {
 }
 
 function int new(str which) {
-	int u = UniqueTID();
+	int u = UniqueTID(10000); // start from a positive for safety
 	if(SpawnForced(which, 0, 0, 0, u, 0))
 		return u;
 
