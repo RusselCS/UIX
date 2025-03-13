@@ -4,28 +4,30 @@
 
 #include "SHRTFUNC.acs"
 
-// #include "UXTBWNUM.acs"
+#include "UXTBNUM.acs"
+#include "UXTBICNS.acs"
 
 #define horizontal 0
 #define vertical 1
 
-int cvOffsx;
-int cvOffsy;
-int cvScale;
-int cvAlpha;
-int cvNamesize;
-int cvMirror;
-int cvDir;
-int cvFontdir;
-int cvStack;
-int cvShowname;
-int cvShowhealth;
-int cvShowlocation;
-int cvShowlives;
-int cvShowmugshot;
-int cvFontIdx;
-int cvReverseText;
-int cvShowWeapon;
+int cvars[17];
+#define CV_OFFSX        0
+#define CV_OFFSY        1
+#define CV_SCALE        2
+#define CV_ALPHA        3
+#define CV_NAMESIZE     4
+#define CV_MIRROR       5
+#define CV_DIR          6
+#define CV_FONTDIR      7
+#define CV_STACK        8
+#define CV_SHOWNAME     9
+#define CV_SHOWHEALTH   10
+#define CV_SHOWLOCATION 11
+#define CV_SHOWLIVES    12
+#define CV_SHOWMUGSHOT  13
+#define CV_FONTIDX      14
+#define CV_REVERSETEXT  15
+#define CV_SHOWWEAPON   16
 
 int dbShowSelf;
 
@@ -63,34 +65,34 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
     } else {
         dbShowSelf = GetUserCvar(cpn, "UIX_DEBUG_SHOWSELF");
 
-        cvOffsx = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
-        cvOffsy = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
-        cvScale = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
-        cvAlpha = baseAlpha;
-        cvNamesize = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
-        cvMirror = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR");
-        cvDir = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
-        cvFontdir = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
-        cvStack = GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK");
-        cvShowname = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
-        cvShowhealth = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
-        cvShowlocation = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
-        cvShowlives = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLIVES");
-        cvShowmugshot = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
-        cvShowWeapon = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWWEAPON");
+        cvars[CV_OFFSX] = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSX");
+        cvars[CV_OFFSY] = GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY");
+        cvars[CV_SCALE] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE");
+        cvars[CV_ALPHA] = baseAlpha;
+        cvars[CV_NAMESIZE] = GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE");
+        cvars[CV_MIRROR] = GetUserCvar(cpn, "UIX_CL_TEAMINFOMIRROR");
+        cvars[CV_DIR] = GetUserCvar(cpn, "UIX_CL_TEAMINFODIR");
+        cvars[CV_FONTDIR] = GetUserCvar(cpn, "UIX_CL_TEAMINFOFONTDIR");
+        cvars[CV_STACK] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSTACK");
+        cvars[CV_SHOWNAME] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWNAME");
+        cvars[CV_SHOWHEALTH] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWHEALTH");
+        cvars[CV_SHOWLOCATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLOCATION");
+        cvars[CV_SHOWLIVES] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLIVES");
+        cvars[CV_SHOWMUGSHOT] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
+        cvars[CV_SHOWWEAPON] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWWEAPON");
 
-        cvFontIdx = cvFontdir ^ cvDir;
-        cvReverseText = cvDir && !cvFontDir;
+        cvars[CV_FONTIDX] = cvars[CV_FONTDIR] ^ cvars[CV_DIR];
+        cvars[CV_REVERSETEXT] = cvars[CV_DIR] && !cvars[CV_FONTDIR];
 
-        if(tiCache_Scale != cvScale || tiCache_Stack != cvStack)
+        if(tiCache_Scale != cvars[CV_SCALE] || tiCache_Stack != cvars[CV_STACK])
         {
-            tiCache_Scale = cvScale;
-            tiCache_Stack = cvStack;
+            tiCache_Scale = cvars[CV_SCALE];
+            tiCache_Stack = cvars[CV_STACK];
 
-            if(cvStack) {
-                tiStackOffs = -1 * FixedMul(STACK_OFFS, cvScale);
+            if(cvars[CV_STACK]) {
+                tiStackOffs = -1 * FixedMul(STACK_OFFS, cvars[CV_SCALE]);
             } else {
-                tiStackOffs = FixedMul(STACK_OFFS, cvScale);
+                tiStackOffs = FixedMul(STACK_OFFS, cvars[CV_SCALE]);
             }
         }
 
@@ -110,8 +112,8 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             if(getPlayerTeam(i) != team)
                 continue;
 
-            int baseX = cvOffsx + (cvDir ? drawnPlayers * tiStackOffs : 0);
-            int baseY = cvOffsy + (!cvDir ? drawnPlayers * tiStackOffs : 0);
+            int baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
+            int baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
 
             drawMugshot(i, baseX, baseY);
             drawName(i, baseX, baseY);
@@ -143,7 +145,7 @@ int mugScale;
 
 function void drawMugshot(int pln, int x, int y)
 {
-    if(!cvShowmugshot)
+    if(!cvars[CV_SHOWMUGSHOT])
         return;
 
     str face = getMugshotGraphicFromTID(pln+PLN_TID_SHRT);
@@ -151,12 +153,12 @@ function void drawMugshot(int pln, int x, int y)
     if(StrLen(face) == 0)
         return;
 
-    if(mugCache_Scale != cvScale) {
-        mugCache_Scale = cvScale;
-        mugScale = FixedMul(cvScale, 4.0);
+    if(mugCache_Scale != cvars[CV_SCALE]) {
+        mugCache_Scale = cvars[CV_SCALE];
+        mugScale = FixedMul(cvars[CV_SCALE], 4.0);
     }
 
-    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvAlpha);
+    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA]);
 }
 
 // Mugshot data pull, from pingbutton
@@ -185,58 +187,58 @@ function str getMugshotGraphicFromTID(int tid) {
 #define NAME_X_11 NAME_X_10
 #define NAME_Y_11 -18
 
-int nameCache_Scale;
-int nameCache_Mirror;
-int nameCache_Dir;
+int nc[4]; // name cache
+#define NC_SCALE    0
+#define NC_MIRROR   1
+#define NC_DIR      2
+#define NC_NAMESIZE 3
 
-int nameCache_Namesize;
-
-int nameX;
-int nameY;
-int nameScale;
-int nameHAlign;
-int nameVAlign;
-
-int nameLength;
+int nv[6]; // name vars
+#define N_X      0
+#define N_Y      1
+#define N_SCALE  2
+#define N_HALIGN 3
+#define N_VALIGN 4
+#define N_LENGTH 5
 
 function void drawName(int pln, int x, int y)
 {
-    if(!cvShowName)
+    if(!cvars[CV_SHOWNAME])
         return;
 
     if(
-        nameCache_Scale != cvScale ||
-        nameCache_Mirror != cvMirror ||
-        nameCache_Dir != cvDir ||
-        nameCache_Namesize != cvNamesize
+        nc[NC_SCALE] != cvars[CV_SCALE] ||
+        nc[NC_MIRROR] != cvars[CV_MIRROR] ||
+        nc[NC_DIR] != cvars[CV_DIR] ||
+        nc[NC_NAMESIZE] != cvars[CV_NAMESIZE]
     )
     {
-        nameCache_Scale = cvScale;
-        nameCache_Mirror = cvMirror;
-        nameCache_Dir = cvDir;
-        nameCache_Namesize = cvNamesize;
+        nc[NC_SCALE] = cvars[CV_SCALE];
+        nc[NC_MIRROR] = cvars[CV_MIRROR];
+        nc[NC_DIR] = cvars[CV_DIR];
+        nc[NC_NAMESIZE] = cvars[CV_NAMESIZE];
 
-        nameX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_X_00 : NAME_X_01) : (!cvMirror ? NAME_X_10 : NAME_X_11)));
-        nameY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? NAME_Y_00 : NAME_Y_01) : (!cvMirror ? NAME_Y_10 : NAME_Y_11)));
-        nameScale = FixedMul(cvScale, TEXT_SCALE);
-        nameLength = FixedDiv(cvNamesize, TEXT_SCALE);
-        nameHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        nameVAlign = !cvMirror && cvDir == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
+        nv[N_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_X_00 : NAME_X_01) : (!cvars[CV_MIRROR] ? NAME_X_10 : NAME_X_11)));
+        nv[N_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_Y_00 : NAME_Y_01) : (!cvars[CV_MIRROR] ? NAME_Y_10 : NAME_Y_11)));
+        nv[N_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
+        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);
+        nv[N_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        nv[N_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
     }
 
-    str name = getPlayerName(pln, cvDir, cvFontIdx);
-    int plrNameLength = getCacheNameWidth(pln, cvDir, cvFontIdx);
+    str name = getPlayerName(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
+    int plrNameLength = getCacheNameWidth(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
     int nameLengthScale = 1.0;
 
-    if(plrNameLength > nameLength) {
-        nameLengthScale = FixedDiv(nameLength, plrNameLength);
+    if(plrNameLength > nv[N_LENGTH]) {
+        nameLengthScale = FixedDiv(nv[N_LENGTH], plrNameLength);
     }
 
-    int nameScaleX = cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
-    int nameScaleY = !cvDir ? nameScale : FixedMul(nameScale, nameLengthScale);
+    int nameScaleX = cvars[CV_DIR] ? nv[N_SCALE] : FixedMul(nv[N_SCALE], nameLengthScale);
+    int nameScaleY = !cvars[CV_DIR] ? nv[N_SCALE] : FixedMul(nv[N_SCALE], nameLengthScale);
     
-    SetFont(uiFonts[cvFontIdx]);
-    displayMessage(name, getNewUIId(), x + nameX, y + nameY, nameScaleX, nameScaleY, cvAlpha, nameHAlign, nameVAlign);
+    SetFont(uiFonts[cvars[CV_FONTIDX]]);
+    displayMessage(name, getNewUIId(), x + nv[N_X], y + nv[N_Y], nameScaleX, nameScaleY, cvars[CV_ALPHA], nv[N_HALIGN], nv[N_VALIGN]);
 }
 
 // Draw Location ========================================================================================================================================
@@ -252,63 +254,63 @@ function void drawName(int pln, int x, int y)
 #define LOC_X_11 LOC_X_10
 #define LOC_Y_11 NAME_Y_11
 
-int locCache_Scale;
-int locCache_Mirror;
-int locCache_Dir;
+int lc[4]; // location cvar cache
+#define LC_SCALE    0
+#define LC_MIRROR   1
+#define LC_DIR      2
+#define LC_NAMESIZE 3
 
-int locCache_Namesize;
-
-int locX;
-int locY;
-int locScale;
-int locHAlign;
-int locVAlign;
-
-int locLength;
+int lv[6]; // location variables
+#define L_X      0
+#define L_Y      1
+#define L_SCALE  2
+#define L_HALIGN 3
+#define L_VALIGN 4
+#define L_LENGTH 5
 
 function void drawLocation(int pln, int x, int y)
 {
-    if(!cvShowLocation)
+    if(!cvars[CV_SHOWLOCATION])
         return;
 
     if(
-        locCache_Scale != cvScale ||
-        locCache_Mirror != cvMirror ||
-        locCache_Dir != cvDir ||
-        locCache_Namesize != cvNamesize
+        lv[LC_SCALE] != cvars[CV_SCALE] ||
+        lv[LC_MIRROR] != cvars[CV_MIRROR] ||
+        lv[LC_DIR] != cvars[CV_DIR] ||
+        lv[LC_NAMESIZE] != cvars[CV_NAMESIZE]
     )
     {
-        locCache_Scale = cvScale;
-        locCache_Mirror = cvMirror;
-        locCache_Dir = cvDir;
-        locCache_Namesize = cvNamesize;
+        lv[LC_SCALE] = cvars[CV_SCALE];
+        lv[LC_MIRROR] = cvars[CV_MIRROR];
+        lv[LC_DIR] = cvars[CV_DIR];
+        lv[LC_NAMESIZE] = cvars[CV_NAMESIZE];
 
-        locX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LOC_X_00 : LOC_X_01) : (!cvMirror ? LOC_X_10 : LOC_X_11)));
-        locY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LOC_Y_00 : LOC_Y_01) : (!cvMirror ? LOC_Y_10 : LOC_Y_11)));
-        locScale = FixedMul(cvScale, TEXT_SCALE);
-        locLength = FixedDiv(cvNamesize, TEXT_SCALE);        
-        locHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        locVAlign = !cvMirror && cvDir == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
+        lv[L_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_X_00 : LOC_X_01) : (!cvars[CV_MIRROR] ? LOC_X_10 : LOC_X_11)));
+        lv[L_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_Y_00 : LOC_Y_01) : (!cvars[CV_MIRROR] ? LOC_Y_10 : LOC_Y_11)));
+        lv[L_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
+        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);        
+        lv[L_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        lv[L_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
     }
 
-    str loc = findLocation(pln, cvDir, cvFontIdx);
+    str loc = findLocation(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
 
     if(loc == -1)
         return;
     
-    int plrLocLength = getLocWidthPlr(pln, cvDir, cvFontIdx);
+    int plrLocLength = getLocWidthPlr(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
 
     int locLengthScale = 1.0;
 
-    if(plrLocLength > locLength) {
-        locLengthScale = FixedDiv(locLength, plrLocLength);
+    if(plrLocLength > lv[L_LENGTH]) {
+        locLengthScale = FixedDiv(lv[L_LENGTH], plrLocLength);
     }
 
-    int locScaleX = cvDir ? locScale : FixedMul(locScale, locLengthScale);
-    int locScaleY = !cvDir ? locScale : FixedMul(locScale, locLengthScale);
+    int locScaleX = cvars[CV_DIR] ? lv[L_SCALE] : FixedMul(lv[L_SCALE], locLengthScale);
+    int locScaleY = !cvars[CV_DIR] ? lv[L_SCALE] : FixedMul(lv[L_SCALE], locLengthScale);
     
-    SetFont(uiFonts[cvFontIdx]);
-    displayMessage(loc, getNewUIId(), x + locX, y + locY, locScaleX, locScaleY, cvAlpha, locHAlign, locVAlign);
+    SetFont(uiFonts[cvars[CV_FONTIDX]]);
+    displayMessage(loc, getNewUIId(), x + lv[L_X], y + lv[L_Y], locScaleX, locScaleY, cvars[CV_ALPHA], lv[L_HALIGN], lv[L_VALIGN]);
 }
 
 // Draw Health ======================================================================================================================================
@@ -327,54 +329,48 @@ function void drawLocation(int pln, int x, int y)
 #define HP_L_CONST HP_LENGTH * 10
 #define HP_W_CONST HP_WIDTH * 10
 
-int healthCache_Scale;
-int healthCache_Mirror;
-int healthCache_Dir;
+int hc[3]; // health cvar cache
+#define HC_SCALE  0
+#define HC_MIRROR 1
+#define HC_DIR    2
 
-int healthX;
-int healthY;
-int healthScale;
-int healthWidth;
-int healthHeight;
-int healthTop;
-int healthBottom;
-
-str healthBars[2][2] = {
-    {"UXTEMHH1", "UXTEMHV1"},
-    {"UXTEMHHB", "UXTEMHVB"}
-};
+int hv[5]; // health variables
+#define H_X      0
+#define H_Y      1
+#define H_SCALE  2
+#define H_WIDTH  3
+#define H_HEIGHT 4
 
 int healthBarDimensions[2] = {HP_L_CONST, HP_W_CONST};
 
 function void drawHealth(int pln, int x, int y)
 {
-    if(!cvShowHealth)
-        return;
-
-    int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
-    if(mhp == 0)
+    if(!cvars[CV_SHOWHEALTH])
         return;
 
     if(
-        healthCache_Scale != cvScale ||
-        healthCache_Mirror != cvMirror ||
-        healthCache_Dir != cvDir
+        hc[HC_SCALE] != cvars[CV_SCALE] ||
+        hc[HC_MIRROR] != cvars[CV_MIRROR] ||
+        hc[HC_DIR] != cvars[CV_DIR]
     )
     {
-        healthCache_Scale = cvScale;
-        healthCache_Mirror = cvMirror;
-        healthCache_Dir = cvDir;
+        hc[HC_SCALE] = cvars[CV_SCALE];
+        hc[HC_MIRROR] = cvars[CV_MIRROR];
+        hc[HC_DIR] = cvars[CV_DIR];
 
-        healthScale = FixedMul(FixedMul(cvScale, 1.3334), 0.1);
-        healthX = FixedMul(healthScale, (!cvDir ? (!cvMirror ? HP_X_00 : HP_X_01) : (!cvMirror ? HP_X_10 : HP_X_11)));
-        healthY = FixedMul(healthScale, (!cvDir ? (!cvMirror ? HP_Y_00 : HP_Y_01) : (!cvMirror ? HP_Y_10 : HP_Y_11)));
-        healthWidth = healthBarDimensions[cvDir];
-        healthHeight = healthBarDimensions[!cvDir];
+        hv[H_SCALE] = FixedMul(FixedMul(cvars[CV_SCALE], 1.3334), 0.1);
+        hv[H_X] = FixedMul(hv[H_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? HP_X_00 : HP_X_01) : (!cvars[CV_MIRROR] ? HP_X_10 : HP_X_11)));
+        hv[H_Y] = FixedMul(hv[H_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? HP_Y_00 : HP_Y_01) : (!cvars[CV_MIRROR] ? HP_Y_10 : HP_Y_11)));
+        hv[H_WIDTH] = healthBarDimensions[cvars[CV_DIR]];
+        hv[H_HEIGHT] = healthBarDimensions[!cvars[CV_DIR]];
     }
-    
-    int chp = GetActorProperty(pln+PLN_TID_SHRT, AProp_Health);
 
-    drawBar(healthBars[0][cvDir], healthBars[1][cvDir], x+healthX, y+healthY, healthWidth, healthHeight, healthScale, healthScale, cvAlpha, chp, mhp, !cvDir+1, false, getNewUIId(), getNewUIId());
+    int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
+    int chp = GetActorProperty(pln+PLN_TID_SHRT, AProp_Health);
+    if(mhp == 0) // the bar flashing off looked weird but this prevents a /0 error.
+        mhp = chp;
+    
+    drawBar(healthBars[0][cvars[CV_DIR]], healthBars[1][cvars[CV_DIR]], x+hv[H_X], y+hv[H_Y], hv[H_WIDTH], hv[H_HEIGHT], hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA], chp, mhp, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId());
 }
 
 // Draw Weapon ======================================================================================================================================
@@ -434,29 +430,31 @@ function void drawHealth(int pln, int x, int y)
 
 #define WEP_ICON_SCALE 0.5
 
-int weaponCache_Scale;
-int weaponCache_Mirror;
-int weaponCache_Dir;
+int wc[3]; // weapon cvar cache
+#define WC_SCALE  0
+#define WC_MIRROR 1
+#define WC_DIR    2
 
-int weaponIconX;
-int weaponIconY;
-int weaponBarX;
-int weaponBarY;
-int weaponBar1X;
-int weaponBar1Y;
-int weaponBar2X;
-int weaponBar2Y;
-int weaponIconScale;
-int weaponBarScale;
-int weaponBarWidth;
-int weaponBarHeight;
-int weaponBarSingleWidth;
-int weaponBarSingleHeight;
-int weaponBar1Top;
-int weaponBar1Bottom;
-int weaponBar2Top;
-int weaponBar2Bottom;
-int weaponScale;
+int wv[19]; // weapon variables
+#define W_ICONX           0
+#define W_ICONY           1
+#define W_BARX            2
+#define W_BARY            3
+#define W_BAR1X           4
+#define W_BAR1Y           5
+#define W_BAR2X           6
+#define W_BAR2Y           7
+#define W_ICONSCALE       8
+#define W_BARSCALE        9
+#define W_BARWIDTH        10
+#define W_BARHEIGHT       11
+#define W_BARSINGLEWIDTH  12
+#define W_BARSINGLEHEIGHT 13
+#define W_BAR1TOP         14
+#define W_BAR1BOTTOM      15
+#define W_BAR2TOP         16
+#define W_BAR2BOTTOM      17
+#define W_SCALE           18
 
 int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
@@ -474,7 +472,7 @@ int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
 function void drawWeapon(int pln, int x, int y)
 {
-    if(!cvShowWeapon)
+    if(!cvars[CV_SHOWWEAPON])
         return;
 
     // int mwep = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnWeapon);
@@ -482,37 +480,37 @@ function void drawWeapon(int pln, int x, int y)
         // return;
 
     if(
-        weaponCache_Scale != cvScale ||
-        weaponCache_Mirror != cvMirror ||
-        weaponCache_Dir != cvDir
+        wc[WC_SCALE] != cvars[CV_SCALE] ||
+        wc[WC_MIRROR] != cvars[CV_MIRROR] ||
+        wc[WC_DIR] != cvars[CV_DIR]
     )
     {
-        weaponCache_Scale = cvScale;
-        weaponCache_Mirror = cvMirror;
-        weaponCache_Dir = cvDir;
+        wc[WC_SCALE] = cvars[CV_SCALE];
+        wc[WC_MIRROR] = cvars[CV_MIRROR];
+        wc[WC_DIR] = cvars[CV_DIR];
 
-        weaponScale = FixedMul(cvScale, 1.3334);
+        wv[W_SCALE] = FixedMul(cvars[CV_SCALE], 1.3334);
 
-        weaponIconX = FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_ICONX_00 : WEP_ICONX_01) : (!cvMirror ? WEP_ICONX_10 : WEP_ICONX_11)));
-        weaponIconY = FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_ICONY_00 : WEP_ICONY_01) : (!cvMirror ? WEP_ICONY_10 : WEP_ICONY_11)));
-        weaponBarX = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BARX_00 : WEP_BARX_01) : (!cvMirror ? WEP_BARX_10 : WEP_BARX_11)));
-        weaponBarY = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BARY_00 : WEP_BARY_01) : (!cvMirror ? WEP_BARY_10 : WEP_BARY_11)));
-        weaponBar1X = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR1X_00 : WEP_BAR1X_01) : (!cvMirror ? WEP_BAR1X_10 : WEP_BAR1X_11)));
-        weaponBar1Y = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR1Y_00 : WEP_BAR1Y_01) : (!cvMirror ? WEP_BAR1Y_10 : WEP_BAR1Y_11)));
-        weaponBar2X = weaponIconX + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR2X_00 : WEP_BAR2X_01) : (!cvMirror ? WEP_BAR2X_10 : WEP_BAR2X_11)));
-        weaponBar2Y = weaponIconY + FixedMul(weaponScale, (!cvDir ? (!cvMirror ? WEP_BAR2Y_00 : WEP_BAR2Y_01) : (!cvMirror ? WEP_BAR2Y_10 : WEP_BAR2Y_11)));
-        weaponBarScale = FixedMul(FixedMul(weaponScale, 1.0), 0.1);
-        weaponIconScale = FixedMul(WEP_ICON_SCALE, weaponScale);
-        weaponBarWidth = weaponBarDimensions[cvDir];
-        weaponBarHeight = weaponBarDimensions[!cvDir];
+        wv[W_ICONX] = FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_ICONX_00 : WEP_ICONX_01) : (!cvars[CV_MIRROR] ? WEP_ICONX_10 : WEP_ICONX_11)));
+        wv[W_ICONY] = FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_ICONY_00 : WEP_ICONY_01) : (!cvars[CV_MIRROR] ? WEP_ICONY_10 : WEP_ICONY_11)));
+        wv[W_BARX] = wv[W_ICONX] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BARX_00 : WEP_BARX_01) : (!cvars[CV_MIRROR] ? WEP_BARX_10 : WEP_BARX_11)));
+        wv[W_BARY] = wv[W_ICONY] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BARY_00 : WEP_BARY_01) : (!cvars[CV_MIRROR] ? WEP_BARY_10 : WEP_BARY_11)));
+        wv[W_BAR1X] = wv[W_ICONX] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BAR1X_00 : WEP_BAR1X_01) : (!cvars[CV_MIRROR] ? WEP_BAR1X_10 : WEP_BAR1X_11)));
+        wv[W_BAR1Y] = wv[W_ICONY] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BAR1Y_00 : WEP_BAR1Y_01) : (!cvars[CV_MIRROR] ? WEP_BAR1Y_10 : WEP_BAR1Y_11)));
+        wv[W_BAR2X] = wv[W_ICONX] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BAR2X_00 : WEP_BAR2X_01) : (!cvars[CV_MIRROR] ? WEP_BAR2X_10 : WEP_BAR2X_11)));
+        wv[W_BAR2Y] = wv[W_ICONY] + FixedMul(wv[W_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? WEP_BAR2Y_00 : WEP_BAR2Y_01) : (!cvars[CV_MIRROR] ? WEP_BAR2Y_10 : WEP_BAR2Y_11)));
+        wv[W_BARSCALE] = FixedMul(FixedMul(wv[W_SCALE], 1.0), 0.1);
+        wv[W_ICONSCALE] = FixedMul(WEP_ICON_SCALE, wv[W_SCALE]);
+        wv[W_BARWIDTH] = weaponBarDimensions[cvars[CV_DIR]];
+        wv[W_BARHEIGHT] = weaponBarDimensions[!cvars[CV_DIR]];
 
-        weaponBarSingleWidth = weaponBarWidth;
-        weaponBarSingleHeight = weaponBarHeight;
+        wv[W_BARSINGLEWIDTH] = wv[W_BARWIDTH];
+        wv[W_BARSINGLEHEIGHT] = wv[W_BARHEIGHT];
 
-        if(cvDir) {
-            weaponBarSingleWidth *= 2;
+        if(cvars[CV_DIR]) {
+            wv[W_BARSINGLEWIDTH] *= 2;
         } else {
-            weaponBarSingleHeight *= 2;
+            wv[W_BARSINGLEHEIGHT] *= 2;
         }
     }
 
@@ -528,25 +526,25 @@ function void drawWeapon(int pln, int x, int y)
         int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
 
         if(amt2 != -1) {
-            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
-            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 2);
+            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 2);
 
             int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
-            str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
-            str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
+            str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
+            str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
 
-            drawLayeredBar(cyan, blue, black, X+weaponBar1X, Y+weaponBar1Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-            drawLayeredBar(cyan2, blue2, black, X+weaponBar2X, Y+weaponBar2Y, weaponBarWidth, weaponBarHeight, weaponBarScale, weaponBarScale, cvAlpha, amt2, amx2, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(cyan, blue, black, X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt1, amx1, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(cyan2, blue2, black, X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt2, amx2, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         } else {
-            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
-            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvDir, 2);
-            drawLayeredBar(cyan, blue, black, X+weaponBarX, Y+weaponBarY, weaponBarSingleWidth, weaponBarSingleHeight, weaponBarScale, weaponBarScale, cvAlpha, amt1, amx1, !cvDir+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
+            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
+            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 2);
+            drawLayeredBar(cyan, blue, black, X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt1, amx1, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         }
     }
 
-    displayIcon(icon, getNewUIId(), x+weaponIconX, y+weaponIconY, weaponIconScale, weaponIconScale, cvAlpha);
+    displayIcon(icon, getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA]);
 }
 
 // Draw Lives =======================================================================================================================================
@@ -576,22 +574,24 @@ function void drawWeapon(int pln, int x, int y)
 
 #define LIVES_OFFS 9
 
-int livesCache_Scale;
-int livesCache_Mirror;
-int livesCache_Dir;
+int sc[3]; // lives cvar cache
+#define SC_SCALE  0
+#define SC_MIRROR 1
+#define SC_DIR    2
 
-int livesX;
-int livesY;
-int livesTextX;
-int livesTextY;
-int livesScale;
-int livesOffsX;
-int livesOffsY;
-int livesTextScale;
-int livesTextHAlign;
-int livesTextVAlign;
-int livesOverflowX;
-int livesOverflowY;
+int sv[12]; // lives variables
+#define S_X          0
+#define S_Y          1
+#define S_TEXTX      2
+#define S_TEXTY      3
+#define S_SCALE      4
+#define S_OFFSX      5
+#define S_OFFSY      6
+#define S_TEXTSCALE  7
+#define S_TEXTHALIGN 8
+#define S_TEXTVALIGN 9
+#define S_OVERFLOWX  10
+#define S_OVERFLOWY  11
 
 int maxLives = -1;
 
@@ -602,91 +602,12 @@ script "UITweaks_TeamInfo_MaxLives" OPEN CLIENTSIDE
     }
 }
 
-str livesIcons[2][256] = {
-    { // cyan
-        "UXTLVC00","UXTLVC01","UXTLVC02","UXTLVC03","UXTLVC04","UXTLVC05","UXTLVC06","UXTLVC07","UXTLVC08","UXTLVC09","UXTLVC0A","UXTLVC0B","UXTLVC0C","UXTLVC0D","UXTLVC0E","UXTLVC0F",
-        "UXTLVC10","UXTLVC11","UXTLVC12","UXTLVC13","UXTLVC14","UXTLVC15","UXTLVC16","UXTLVC17","UXTLVC18","UXTLVC19","UXTLVC1A","UXTLVC1B","UXTLVC1C","UXTLVC1D","UXTLVC1E","UXTLVC1F",
-        "UXTLVC20","UXTLVC21","UXTLVC22","UXTLVC23","UXTLVC24","UXTLVC25","UXTLVC26","UXTLVC27","UXTLVC28","UXTLVC29","UXTLVC2A","UXTLVC2B","UXTLVC2C","UXTLVC2D","UXTLVC2E","UXTLVC2F",
-        "UXTLVC30","UXTLVC31","UXTLVC32","UXTLVC33","UXTLVC34","UXTLVC35","UXTLVC36","UXTLVC37","UXTLVC38","UXTLVC39","UXTLVC3A","UXTLVC3B","UXTLVC3C","UXTLVC3D","UXTLVC3E","UXTLVC3F",
-        "UXTLVC40","UXTLVC41","UXTLVC42","UXTLVC43","UXTLVC44","UXTLVC45","UXTLVC46","UXTLVC47","UXTLVC48","UXTLVC49","UXTLVC4A","UXTLVC4B","UXTLVC4C","UXTLVC4D","UXTLVC4E","UXTLVC4F",
-        "UXTLVC50","UXTLVC51","UXTLVC52","UXTLVC53","UXTLVC54","UXTLVC55","UXTLVC56","UXTLVC57","UXTLVC58","UXTLVC59","UXTLVC5A","UXTLVC5B","UXTLVC5C","UXTLVC5D","UXTLVC5E","UXTLVC5F",
-        "UXTLVC60","UXTLVC61","UXTLVC62","UXTLVC63","UXTLVC64","UXTLVC65","UXTLVC66","UXTLVC67","UXTLVC68","UXTLVC69","UXTLVC6A","UXTLVC6B","UXTLVC6C","UXTLVC6D","UXTLVC6E","UXTLVC6F",
-        "UXTLVC70","UXTLVC71","UXTLVC72","UXTLVC73","UXTLVC74","UXTLVC75","UXTLVC76","UXTLVC77","UXTLVC78","UXTLVC79","UXTLVC7A","UXTLVC7B","UXTLVC7C","UXTLVC7D","UXTLVC7E","UXTLVC7F",
-        "UXTLVC80","UXTLVC81","UXTLVC82","UXTLVC83","UXTLVC84","UXTLVC85","UXTLVC86","UXTLVC87","UXTLVC88","UXTLVC89","UXTLVC8A","UXTLVC8B","UXTLVC8C","UXTLVC8D","UXTLVC8E","UXTLVC8F",
-        "UXTLVC90","UXTLVC91","UXTLVC92","UXTLVC93","UXTLVC94","UXTLVC95","UXTLVC96","UXTLVC97","UXTLVC98","UXTLVC99","UXTLVC9A","UXTLVC9B","UXTLVC9C","UXTLVC9D","UXTLVC9E","UXTLVC9F",
-        "UXTLVCA0","UXTLVCA1","UXTLVCA2","UXTLVCA3","UXTLVCA4","UXTLVCA5","UXTLVCA6","UXTLVCA7","UXTLVCA8","UXTLVCA9","UXTLVCAA","UXTLVCAB","UXTLVCAC","UXTLVCAD","UXTLVCAE","UXTLVCAF",
-        "UXTLVCB0","UXTLVCB1","UXTLVCB2","UXTLVCB3","UXTLVCB4","UXTLVCB5","UXTLVCB6","UXTLVCB7","UXTLVCB8","UXTLVCB9","UXTLVCBA","UXTLVCBB","UXTLVCBC","UXTLVCBD","UXTLVCBE","UXTLVCBF",
-        "UXTLVCC0","UXTLVCC1","UXTLVCC2","UXTLVCC3","UXTLVCC4","UXTLVCC5","UXTLVCC6","UXTLVCC7","UXTLVCC8","UXTLVCC9","UXTLVCCA","UXTLVCCB","UXTLVCCC","UXTLVCCD","UXTLVCCE","UXTLVCCF",
-        "UXTLVCD0","UXTLVCD1","UXTLVCD2","UXTLVCD3","UXTLVCD4","UXTLVCD5","UXTLVCD6","UXTLVCD7","UXTLVCD8","UXTLVCD9","UXTLVCDA","UXTLVCDB","UXTLVCDC","UXTLVCDD","UXTLVCDE","UXTLVCDF",
-        "UXTLVCE0","UXTLVCE1","UXTLVCE2","UXTLVCE3","UXTLVCE4","UXTLVCE5","UXTLVCE6","UXTLVCE7","UXTLVCE8","UXTLVCE9","UXTLVCEA","UXTLVCEB","UXTLVCEC","UXTLVCED","UXTLVCEE","UXTLVCEF",
-        "UXTLVCF0","UXTLVCF1","UXTLVCF2","UXTLVCF3","UXTLVCF4","UXTLVCF5","UXTLVCF6","UXTLVCF7","UXTLVCF8","UXTLVCF9","UXTLVCFA","UXTLVCFB","UXTLVCFC","UXTLVCFD","UXTLVCFE","UXTLVCFF",
-    },
-    { // blue
-        "UXTLVB00","UXTLVB01","UXTLVB02","UXTLVB03","UXTLVB04","UXTLVB05","UXTLVB06","UXTLVB07","UXTLVB08","UXTLVB09","UXTLVB0A","UXTLVB0B","UXTLVB0C","UXTLVB0D","UXTLVB0E","UXTLVB0F",
-        "UXTLVB10","UXTLVB11","UXTLVB12","UXTLVB13","UXTLVB14","UXTLVB15","UXTLVB16","UXTLVB17","UXTLVB18","UXTLVB19","UXTLVB1A","UXTLVB1B","UXTLVB1C","UXTLVB1D","UXTLVB1E","UXTLVB1F",
-        "UXTLVB20","UXTLVB21","UXTLVB22","UXTLVB23","UXTLVB24","UXTLVB25","UXTLVB26","UXTLVB27","UXTLVB28","UXTLVB29","UXTLVB2A","UXTLVB2B","UXTLVB2C","UXTLVB2D","UXTLVB2E","UXTLVB2F",
-        "UXTLVB30","UXTLVB31","UXTLVB32","UXTLVB33","UXTLVB34","UXTLVB35","UXTLVB36","UXTLVB37","UXTLVB38","UXTLVB39","UXTLVB3A","UXTLVB3B","UXTLVB3C","UXTLVB3D","UXTLVB3E","UXTLVB3F",
-        "UXTLVB40","UXTLVB41","UXTLVB42","UXTLVB43","UXTLVB44","UXTLVB45","UXTLVB46","UXTLVB47","UXTLVB48","UXTLVB49","UXTLVB4A","UXTLVB4B","UXTLVB4C","UXTLVB4D","UXTLVB4E","UXTLVB4F",
-        "UXTLVB50","UXTLVB51","UXTLVB52","UXTLVB53","UXTLVB54","UXTLVB55","UXTLVB56","UXTLVB57","UXTLVB58","UXTLVB59","UXTLVB5A","UXTLVB5B","UXTLVB5C","UXTLVB5D","UXTLVB5E","UXTLVB5F",
-        "UXTLVB60","UXTLVB61","UXTLVB62","UXTLVB63","UXTLVB64","UXTLVB65","UXTLVB66","UXTLVB67","UXTLVB68","UXTLVB69","UXTLVB6A","UXTLVB6B","UXTLVB6C","UXTLVB6D","UXTLVB6E","UXTLVB6F",
-        "UXTLVB70","UXTLVB71","UXTLVB72","UXTLVB73","UXTLVB74","UXTLVB75","UXTLVB76","UXTLVB77","UXTLVB78","UXTLVB79","UXTLVB7A","UXTLVB7B","UXTLVB7C","UXTLVB7D","UXTLVB7E","UXTLVB7F",
-        "UXTLVB80","UXTLVB81","UXTLVB82","UXTLVB83","UXTLVB84","UXTLVB85","UXTLVB86","UXTLVB87","UXTLVB88","UXTLVB89","UXTLVB8A","UXTLVB8B","UXTLVB8C","UXTLVB8D","UXTLVB8E","UXTLVB8F",
-        "UXTLVB90","UXTLVB91","UXTLVB92","UXTLVB93","UXTLVB94","UXTLVB95","UXTLVB96","UXTLVB97","UXTLVB98","UXTLVB99","UXTLVB9A","UXTLVB9B","UXTLVB9C","UXTLVB9D","UXTLVB9E","UXTLVB9F",
-        "UXTLVBA0","UXTLVBA1","UXTLVBA2","UXTLVBA3","UXTLVBA4","UXTLVBA5","UXTLVBA6","UXTLVBA7","UXTLVBA8","UXTLVBA9","UXTLVBAA","UXTLVBAB","UXTLVBAC","UXTLVBAD","UXTLVBAE","UXTLVBAF",
-        "UXTLVBB0","UXTLVBB1","UXTLVBB2","UXTLVBB3","UXTLVBB4","UXTLVBB5","UXTLVBB6","UXTLVBB7","UXTLVBB8","UXTLVBB9","UXTLVBBA","UXTLVBBB","UXTLVBBC","UXTLVBBD","UXTLVBBE","UXTLVBBF",
-        "UXTLVBC0","UXTLVBC1","UXTLVBC2","UXTLVBC3","UXTLVBC4","UXTLVBC5","UXTLVBC6","UXTLVBC7","UXTLVBC8","UXTLVBC9","UXTLVBCA","UXTLVBCB","UXTLVBCC","UXTLVBCD","UXTLVBCE","UXTLVBCF",
-        "UXTLVBD0","UXTLVBD1","UXTLVBD2","UXTLVBD3","UXTLVBD4","UXTLVBD5","UXTLVBD6","UXTLVBD7","UXTLVBD8","UXTLVBD9","UXTLVBDA","UXTLVBDB","UXTLVBDC","UXTLVBDD","UXTLVBDE","UXTLVBDF",
-        "UXTLVBE0","UXTLVBE1","UXTLVBE2","UXTLVBE3","UXTLVBE4","UXTLVBE5","UXTLVBE6","UXTLVBE7","UXTLVBE8","UXTLVBE9","UXTLVBEA","UXTLVBEB","UXTLVBEC","UXTLVBED","UXTLVBEE","UXTLVBEF",
-        "UXTLVBF0","UXTLVBF1","UXTLVBF2","UXTLVBF3","UXTLVBF4","UXTLVBF5","UXTLVBF6","UXTLVBF7","UXTLVBF8","UXTLVBF9","UXTLVBFA","UXTLVBFB","UXTLVBFC","UXTLVBFD","UXTLVBFE","UXTLVBFF",
-    },
-};
-
-// premature optimizations
-str livesCounts[3][100] = {
-    { // horizontal
-        "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
-        "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-        "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
-        "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
-        "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
-        "50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
-        "60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
-        "70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
-        "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
-        "90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
-    },
-    { // vertical
-        "0\n0", "0\n1", "0\n2", "0\n3", "0\n4", "0\n5", "0\n6", "0\n7", "0\n8", "0\n9",
-        "1\n0", "1\n1", "1\n2", "1\n3", "1\n4", "1\n5", "1\n6", "1\n7", "1\n8", "1\n9",
-        "2\n0", "2\n1", "2\n2", "2\n3", "2\n4", "2\n5", "2\n6", "2\n7", "2\n8", "2\n9",
-        "3\n0", "3\n1", "3\n2", "3\n3", "3\n4", "3\n5", "3\n6", "3\n7", "3\n8", "3\n9",
-        "4\n0", "4\n1", "4\n2", "4\n3", "4\n4", "4\n5", "4\n6", "4\n7", "4\n8", "4\n9",
-        "5\n0", "5\n1", "5\n2", "5\n3", "5\n4", "5\n5", "5\n6", "5\n7", "5\n8", "5\n9",
-        "6\n0", "6\n1", "6\n2", "6\n3", "6\n4", "6\n5", "6\n6", "6\n7", "6\n8", "6\n9",
-        "7\n0", "7\n1", "7\n2", "7\n3", "7\n4", "7\n5", "7\n6", "7\n7", "7\n8", "7\n9",
-        "8\n0", "8\n1", "8\n2", "8\n3", "8\n4", "8\n5", "8\n6", "8\n7", "8\n8", "8\n9",
-        "9\n0", "9\n1", "9\n2", "9\n3", "9\n4", "9\n5", "9\n6", "9\n7", "9\n8", "9\n9",
-    },
-    { // verticalreverse
-        "0\n0", "1\n0", "2\n0", "3\n0", "4\n0", "5\n0", "6\n0", "7\n0", "8\n0", "9\n0",
-        "0\n1", "1\n1", "2\n1", "3\n1", "4\n1", "5\n1", "6\n1", "7\n1", "8\n1", "9\n1",
-        "0\n2", "1\n2", "2\n2", "3\n2", "4\n2", "5\n2", "6\n2", "7\n2", "8\n2", "9\n2",
-        "0\n3", "1\n3", "2\n3", "3\n3", "4\n3", "5\n3", "6\n3", "7\n3", "8\n3", "9\n3",
-        "0\n4", "1\n4", "2\n4", "3\n4", "4\n4", "5\n4", "6\n4", "7\n4", "8\n4", "9\n4",
-        "0\n5", "1\n5", "2\n5", "3\n5", "4\n5", "5\n5", "6\n5", "7\n5", "8\n5", "9\n5",
-        "0\n6", "1\n6", "2\n6", "3\n6", "4\n6", "5\n6", "6\n6", "7\n6", "8\n6", "9\n6",
-        "0\n7", "1\n7", "2\n7", "3\n7", "4\n7", "5\n7", "6\n7", "7\n7", "8\n7", "9\n7",
-        "0\n8", "1\n8", "2\n8", "3\n8", "4\n8", "5\n8", "6\n8", "7\n8", "8\n8", "9\n8",
-        "0\n9", "1\n9", "2\n9", "3\n9", "4\n9", "5\n9", "6\n9", "7\n9", "8\n9", "9\n9",
-    },
-};
-
 function void drawLives(int pln, int x, int y)
 {
     if(maxLives == -1)
         return;
 
-    if(!cvShowLives)
+    if(!cvars[CV_SHOWLIVES])
         return;
 
     int lives = GetPlayerLivesLeft(pln);
@@ -694,40 +615,40 @@ function void drawLives(int pln, int x, int y)
         return;
 
     if(
-        livesCache_Scale != cvScale ||
-        livesCache_Mirror != cvMirror ||
-        livesCache_Dir != cvDir
+        sc[SC_SCALE] != cvars[CV_SCALE] ||
+        sc[SC_MIRROR] != cvars[CV_MIRROR] ||
+        sc[SC_DIR] != cvars[CV_DIR]
     )
     {
-        livesCache_Scale = cvScale;
-        livesCache_Mirror = cvMirror;
-        livesCache_Dir = cvDir;
+        sc[SC_SCALE] = cvars[CV_SCALE];
+        sc[SC_MIRROR] = cvars[CV_MIRROR];
+        sc[SC_DIR] = cvars[CV_DIR];
 
-        livesX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_X_00 : LIVES_X_01) : (!cvMirror ? LIVES_X_10 : LIVES_X_11)));
-        livesY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_Y_00 : LIVES_Y_01) : (!cvMirror ? LIVES_Y_10 : LIVES_Y_11)));
-        livesTextX = livesX + FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_TEXT_X_00 : LIVES_TEXT_X_01) : (!cvMirror ? LIVES_TEXT_X_10 : LIVES_TEXT_X_11)));
-        livesTextY = livesY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? LIVES_TEXT_Y_00 : LIVES_TEXT_Y_01) : (!cvMirror ? LIVES_TEXT_Y_10 : LIVES_TEXT_Y_11)));
-        livesScale = cvScale;
-        livesOffsX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? -LIVES_OFFS : LIVES_OFFS) : 0));
-        livesOffsY = FixedMul(cvScale, ( cvDir ? (!cvMirror ? -LIVES_OFFS : LIVES_OFFS) : 0));
+        sv[S_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LIVES_X_00 : LIVES_X_01) : (!cvars[CV_MIRROR] ? LIVES_X_10 : LIVES_X_11)));
+        sv[S_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LIVES_Y_00 : LIVES_Y_01) : (!cvars[CV_MIRROR] ? LIVES_Y_10 : LIVES_Y_11)));
+        sv[S_TEXTX] = sv[S_X] + FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LIVES_TEXT_X_00 : LIVES_TEXT_X_01) : (!cvars[CV_MIRROR] ? LIVES_TEXT_X_10 : LIVES_TEXT_X_11)));
+        sv[S_TEXTY] = sv[S_Y] + FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LIVES_TEXT_Y_00 : LIVES_TEXT_Y_01) : (!cvars[CV_MIRROR] ? LIVES_TEXT_Y_10 : LIVES_TEXT_Y_11)));
+        sv[S_SCALE] = cvars[CV_SCALE];
+        sv[S_OFFSX] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? -LIVES_OFFS : LIVES_OFFS) : 0));
+        sv[S_OFFSY] = FixedMul(cvars[CV_SCALE], ( cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? -LIVES_OFFS : LIVES_OFFS) : 0));
 
-        livesTextScale = FixedMul(cvScale, TEXT_SCALE);        
-        livesTextHAlign = cvMirror && cvDir == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        livesTextVAlign = !cvMirror && cvDir == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
+        sv[S_TEXTSCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);        
+        sv[S_TEXTHALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        sv[S_TEXTVALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
 
-        livesOverflowX = livesX + (!cvDir ? (!cvMirror ? livesOffsX*2 : 0) : (!cvMirror ? 0 : 0));
-        livesOverflowY = livesY + (!cvDir ? (!cvMirror ? livesOffsY*2 : 0) : (!cvMirror ? 0 : 0));
+        sv[S_OVERFLOWX] = sv[S_X] + (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? sv[S_OFFSX]*2 : 0) : (!cvars[CV_MIRROR] ? 0 : 0));
+        sv[S_OVERFLOWY] = sv[S_Y] + (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? sv[S_OFFSY]*2 : 0) : (!cvars[CV_MIRROR] ? 0 : 0));
     }
 
     int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
     
-    displayIcon(livesIcons[0][cyan], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
-    displayIcon(livesIcons[1][blue], getNewUIId(), x+livesOverflowX, y+livesOverflowY, livesScale, livesScale, cvAlpha);
+    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA]);
+    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA]);
 
-    SetFont(uiFonts[cvFontIdx]);
-    displayMessage(livesCounts[cvDir + cvReverseText][lives < 100 ? lives : 99], getNewUIId(), x + livesTextX, y + livesTextY, livesTextScale, livesTextScale, cvAlpha, livesTextHAlign, livesTextVAlign);
+    SetFont(uiFonts[cvars[CV_FONTIDX]]);
+    displayMessage(livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], getNewUIId(), x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);
 }
 
 // Player name cache ================================================================================================================================
