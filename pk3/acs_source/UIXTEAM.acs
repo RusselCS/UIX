@@ -894,10 +894,13 @@ int playerLocs[64][2];
 // [Russ] This algorithm is based on one very dangerous assumption.
 // Will the engine generate an identical string with a separate index in the string table?
 // I feel like only god knows.
+// EDIT: NOPE.
+// IT SOMETIMES RETURNS A NEW INDEX.
+// I DON'T KNOW WHEN I DON'T KNOW HOW I JUST KNOW IT DOES.
 //
 function int findLoc(int id) {
     for(int i = 0; i < LOC_SIZE; i++) {
-        if(getLocId(i) == id)
+        if(StrCmp(getLocId(i), id) == 0)
             return i;
     }
     return -1;
@@ -920,7 +923,7 @@ function str findLocation(int plr, int o, int r) {
     if(StrLen(loc) == 0)
         return "";
 
-    if(playerLocs[plr][0] == loc) {
+    if(StrCmp(playerLocs[plr][0], loc) == 0) {
         return getLocName(playerLocs[plr][1], o, r);
     }
 

@@ -97,7 +97,7 @@ function str GetWeaponProperty_S(int pln, int prop) {
     str newWep = ACS_NamedExecuteWithResult("UIX_GetCurrentWeapon", pln);
     
     if(lastWeapon_init[pln])
-        if(newWep == lastWeapon_str[pln][0])
+        if(StrCmp(newWep, lastWeapon_str[pln][0]) == 0)
             return getWeaponProperty(pln, prop);
     
     lastWeapon_init[pln] = 1;
