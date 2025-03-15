@@ -827,7 +827,7 @@ function void rebuildString(str name) {
 // int width vertical
 // int width vertical reverse
 //
-str namesCache[64][7];
+str namesCache[MAX_PLAYERS_SHRT][7];
 
 function int isCacheInit(int plr) { return namesCache[plr][0]; }
 function void setCacheInit(int plr, int val) { namesCache[plr][0] = val; }
@@ -889,7 +889,7 @@ str locs[LOC_SIZE_LIMIT+1][7];
 // int loc
 // int idx
 //
-int playerLocs[64][2];
+int playerLocs[MAX_PLAYERS_SHRT][2];
 
 // [Russ] This algorithm is based on one very dangerous assumption.
 // Will the engine generate an identical string with a separate index in the string table?

@@ -30,6 +30,8 @@
 #define MAX_INT 2147483647
 #define MIN_INT -2147483648
 
+global int 4: ServerMAX;
+
 function int getNewUIId(void) { return CallACS0("UIX_GetNewID"); }
 
 function void displayBar(str baseStr, str fillPiece, str empPiece, int cur, int max, int id1, int id2, int offsX, int offsY, int scaleX, int scaleY, int alpha)
