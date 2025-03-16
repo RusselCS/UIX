@@ -50,21 +50,25 @@ Done:
 
 == V2B TO DO ==
 - Cleanup: Remove constants unused
-- Cleanup: Move "bloat" tables into separate include files
 - Teaminfo: Make it so weapons with no icon offset the bars
 - Teaminfo: Name squish defect for "The Saint of Hope or something"
 - Teaminfo: Add a wrapping function?
 - Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 - Teaminfo: Bottom-left default preset packs up too quick
+- Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
+- Staging: Get Xover staging script from SDM.
 - WeaponBar: Apparently doubleammo does not depopulate when overwritten
-- Killfeed: Fix mugshots in self-destruct scenarios.
 - Killfeed: Fix when mugshot is not found.
-- Killfeed: Should work for spectators.
 - Teaminfo: Add number toggles for everything
 - Pickup respawn: 1 minute timer
 
 Done:
+- Cleanup: Move "bloat" tables into separate include files
+- Killfeed: Fix mugshots in self-destruct scenarios.
+- Killfeed: Should work for spectators.
+- Killfeed: Fixed hudmessages being drawn, even for players not part of the kill transaction.
 - Teaminfo: Update offsets of everything again
+- Teaminfo: Fixed possible cache misses on some components, which should improve performance.
 - weaponbar: bug fixes
 - give a full-size weapon bar
 
