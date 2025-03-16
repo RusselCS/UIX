@@ -80,11 +80,21 @@ function void displayBar1M(str fillMsg, str empMsg, str fillPiece, int cur, int 
 	displayBar_(res, fillPiece, "", id1, 0, offsX, offsY, scaleX, scaleY, alpha);
 }
 
-function void displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+function int displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
-    SetFont(icon);
-    displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha, 0, 0);
+	int res = CheckFont(icon);
+    if(res) {
+		SetFont(icon);
+		displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha, 0, 0);
+	}
+	return res;
 }
+
+// function void displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
+// {
+// 	SetFont(icon);
+// 	displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha, 0, 0);
+// }
 
 function void displayIconL(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)
 {
@@ -458,3 +468,5 @@ function int getPlayerTeam(int pln) {
 	
 	return GetPlayerInfo(pln, PLAYERINFO_TEAM);
 }
+
+function void resetActivator(void) { SetActivator(0, AAPTR_NULL); }

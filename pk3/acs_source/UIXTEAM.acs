@@ -2,10 +2,13 @@
 
 #include "zcommon.acs"
 
+#import "8BDT.acs"
+
 #include "SHRTFUNC.acs"
 
 #include "UXTBNUM.acs"
 #include "UXTBICNS.acs"
+#include "UXTBWBAR.acs"
 
 #define horizontal 0
 #define vertical 1
@@ -367,8 +370,13 @@ function void drawHealth(int pln, int x, int y)
 
     int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
     int chp = GetActorProperty(pln+PLN_TID_SHRT, AProp_Health);
-    if(mhp == 0) // the bar flashing off looked weird but this prevents a /0 error.
-        mhp = chp;
+    if(mhp == 0) {
+        if(chp == 0) {
+            mhp = 1;
+        } else {
+            mhp = chp;
+        }
+    }
     
     drawBar(healthBars[0][cvars[CV_DIR]], healthBars[1][cvars[CV_DIR]], x+hv[H_X], y+hv[H_Y], hv[H_WIDTH], hv[H_HEIGHT], hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA], chp, mhp, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId());
 }
@@ -470,6 +478,18 @@ int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 #define UIX_WeapProp_Cyan2 8
 #define UIX_WeapProp_Blue2 9
 
+int playerWeaponInfo[10];
+#define PI_SUCCESS 0
+#define PI_ICON 1
+#define PI_AMMO_AMT1 2
+#define PI_AMMO_MAX1 3
+#define PI_AMMO_AMT2 4
+#define PI_AMMO_MAX2 5
+#define PI_CYAN1 6
+#define PI_BLUE1 7
+#define PI_CYAN2 8
+#define PI_BLUE2 9
+
 function void drawWeapon(int pln, int x, int y)
 {
     if(!cvars[CV_SHOWWEAPON])
@@ -514,37 +534,23 @@ function void drawWeapon(int pln, int x, int y)
         }
     }
 
-    str icon = ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Icon);
+    getPlayerWeaponInfo(pln);
 
-    int amt1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 0);
+    if(!playerWeaponInfo[PI_SUCCESS]) {
+        Log(s:"Canceling due to invalid data");
+        return;
+    }
 
-    if(amt1 != -1) {
-        int amx1 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 0, 1);
-
-        str cyan, blue, black;
-
-        int amt2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 0);
-
-        if(amt2 != -1) {
-            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
-            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 2);
-
-            int amx2 = ACS_NamedExecuteWithResult("UIXDB_GetPlayerAmmo", pln, 1, 1);
-            str cyan2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan2));
-            str blue2 = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 2+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue2));
-
-            drawLayeredBar(cyan, blue, black, X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt1, amx1, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-            drawLayeredBar(cyan2, blue2, black, X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt2, amx2, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+    if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
+        if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
+            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         } else {
-            cyan = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 0, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Cyan));
-            blue = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 1, ACS_NamedExecuteWithResult("UIXDB_GetPlayerWeaponProperty", pln, UIX_WeapProp_Blue));
-            black = ACS_NamedExecuteWithResult("UIXDB_GetAmmoBar", 4+cvars[CV_DIR], 2);
-            drawLayeredBar(cyan, blue, black, X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], amt1, amx1, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(4+cvars[CV_DIR],2,0), X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
         }
     }
 
-    displayIcon(icon, getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA]);
+    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA]);
 }
 
 // Draw Lives =======================================================================================================================================
@@ -991,4 +997,197 @@ function int getCharWidth(int char) {
     int width = parseInt(StrParam(l:StrParam(s:"UI_SMALLFONT_", c:char<0?'N':'P', i:char)));
     fontCharWidths[idx] = width;
     return width;
+}
+
+// Weapon data store ================================================================================================================================
+
+// bool: cached
+// int:  cyan1
+// int:  blue1
+// int:  cyan2
+// int:  blue2
+//
+int weapon_colors[MAX_WEAPONS_GLOBAL_LIMIT][5];
+#define WC_ISCACHED 0
+#define WC_CYAN1 1
+#define WC_BLUE1 2
+#define WC_CYAN2 3
+#define WC_BLUE2 4
+
+int readBlue1, readCyan1, readBlue2, readCyan2;
+function void readWeaponBars(str weap) {
+    // Log(s:"Called read weapon bars for weapon: ", s:weap);
+    readCyan1 = -1;
+    readBlue1 = -1;
+    readCyan2 = -1;
+    readBlue2 = -1;
+
+    int obj;
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
+    }
+
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan1 = GetActorArg(obj, 0);
+        readBlue1 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+
+    obj = new(StrParam(s:weap, s:"_SecondBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan2 = GetActorArg(obj, 0);
+        readBlue2 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
+}
+
+// core function
+function int getWeaponColor(int idx, int prop)
+{
+    if(idx == -1 || prop == 0)
+        return -1;
+
+    if(weapon_colors[idx][WC_ISCACHED])
+        return weapon_colors[idx][prop];
+    
+    str act = getWeaponActor(idx);
+    readWeaponBars(act);
+
+    weapon_colors[idx][WC_ISCACHED] = true;
+    weapon_colors[idx][WC_CYAN1] = readCyan1;
+    weapon_colors[idx][WC_BLUE1] = readBlue1;
+    weapon_colors[idx][WC_CYAN2] = readCyan2;
+    weapon_colors[idx][WC_BLUE2] = readBlue2;
+    return weapon_colors[idx][prop];
+}
+
+function int findWeaponByActor(str actor)
+{
+    int res = -1;
+	for(int i = 0; i < MAX_WEAPONS_GLOBAL && res == -1; i++)
+    {
+        if(StrICmp(actor, getWeaponActor(i)) == 0) {
+            res = i;
+        }
+    }
+    return res;
+}
+
+function int findWeaponInDTs(str weap) {
+    int i;
+
+	for(i = 0; i < MAX_WEAPONS_GLOBAL; i++)
+    {
+        if(StrICmp(actor, getWeaponActor(i)) == 0)
+            return i+1;
+    }
+
+    for(i = 0; i < MAX_BUSTERUPGRADES; i++)
+    {
+        if(StrICmp(actor, getBusterActor(i)) == 0)
+            return -(i+1);
+    }
+
+    return 0;
+}
+
+// bool: init
+// int:  index
+// int:  timestamp
+// str:  weaponActor
+//
+int playerWeapons[MAX_PLAYERS_SHRT][4];
+#define WP_INIT 0
+#define WP_INDEX 1
+#define WP_TIMESTAMP 2
+#define WP_ACTOR 3
+
+// this function will throw all of its information
+// to variables defined way earlier
+function void getPlayerWeaponInfo(int pln)
+{
+    // flag to mark this function has initialized
+    playerWeaponInfo[PI_SUCCESS] = false;
+
+    // regardless, data access is difficult without setting activator
+    SetActivatorToPlayer(pln);
+    int idx = 0;
+
+    // check if the data in the cache is still fresh
+    // if a "stale timer" is added, check that here
+    //
+    if(playerWeapons[pln][WP_INIT]) {
+        if(!CheckWeapon(playerWeapons[pln][WP_ACTOR])) {
+            playerWeapons[pln][WP_INIT] = false;
+        } else {
+            idx = playerWeapons[pln][WP_INDEX];
+        }
+    }
+
+    if(!playerWeapons[pln][WP_INIT]) {
+        str weap = GetWeapon();
+        idx = findWeaponInDTs(weap);
+        playerWeapons[pln][WP_INIT] = true;
+        playerWeapons[pln][WP_INDEX] = idx;
+        playerWeapons[pln][WP_TIMESTAMP] = Timer();
+        playerWeapons[pln][WP_ACTOR] = weap;
+    }
+
+    if(idx <= 0) {
+        if(idx < 0) { // weapon is a known buster
+            playerWeaponInfo[PI_ICON] = getBusterIcon(-idx-1);
+        } else { // weapon is unknown
+            playerWeaponInfo[PI_ICON] = "";
+        }
+
+        playerWeaponInfo[PI_AMMO_AMT1] = -1;
+        playerWeaponInfo[PI_AMMO_MAX1] = -1;
+        playerWeaponInfo[PI_AMMO_AMT2] = -1;
+        playerWeaponInfo[PI_AMMO_MAX2] = -1;
+        playerWeaponInfo[PI_CYAN1] = -1;
+        playerWeaponInfo[PI_BLUE1] = -1;
+        playerWeaponInfo[PI_CYAN2] = -1;
+        playerWeaponInfo[PI_BLUE2] = -1;
+    } else { // weapon is a known copywep
+        idx--; // convert the combined index into the copywep index
+
+        int amo1 = getWeaponAmmoType(idx);
+        int amo2 = getWeaponAmmo2Type(idx);
+
+        playerWeaponInfo[PI_ICON] = getWeaponIcon(idx);
+
+        playerWeaponInfo[PI_CYAN1] = getWeaponColor(idx, WC_CYAN1);
+        playerWeaponInfo[PI_BLUE1] = getWeaponColor(idx, WC_BLUE1);
+        playerWeaponInfo[PI_CYAN2] = getWeaponColor(idx, WC_CYAN2);
+        playerWeaponInfo[PI_BLUE2] = getWeaponColor(idx, WC_BLUE2);
+
+        if(StrLen(amo1) != 0 && playerWeaponInfo[PI_CYAN1] != -1) {
+            playerWeaponInfo[PI_AMMO_AMT1] = CheckInventory(amo1);
+            playerWeaponInfo[PI_AMMO_MAX1] = GetAmmoCapacity(amo1);
+        } else {
+            playerWeaponInfo[PI_AMMO_AMT1] = -1;
+            playerWeaponInfo[PI_AMMO_MAX1] = -1;
+        }
+        if(StrLen(amo2) != 0 && playerWeaponInfo[PI_CYAN2] != -1) {
+            playerWeaponInfo[PI_AMMO_AMT2] = CheckInventory(amo2);
+            playerWeaponInfo[PI_AMMO_MAX2] = GetAmmoCapacity(amo2);
+        } else {
+            playerWeaponInfo[PI_AMMO_AMT2] = -1;
+            playerWeaponInfo[PI_AMMO_MAX2] = -1;
+        }
+    }
+
+    playerWeaponInfo[PI_SUCCESS] = true;
+    resetActivator();
+    return;
 }
