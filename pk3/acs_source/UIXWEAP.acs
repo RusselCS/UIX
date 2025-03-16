@@ -415,14 +415,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 } else {
                     iconX = baseX + weightOffsX * (i-1);
                     iconY = baseY + weightOffsY * (i-1);
-                    displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5));
+                    displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
                 }
             } else {
                 weap = i;
 
                 iconX = baseX + weightOffsX * i;
                 iconY = baseY + weightOffsY * i;
-                displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5));
+                displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
             }
 
             if(!slotVals[slot][weap][WEAP_TYPE]) {
@@ -440,7 +440,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    barScale, barScale, cvAlpha,
                                    slotVals[slot][weap][WEAP_AMMO2_AMT],
                                    slotVals[slot][weap][WEAP_AMMO2_MAX],
-                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
                     // Draw the bar1 based on whether the bar2 will be drawn.
                     // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
@@ -453,7 +453,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barScale, barScale, cvAlpha,
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
-                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
                     }
                 } else {
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
@@ -466,11 +466,11 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barScale, barScale, cvAlpha,
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
-                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID());
+                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
                     }
                 }
             }
-            displayIcon(icon, GetNewUIID(), iconX, iconY, cvScale, cvScale, cvAlpha);
+            displayIcon(icon, GetNewUIID(), iconX, iconY, cvScale, cvScale, cvAlpha, ALIGN_CENTER, ALIGN_CENTER);
         }
 
         if(slotCounts[slot]) {

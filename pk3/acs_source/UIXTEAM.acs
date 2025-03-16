@@ -161,7 +161,7 @@ function void drawMugshot(int pln, int x, int y)
         mugScale = FixedMul(cvars[CV_SCALE], 4.0);
     }
 
-    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA]);
+    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 }
 
 // Mugshot data pull, from pingbutton
@@ -378,7 +378,7 @@ function void drawHealth(int pln, int x, int y)
         }
     }
     
-    drawBar(healthBars[0][cvars[CV_DIR]], healthBars[1][cvars[CV_DIR]], x+hv[H_X], y+hv[H_Y], hv[H_WIDTH], hv[H_HEIGHT], hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA], chp, mhp, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId());
+    drawBar(healthBars[0][cvars[CV_DIR]], healthBars[1][cvars[CV_DIR]], x+hv[H_X], y+hv[H_Y], hv[H_WIDTH], hv[H_HEIGHT], hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA], chp, mhp, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
 }
 
 // Draw Weapon ======================================================================================================================================
@@ -543,14 +543,14 @@ function void drawWeapon(int pln, int x, int y)
 
     if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
         if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
-            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
-            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
+            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
         } else {
-            drawLayeredBar(getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(4+cvars[CV_DIR],2,0), X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId());
+            drawLayeredBar(getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(4+cvars[CV_DIR],2,0), X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
         }
     }
 
-    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA]);
+    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 }
 
 // Draw Lives =======================================================================================================================================
@@ -650,8 +650,8 @@ function void drawLives(int pln, int x, int y)
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
     
-    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA]);
-    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA]);
+    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
     displayMessage(livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], getNewUIId(), x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);
