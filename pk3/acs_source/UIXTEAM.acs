@@ -1071,30 +1071,18 @@ function int getWeaponColor(int idx, int prop)
     return weapon_colors[idx][prop];
 }
 
-function int findWeaponByActor(str actor)
-{
-    int res = -1;
-	for(int i = 0; i < MAX_WEAPONS_GLOBAL && res == -1; i++)
-    {
-        if(StrICmp(actor, getWeaponActor(i)) == 0) {
-            res = i;
-        }
-    }
-    return res;
-}
-
 function int findWeaponInDTs(str weap) {
     int i;
 
 	for(i = 0; i < MAX_WEAPONS_GLOBAL; i++)
     {
-        if(StrICmp(actor, getWeaponActor(i)) == 0)
+        if(StrICmp(weap, getWeaponActor(i)) == 0)
             return i+1;
     }
 
     for(i = 0; i < MAX_BUSTERUPGRADES; i++)
     {
-        if(StrICmp(actor, getBusterActor(i)) == 0)
+        if(StrICmp(weap, getBusterActor(i)) == 0)
             return -(i+1);
     }
 
