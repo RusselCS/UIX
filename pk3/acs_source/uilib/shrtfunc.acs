@@ -94,6 +94,7 @@ function int displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int
 // {
 // 	SetFont(icon);
 // 	displayMessage("A", id, offsX, offsY, scaleX, scaleY, alpha, 0, 0);
+// 	return 1;
 // }
 
 function void displayIconL(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha)

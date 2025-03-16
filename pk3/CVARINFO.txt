@@ -40,5 +40,8 @@ user bool UIX_CL_TEAMINFOSHOWLIVES = true;
 user bool UIX_CL_TEAMINFOSHOWWEAPON = true;
 user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
 
+server noarchive bool UIX_SV_DRAWKILLFEED = true;
+user bool UIX_CL_DRAWKILLFEED = true;
+
 // debug stuff
 user noarchive bool UIX_DEBUG_SHOWSELF = false;

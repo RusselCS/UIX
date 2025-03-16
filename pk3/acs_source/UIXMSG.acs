@@ -18,21 +18,24 @@ script "UITweaks_FragIcon" OPEN CLIENTSIDE
     infiniteRespawns = !(GetCvar("lastmanstanding") || GetCvar("teamlms"));
 }
 
-script "UITweaks_FragCheck" DEATH CLIENTSIDE
+script "UIX_KillfeedDispatch" DEATH CLIENTSIDE
 {
     delay(1);
 
-    int vpln = PlayerNumber();
-    lastDeath[vpln] = timer();
-
+    if(!GetCVar("UIX_SV_DRAWKILLFEED"))
+        terminate;
+    if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_DRAWKILLFEED"))
+        terminate;
     if(GetGamemodeState() != GAMESTATE_INPROGRESS)
         terminate;
 
+    int vpln = PlayerNumber();
+    lastDeath[vpln] = timer();
     int vfrags = PlayerFrags();
     SetActivatorToTarget(0);
     int apln = PlayerNumber();
 
-    if(apln == -1) { // world killed me
+    if(vpln == apln || apln == -1) { // world killed me
         plrFrags[vpln] = vfrags;
         terminate;
     }
@@ -46,9 +49,24 @@ script "UITweaks_FragCheck" DEATH CLIENTSIDE
 
     lastFrag[apln] = timer();
 
-    ACS_NamedExecuteWithResult("UITweaks_FragMugshot", vpln);
-    SetActivatorToPlayer(vpln);
-    ACS_NamedExecuteWithResult("UITweaks_FragMugshot", apln, true);
+    resetActivator();
+
+    int cam = getCameraPln(ConsolePlayerNumber());
+
+    if(cam == apln)
+        CallACS3("UIX_Killfeed", cam, vpln, false);
+
+    if(cam == vpln)
+        CallACS3("UIX_Killfeed", cam, apln, true);
+}
+
+function int getCameraPln(int pln) { return CallACS1("uix_cameraplayernumber", pln); }
+
+script "uix_cameraplayernumber" (int pln)
+{
+    SetActivatorToPlayer(pln);
+    SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+    SetResultValue(PlayerNumber());
 }
 
 // Mugshot data pull, from pingbutton
@@ -87,14 +105,14 @@ script "UIT_FREEZEBOTS" (void)
     }
 }
 
-script "UITweaks_FragMugshot" (int other, int fragged) CLIENTSIDE
+script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
 {
-    str mug = getMugshotGraphicFromTid(other + PLN_TID_SHRT);
+    str mug = getMugshotGraphicFromTid(who + PLN_TID_SHRT);
 
     if(strLen(mug) == 0)
         terminate;
 
-    int pln = PlayerNumber();
+    int pln = cam;
 
     int fragTime = lastFrag[pln];
     int deathTime = lastDeath[pln];
@@ -110,7 +128,7 @@ script "UITweaks_FragMugshot" (int other, int fragged) CLIENTSIDE
     int scale = FRAGMSG_MUG_SCALE;
     int alpha = 0.0;
     int x = 0;
-    int y = destY + (fragged ? -FRAGMSG_MUG_SIZERANGE : FRAGMSG_MUG_SIZERANGE);
+    int y = destY + (dead ? -FRAGMSG_MUG_SIZERANGE : FRAGMSG_MUG_SIZERANGE);
 
     int scaleIter = (destScale - scale) / FRAGMSG_ITERATION;
     int alphaIter = (destAlpha - alpha) / FRAGMSG_ITERATION;
@@ -122,9 +140,9 @@ script "UITweaks_FragMugshot" (int other, int fragged) CLIENTSIDE
 
     int update = 0;
 
-    int canRespawn = getPlayerLivesLeft(other) > 0;
+    int canRespawn = getPlayerLivesLeft(who) > 0;
 
-    int team = GetPlayerInfo(other, PLAYERINFO_TEAM);
+    int team = GetPlayerInfo(who, PLAYERINFO_TEAM);
     int cyan, blue;
 
     if(team == 255) {
@@ -179,7 +197,7 @@ script "UITweaks_FragMugshot" (int other, int fragged) CLIENTSIDE
             terminate;
         }
 
-        if(!fragged) {
+        if(!dead) {
             if(infiniteRespawns) {
                 displayIcon(respawnFrames[FRAGMSG_RESPAWNFRAMES-1], getNewUIId(), x, y, scale, scale, alpha);
             } else {
