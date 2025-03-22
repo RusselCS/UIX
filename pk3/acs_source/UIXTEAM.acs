@@ -224,9 +224,9 @@ function void drawName(int pln, int x, int y)
         nv[N_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_X_00 : NAME_X_01) : (!cvars[CV_MIRROR] ? NAME_X_10 : NAME_X_11)));
         nv[N_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_Y_00 : NAME_Y_01) : (!cvars[CV_MIRROR] ? NAME_Y_10 : NAME_Y_11)));
         nv[N_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], nv[N_SCALE]);
-        nv[N_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
-        nv[N_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
+        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);
+        nv[N_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        nv[N_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
     }
 
     str name = getPlayerName(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
@@ -291,9 +291,9 @@ function void drawLocation(int pln, int x, int y)
         lv[L_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_X_00 : LOC_X_01) : (!cvars[CV_MIRROR] ? LOC_X_10 : LOC_X_11)));
         lv[L_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_Y_00 : LOC_Y_01) : (!cvars[CV_MIRROR] ? LOC_Y_10 : LOC_Y_11)));
         lv[L_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);
-        lv[L_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
-        lv[L_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
+        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);        
+        lv[L_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
+        lv[L_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
     }
 
     str loc = findLocation(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
