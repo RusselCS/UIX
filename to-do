@@ -50,9 +50,11 @@ Done:
 
 == V2B TO DO ==
 - Cleanup: Remove constants unused
+- Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
+- Teaminfo: Trill's request: Add ability for the component to "wrap."
+- Teaminfo: Objective items should display.
 - Teaminfo: Make it so weapons with no icon offset the bars
 - Teaminfo: Name squish defect for "The Saint of Hope or something"
-- Teaminfo: Add a wrapping function?
 - Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 - Teaminfo: Bottom-left default preset packs up too quick
 - Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
