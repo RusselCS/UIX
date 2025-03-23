@@ -178,13 +178,13 @@ function str getMugshotGraphicFromTID(int tid) {
 }
 
 // Draw Name ========================================================================================================================================
-#define NAME_X_00 16 // -18
-#define NAME_Y_00 -9
+#define NAME_X_00 17
+#define NAME_Y_00 -14
 
-#define NAME_X_01 -19
+#define NAME_X_01 -NAME_X_00-1
 #define NAME_Y_01 NAME_Y_00
 
-#define NAME_X_10 -19
+#define NAME_X_10 -15
 #define NAME_Y_10 17
 
 #define NAME_X_11 NAME_X_10
@@ -224,9 +224,9 @@ function void drawName(int pln, int x, int y)
         nv[N_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_X_00 : NAME_X_01) : (!cvars[CV_MIRROR] ? NAME_X_10 : NAME_X_11)));
         nv[N_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_Y_00 : NAME_Y_01) : (!cvars[CV_MIRROR] ? NAME_Y_10 : NAME_Y_11)));
         nv[N_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);
-        nv[N_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        nv[N_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
+        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], nv[N_SCALE]);
+        nv[N_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
+        nv[N_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
 
     str name = getPlayerName(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
@@ -255,7 +255,7 @@ function void drawName(int pln, int x, int y)
 #define LOC_Y_10 NAME_Y_10
 
 #define LOC_X_11 LOC_X_10
-#define LOC_Y_11 NAME_Y_11
+#define LOC_Y_11 NAME_Y_11-1
 
 int lc[4]; // location cvar cache
 #define LC_SCALE    0
@@ -291,9 +291,9 @@ function void drawLocation(int pln, int x, int y)
         lv[L_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_X_00 : LOC_X_01) : (!cvars[CV_MIRROR] ? LOC_X_10 : LOC_X_11)));
         lv[L_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_Y_00 : LOC_Y_01) : (!cvars[CV_MIRROR] ? LOC_Y_10 : LOC_Y_11)));
         lv[L_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], TEXT_SCALE);        
-        lv[L_HALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        lv[L_VALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
+        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], lv[L_SCALE]);
+        lv[L_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
+        lv[L_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
 
     str loc = findLocation(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
@@ -317,17 +317,17 @@ function void drawLocation(int pln, int x, int y)
 }
 
 // Draw Health ======================================================================================================================================
-#define HP_X_00 LOC_X_00 +104
-#define HP_Y_00 LOC_Y_00 -28
+#define HP_X_00 120
+#define HP_Y_00 10
 
-#define HP_X_01 LOC_X_01 -764
+#define HP_X_01 -HP_X_00-23
 #define HP_Y_01 HP_Y_00
 
-#define HP_X_10 LOC_X_10-28
-#define HP_Y_10 126
+#define HP_X_10 0
+#define HP_Y_10 123
 
 #define HP_X_11 HP_X_10
-#define HP_Y_11 -774
+#define HP_Y_11 -HP_Y_10-16
 
 #define HP_L_CONST HP_LENGTH * 10
 #define HP_W_CONST HP_WIDTH * 10
@@ -337,12 +337,14 @@ int hc[3]; // health cvar cache
 #define HC_MIRROR 1
 #define HC_DIR    2
 
-int hv[5]; // health variables
+int hv[7]; // health variables
 #define H_X      0
 #define H_Y      1
 #define H_SCALE  2
 #define H_WIDTH  3
 #define H_HEIGHT 4
+#define H_HALIGN 5
+#define H_VALIGN 6
 
 int healthBarDimensions[2] = {HP_L_CONST, HP_W_CONST};
 
@@ -366,6 +368,8 @@ function void drawHealth(int pln, int x, int y)
         hv[H_Y] = FixedMul(hv[H_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? HP_Y_00 : HP_Y_01) : (!cvars[CV_MIRROR] ? HP_Y_10 : HP_Y_11)));
         hv[H_WIDTH] = healthBarDimensions[cvars[CV_DIR]];
         hv[H_HEIGHT] = healthBarDimensions[!cvars[CV_DIR]];
+        hv[H_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
+        hv[H_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
 
     int mhp = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnHealth);
@@ -378,56 +382,65 @@ function void drawHealth(int pln, int x, int y)
         }
     }
     
-    drawBar(healthBars[0][cvars[CV_DIR]], healthBars[1][cvars[CV_DIR]], x+hv[H_X], y+hv[H_Y], hv[H_WIDTH], hv[H_HEIGHT], hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA], chp, mhp, !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
+    drawBar(
+        healthBars[0][cvars[CV_DIR]],
+        healthBars[1][cvars[CV_DIR]],
+        x+hv[H_X], y+hv[H_Y],
+        hv[H_WIDTH], hv[H_HEIGHT],
+        hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA],
+        chp, mhp,
+        !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(),
+        hv[H_HALIGN], hv[H_VALIGN]
+    );
 }
 
 // Draw Weapon ======================================================================================================================================
-#define WEP_ICONX_00 20
-#define WEP_ICONY_00 18
+#define WEP_ICONX_00 16
+#define WEP_ICONY_00 17
 
-#define WEP_ICONX_01 -41
+#define WEP_ICONX_01 -WEP_ICONX_00-30
 #define WEP_ICONY_01 WEP_ICONY_00
 
 #define WEP_ICONX_10 12
-#define WEP_ICONY_10 53
+#define WEP_ICONY_10 56
 
 #define WEP_ICONX_11 WEP_ICONX_10
-#define WEP_ICONY_11 -8
+#define WEP_ICONY_11 -5
 
 // Bar is relative to the icon
-#define WEP_BARX_00 -1
-#define WEP_BARY_00 -13
+#define WEP_BARX_00 3
+#define WEP_BARY_00 -8
 
 #define WEP_BARX_01 WEP_BARX_00
 #define WEP_BARY_01 WEP_BARY_00
 
-#define WEP_BARX_10 -8
-#define WEP_BARY_10 -40
+#define WEP_BARX_10 -4
+#define WEP_BARY_10 -16
 
 #define WEP_BARX_11 WEP_BARX_10
 #define WEP_BARY_11 WEP_BARY_10
 
 // Double bar has a different set of coords
-#define WEP_BAR1X_00 -1
-#define WEP_BAR1Y_00 -8
+#define WEP_BAR1X_00 3
+#define WEP_BAR1Y_00 -6
 
 #define WEP_BAR1X_01 WEP_BAR1X_00
 #define WEP_BAR1Y_01 WEP_BAR1Y_00
 
-#define WEP_BAR1X_10 -4
-#define WEP_BAR1Y_10 -40
+#define WEP_BAR1X_10 -2
+#define WEP_BAR1Y_10 -16
 
 #define WEP_BAR1X_11 WEP_BAR1X_10
 #define WEP_BAR1Y_11 WEP_BAR1Y_10
 
-#define WEP_BAR2X_00 -1
-#define WEP_BAR2Y_00 -12
+#define WEP_BAR2X_00 WEP_BAR1X_00
+#define WEP_BAR2Y_00 -10
 
 #define WEP_BAR2X_01 WEP_BAR2X_00
 #define WEP_BAR2Y_01 WEP_BAR2Y_00
 
-#define WEP_BAR2X_10 -8
-#define WEP_BAR2Y_10 -40
+#define WEP_BAR2X_10 -6
+#define WEP_BAR2Y_10 -16
 
 #define WEP_BAR2X_11 WEP_BAR2X_10
 #define WEP_BAR2Y_11 WEP_BAR2Y_10
@@ -443,7 +456,7 @@ int wc[3]; // weapon cvar cache
 #define WC_MIRROR 1
 #define WC_DIR    2
 
-int wv[19]; // weapon variables
+int wv[21]; // weapon variables
 #define W_ICONX           0
 #define W_ICONY           1
 #define W_BARX            2
@@ -463,6 +476,8 @@ int wv[19]; // weapon variables
 #define W_BAR2TOP         16
 #define W_BAR2BOTTOM      17
 #define W_SCALE           18
+#define W_HALIGN          19
+#define W_VALIGN          20
 
 int weaponBarDimensions[2] = {WEP_L_CONST, WEP_W_CONST};
 
@@ -523,6 +538,8 @@ function void drawWeapon(int pln, int x, int y)
         wv[W_ICONSCALE] = FixedMul(WEP_ICON_SCALE, wv[W_SCALE]);
         wv[W_BARWIDTH] = weaponBarDimensions[cvars[CV_DIR]];
         wv[W_BARHEIGHT] = weaponBarDimensions[!cvars[CV_DIR]];
+        wv[W_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : ALIGN_LEFT;
+        wv[W_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : ALIGN_BOTTOM;
 
         wv[W_BARSINGLEWIDTH] = wv[W_BARWIDTH];
         wv[W_BARSINGLEHEIGHT] = wv[W_BARHEIGHT];
@@ -541,42 +558,82 @@ function void drawWeapon(int pln, int x, int y)
         return;
     }
 
-    if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
+    if(playerWeaponInfo[PI_AMMO_MAX1] > 0 && playerWeaponInfo[PI_AMMO_MAX2] > 0) {
+        drawLayeredBar(
+            getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
+            getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
+            getAmmoBar(2+cvars[CV_DIR],2,0),
+            X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
+            wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
+            playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
+            !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+            wv[W_HALIGN], wv[W_VALIGN]
+        );
+        drawLayeredBar(
+            getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]),
+            getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]),
+            getAmmoBar(2+cvars[CV_DIR],2,0),
+            X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
+            wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
+            playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],
+            !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+            wv[W_HALIGN], wv[W_VALIGN]
+        );
+    } else {
+        if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
+            drawLayeredBar(
+                getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
+                getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
+                getAmmoBar(4+cvars[CV_DIR],2,0),
+                X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
+                wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
+                playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
+                !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+                wv[W_HALIGN], wv[W_VALIGN]
+            );
+        }
+        
         if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
-            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
-            drawLayeredBar(getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]), getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]), getAmmoBar(2+cvars[CV_DIR],2,0), X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
-        } else {
-            drawLayeredBar(getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]), getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]), getAmmoBar(4+cvars[CV_DIR],2,0), X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT], wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA], playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1], !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(), ALIGN_TOP, ALIGN_LEFT);
+            drawLayeredBar(
+                getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
+                getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
+                getAmmoBar(4+cvars[CV_DIR],2,0),
+                X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
+                wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
+                playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],
+                !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+                wv[W_HALIGN], wv[W_VALIGN]
+            );
         }
     }
 
-    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA], wv[W_HALIGN], wv[W_VALIGN]);
 }
 
 // Draw Lives =======================================================================================================================================
-#define LIVES_X_00 105
+#define LIVES_X_00 88
 #define LIVES_Y_00 16
 
-#define LIVES_X_01 -96
+#define LIVES_X_01 -LIVES_X_00-8
 #define LIVES_Y_01 LIVES_Y_00
 
 #define LIVES_X_10 13
-#define LIVES_Y_10 86
+#define LIVES_Y_10 80+20
 
 #define LIVES_X_11 LIVES_X_10
 #define LIVES_Y_11 -80
 
-#define LIVES_TEXT_X_00 -16
-#define LIVES_TEXT_Y_00 0
+#define LIVES_TEXT_X_00 2
+#define LIVES_TEXT_Y_00 -4
 
-#define LIVES_TEXT_X_01 8
-#define LIVES_TEXT_Y_01 0
+#define LIVES_TEXT_X_01 LIVES_TEXT_X_00
+#define LIVES_TEXT_Y_01 LIVES_TEXT_Y_00
 
-#define LIVES_TEXT_X_10 -7
-#define LIVES_TEXT_Y_10 1
+#define LIVES_TEXT_X_10 -4
+#define LIVES_TEXT_Y_10 -10
 
-#define LIVES_TEXT_X_11 -7
-#define LIVES_TEXT_Y_11 -10
+#define LIVES_TEXT_X_11 LIVES_TEXT_X_10
+#define LIVES_TEXT_Y_11 LIVES_TEXT_Y_10
 
 #define LIVES_OFFS 9
 
@@ -585,7 +642,7 @@ int sc[3]; // lives cvar cache
 #define SC_MIRROR 1
 #define SC_DIR    2
 
-int sv[12]; // lives variables
+int sv[10]; // lives variables
 #define S_X          0
 #define S_Y          1
 #define S_TEXTX      2
@@ -596,8 +653,6 @@ int sv[12]; // lives variables
 #define S_TEXTSCALE  7
 #define S_TEXTHALIGN 8
 #define S_TEXTVALIGN 9
-#define S_OVERFLOWX  10
-#define S_OVERFLOWY  11
 
 int maxLives = -1;
 
@@ -639,19 +694,16 @@ function void drawLives(int pln, int x, int y)
         sv[S_OFFSY] = FixedMul(cvars[CV_SCALE], ( cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? -LIVES_OFFS : LIVES_OFFS) : 0));
 
         sv[S_TEXTSCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);        
-        sv[S_TEXTHALIGN] = cvars[CV_MIRROR] && cvars[CV_DIR] == horizontal ? ALIGN_RIGHT : ALIGN_LEFT;
-        sv[S_TEXTVALIGN] = !cvars[CV_MIRROR] && cvars[CV_DIR] == vertical ? ALIGN_TOP : ALIGN_BOTTOM;
-
-        sv[S_OVERFLOWX] = sv[S_X] + (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? sv[S_OFFSX]*2 : 0) : (!cvars[CV_MIRROR] ? 0 : 0));
-        sv[S_OVERFLOWY] = sv[S_Y] + (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? sv[S_OFFSY]*2 : 0) : (!cvars[CV_MIRROR] ? 0 : 0));
+        sv[S_TEXTHALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : ALIGN_LEFT;
+        sv[S_TEXTVALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : ALIGN_BOTTOM;
     }
 
     int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
     
-    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_OVERFLOWX], y+sv[S_OVERFLOWY], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
     displayMessage(livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], getNewUIId(), x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);

@@ -2,6 +2,7 @@
 
 #define ALIGN_LEFT 0.1
 #define ALIGN_RIGHT 0.24
+#define ALIGN_NEGRIGHT 1.0-ALIGN_RIGHT
 
 #define ALIGN_CENTER 0.0
 
@@ -36,19 +37,44 @@ function int displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int
 	return res;
 }
 
-int lastmsgX;
-int lastmsgY;
+// [Russ] maybe
+// int virtScale = 1.0;
+// function void setVirtualScale(int scale)
+// {
+// 	virtScale = scale;
+// }
 
-function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign)
+int calcX, calcY, calcHAlign, calcvalign;
+function void calcMessageDisplayOffsets(int offsX, int offsY, int scaleX, int scaleY, int halign, int valign)
 {
 	int resX = FixedDiv(BASE_RES_X, scaleX);
 	int resY = FixedDiv(BASE_RES_Y, scaleY);
 	offsX = mask(FixedDiv(offsX << 16, scaleX));
 	offsY = mask(FixedDiv(offsY << 16, scaleY));
-	lastmsgX = 1.0*(resX/2)+offsX+halign;
-	lastmsgY = 1.0*(resY/2)+offsY+valign;
+	calcX = ((resX/2)<<16)+offsX;
+	calcY = ((resY/2)<<16)+offsY;
+
+	// calcX = mask(FixedMul(mask(FixedDiv(calcX, virtScale)), virtScale));
+	// calcY = mask(FixedMul(mask(FixedDiv(calcY, virtScale)), virtScale));
+
+
+	if(calcX < 0 && halign == ALIGN_RIGHT) {
+		calcHAlign = ALIGN_NEGRIGHT;
+	} else {
+		calcHAlign = halign;
+	}
+
+	calcVAlign = valign;
+	calcX += calcHAlign;
+	calcY += calcVAlign;
+
 	SetHudSize(resX, resY, 0);
-	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, lastmsgX, lastmsgY, MSG_TIME, alpha);
+}
+
+function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 }
 
 #define BAR_DISPLAY_NONE 0
@@ -60,19 +86,10 @@ function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, 
 //
 function void drawLayeredBar(str bar1, str bar2, str empty, int offsx, int offsy, int width, int height, int scalex, int scaley, int alpha, int amount, int maxAmount, int mode, int reverse, int bar1Id, int bar2Id, int backId, int halign, int valign)
 {
-	int resX = FixedDiv(BASE_RES_X, scaleX);
-	int resY = FixedDiv(BASE_RES_Y, scaleY);
-	offsX = FixedDiv(offsX, scaleX);
-	offsY = FixedDiv(offsY, scaleY);
-	// width = FixedMul(width, scaleX);
-	// height = FixedMul(height, scaleY);
-	int x = 1.0*(resX/2)+1.0*offsX;
-	int y = 1.0*(resY/2)+1.0*offsY;
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
 
-	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (halign == ALIGN_RIGHT ? -width : 0));
-	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (valign == ALIGN_BOTTOM ? -height : 0));
-
-	SetHudSize(resX, resY, 0);
+	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (calchalign == ALIGN_RIGHT || calchalign == ALIGN_NEGRIGHT ? -width : 0));
+	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (calcvalign == ALIGN_BOTTOM ? -height : 0));
 
     if(mode == BAR_DISPLAY_NONE)
        return;
@@ -80,38 +97,30 @@ function void drawLayeredBar(str bar1, str bar2, str empty, int offsx, int offsy
     int clip;
     if(mode == BAR_DISPLAY_VERT) {
         clip = (amount * height) / maxAmount;
-        SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH + (height - clip), width, clip);
+        SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH + (height - clip), width, clip);
     }
     if(mode == BAR_DISPLAY_HORI) {
         clip = (amount * width) / maxAmount;
-		SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH, clip, height);
+		SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
     }
 
 	SetFont(bar1);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, x + halign, y + valign, MSG_TIME, alpha);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetFont(bar2);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar2Id, CR_UNTRANSLATED, x + halign, y + valign, MSG_TIME, alpha);
-    SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH, width, height);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar2Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+    // SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, width, height);
+    SetHudClipRect(0, 0, 0, 0, 0);
     SetFont(empty);
-    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, x + halign, y + valign, MSG_TIME, alpha);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetHudClipRect(0,0,0,0);
 }
 
 function void drawBar(str bar1, str empty, int offsx, int offsy, int width, int height, int scalex, int scaley, int alpha, int amount, int maxAmount, int mode, int reverse, int bar1Id, int backId, int halign, int valign)
 {
-	int resX = FixedDiv(BASE_RES_X, scaleX);
-	int resY = FixedDiv(BASE_RES_Y, scaleY);
-	offsX = FixedDiv(offsX, scaleX);
-	offsY = FixedDiv(offsY, scaleY);
-	// width = FixedMul(width, scaleX);
-	// height = FixedMul(height, scaleY);
-	int x = 1.0*(resX/2)+1.0*offsX;
-	int y = 1.0*(resY/2)+1.0*offsY;
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
 
-	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (halign == ALIGN_RIGHT ? -width : 0));
-	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (valign == ALIGN_BOTTOM ? -height : 0));
-
-	SetHudSize(resX, resY, 0);
+	int clipOffsW = (calchalign == ALIGN_CENTER ? -width / 2 : (calchalign == ALIGN_RIGHT || calchalign == ALIGN_NEGRIGHT ? -width : 0));
+	int clipOffsH = (calcvalign == ALIGN_CENTER ? -height / 2 : (calcvalign == ALIGN_BOTTOM ? -height : 0));
 
     if(mode == BAR_DISPLAY_NONE)
        return;
@@ -119,18 +128,19 @@ function void drawBar(str bar1, str empty, int offsx, int offsy, int width, int 
     int clip;
     if(mode == BAR_DISPLAY_VERT) {
         clip = (amount * height) / maxAmount;
-        SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH + (height - clip), width, clip);
+        SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH + (height - clip), width, clip);
     }
     if(mode == BAR_DISPLAY_HORI) {
         clip = (amount * width) / maxAmount;
-		SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH, clip, height);
+		SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
     }
 
 	SetFont(bar1);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, x + halign, y + valign, MSG_TIME, alpha);
-    SetHudClipRect((x >> 16) + clipOffsW, (y >> 16) + clipOffsH, width, height);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+    // SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, width, height);
+    SetHudClipRect(0, 0, 0, 0, 0);
     SetFont(empty);
-    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, x + halign, y + valign, MSG_TIME, alpha);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetHudClipRect(0,0,0,0);
 }
 
