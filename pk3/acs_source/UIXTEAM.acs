@@ -618,7 +618,7 @@ function void drawWeapon(int pln, int x, int y)
 #define LIVES_Y_01 LIVES_Y_00
 
 #define LIVES_X_10 13
-#define LIVES_Y_10 80+20
+#define LIVES_Y_10 100
 
 #define LIVES_X_11 LIVES_X_10
 #define LIVES_Y_11 -80
