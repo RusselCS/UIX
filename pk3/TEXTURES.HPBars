@@ -1,15 +1,4 @@
-texture UXTEMHVA, 8, 1 {patch UXTEMHPA, 0, 0 {Rotate 270}}
-texture UXTEMHVB, 8, 1 {patch UXTEMHPB, 0, 0 {Rotate 270}}
-texture UXTEMHVC, 8, 1 {patch UXTEMHPC, 0, 0 {Rotate 270}}
-texture UXTEMHVD, 8, 1 {patch UXTEMHPD, 0, 0 {Rotate 270}}
-texture UXTEMHVE, 8, 1 {patch UXTEMHPE, 0, 0 {Rotate 270}}
-texture UXTEMHVF, 8, 1 {patch UXTEMHPF, 0, 0 {Rotate 270}}
-texture UXTEMHVG, 8, 1 {patch UXTEMHPG, 0, 0 {Rotate 270}}
-texture UXTEMHVH, 8, 1 {patch UXTEMHPH, 0, 0 {Rotate 270}}
-texture UXTEMHVI, 8, 1 {patch UXTEMHPI, 0, 0 {Rotate 270}}
-texture UXTEMHVJ, 8, 1 {patch UXTEMHPJ, 0, 0 {Rotate 270}}
-texture UXTEMHV_, 8, 1 {patch UXTEMHP_, 0, 0 {Rotate 270}}
-
+// Health Bars
 texture UXTEMHVB, 8, 64 {xscale 0.1 yscale 0.1 patch UIXTVHB, 0, 0}
 texture UXTEMHV1, 8, 64 {xscale 0.1 yscale 0.1 patch UIXTVHP1, 0, 0}
 
