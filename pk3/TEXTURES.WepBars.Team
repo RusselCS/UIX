@@ -1033,7 +1033,7 @@ texture UXTWVCFD, 4, 28 {xscale 0.1 yscale 0.1 patch UIXTVWC, 0, 0 {Translation 
 texture UXTWVCFE, 4, 28 {xscale 0.1 yscale 0.1 patch UIXTVWC, 0, 0 {Translation "192:192=254:254"}}
 texture UXTWVCFF, 4, 28 {xscale 0.1 yscale 0.1 patch UIXTVWC, 0, 0 {Translation "192:192=255:255"}}
 
-// Horizontal bars
+// Horizontal bars - thicker weapon bars
 texture UXTWHHMP, 28, 8 {xscale 0.1 yscale 0.1 patch UIXTVWH, 0, 0 {rotate 90}}
 
 texture UXTWHG00, 28, 8 {xscale 0.1 yscale 0.1 patch UIXTVWG, 0, 0 {Translation "198:198=0:0" Rotate 90}}
