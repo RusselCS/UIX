@@ -1,7 +1,6 @@
 # UIX
 
 UI Extensions for MM8BDM v6b
-(now with limited v6a support!)
 by Russel
 
 Addon that implements additional UI elements:
@@ -83,3 +82,15 @@ v2a changelog:
 --- Now wooshes in the opposite direction (better matching SRB2)
 --- Transparency now matches the SR50 user's transparency
 --- Now properly disables if user disables all of UI Extensions
+
+v2b changelog:
+- Teaminfo:
+--- Bars for ammo and health are now thicker
+--- Fixed a possible cache miss with location and weapon name
+--- Put down some framework to make maths easier for a future change
+--- Objective icons now appear over allied mugshots (only works with mugshots enabled)
+- Weapon Bar:
+--- Fixed a bug where second ammo bar would not properly display when orientation was horizontal
+--- 
+- Several background organization changes
+- 

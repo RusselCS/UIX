@@ -52,7 +52,6 @@ Done:
 - Cleanup: Remove constants unused
 - Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
 - Teaminfo: Trill's request: Add ability for the component to "wrap."
-- Teaminfo: Objective items should display.
 - Teaminfo: Make it so weapons with no icon offset the bars
 - Teaminfo: Name squish defect for "The Saint of Hope or something"
 - Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
@@ -73,6 +72,7 @@ Done:
 - Teaminfo: Fixed possible cache misses on some components, which should improve performance.
 - weaponbar: bug fixes
 - give a full-size weapon bar
+- Teaminfo: Objective items should display.
 
 == Future ==
 - Add a compass + location.

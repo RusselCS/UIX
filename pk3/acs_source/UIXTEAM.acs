@@ -10,6 +10,54 @@
 #include "UXTBICNS.acs"
 #include "UXTBWBAR.acs"
 
+// Preliminary data preparatation =====================================================================================
+
+// modes are ordered in what's most likely to be played
+#define OBJ_IDC -1
+#define OBJ_ONEFLAG 0
+#define OBJ_SKULLTAG 1
+#define OBJ_CTF 2
+#define OBJ_TEAMPOSS 3
+#define OBJ_MODES 4
+str objectiveModes[OBJ_MODES] = { "OneFlagCTF", "Skulltag", "CTF", "TeamPossession" };
+str objectiveItems[OBJ_MODES][4] = {
+    {"MegaWhiteFlag", "MegaWhiteFlag", "MegaWhiteFlag", "MegaWhiteFlag"},
+    {"MegaBlueHat", "MegaRedHat", "MegaGreenHat", "MegaYellowHat"},
+    {"MegaBlueFlag", "MegaRedFlag", "MegaGreenFlag", "MegaYellowFlag"},
+    {"PowerPossessionArtifact", "PowerPossessionArtifact", "PowerPossessionArtifact", "PowerPossessionArtifact"},
+};
+int objective = OBJ_IDC;
+int maxTeams = -1;
+int objectiveDrawn = false; // /!\ MANIPULATED IN DRAWMUGSHOT /!\
+int lastPickup = -1; // /!\ MANIPULATED IN DRAWMUGSHOT /!\
+
+#define SURVIVAL 3
+str survivalModes[SURVIVAL] = { "teamlms", "lastmanstanding", "survival" };
+int maxLives = -1;
+
+script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
+{
+    str mode = GetCurrentGamemode();
+    int i;
+
+    for(i = 0; i < OBJ_MODES; i++) {
+        if(StrICmp(objectiveModes[i], mode) == 0) {
+            objective = i;
+            maxTeams = GetCvar("sv_maxteams");
+            terminate;
+        }
+    }
+
+    for(i = 0; i < SURVIVAL; i++) {
+        if(StrICmp(survivalModes[i], mode) == 0) {
+            maxLives = GetCvar("sv_maxlives");
+            break;
+        }
+    }
+}
+
+// Main dispatch script ===============================================================================================
+
 #define horizontal 0
 #define vertical 1
 
@@ -118,7 +166,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             int baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
             int baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
 
-            drawMugshot(i, baseX, baseY);
+            drawMugshot(i, baseX, baseY, team);
             drawName(i, baseX, baseY);
             drawLocation(i, baseX, baseY);
             drawHealth(i, baseX, baseY);
@@ -126,6 +174,11 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             drawLives(i, baseX, baseY);
 
             drawnPlayers++;
+        }
+        if(!objectiveDrawn) {
+            lastPickup = -1;
+        } else {
+            objectiveDrawn = false;
         }
     }
 }
@@ -146,7 +199,13 @@ str uiFonts[2] = {
 int mugCache_Scale = 0;
 int mugScale;
 
-function void drawMugshot(int pln, int x, int y)
+int mugShot_ObjX;
+int mugShot_ObjY;
+
+#define MG_OBJ_X -4
+#define MG_OBJ_Y -4
+
+function void drawMugshot(int pln, int x, int y, int team)
 {
     if(!cvars[CV_SHOWMUGSHOT])
         return;
@@ -159,6 +218,35 @@ function void drawMugshot(int pln, int x, int y)
     if(mugCache_Scale != cvars[CV_SCALE]) {
         mugCache_Scale = cvars[CV_SCALE];
         mugScale = FixedMul(cvars[CV_SCALE], 4.0);
+
+        mugShot_ObjX = fixedMul(mugScale, MG_OBJ_X);
+        mugShot_ObjY = fixedMul(mugScale, MG_OBJ_Y);
+    }
+
+    if(objective != OBJ_IDC && !objectiveDrawn) {
+        for(int i = 0; i < maxTeams; i++) {
+            if(i == team)
+                continue;
+            if(CheckActorInventory(pln+PLN_TID_SHRT, objectiveItems[objective][i]) == 0)
+                continue;
+
+            objectiveDrawn = true;
+            if(lastPickup == -1)
+                lastPickup = Timer();
+
+            if(((Timer()-lastPickup) / 35) % 2 == 1) {
+                displayIcon(getObjectiveIcon(objective, 2, 0), getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+            }
+
+            str cyan = getObjectiveIcon(objective, 0, CallACS2("core_getteampalette", i, 0));
+            str blue = getObjectiveIcon(objective, 1, CallACS2("core_getteampalette", i, 1));
+
+            displayIcon(cyan, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+
+            if(cyan != blue) {
+                displayIcon(blue, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+            }
+        }
     }
 
     displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
@@ -653,15 +741,6 @@ int sv[10]; // lives variables
 #define S_TEXTSCALE  7
 #define S_TEXTHALIGN 8
 #define S_TEXTVALIGN 9
-
-int maxLives = -1;
-
-script "UITweaks_TeamInfo_MaxLives" OPEN CLIENTSIDE
-{
-    if(GetCvar("lastmanstanding") || GetCvar("teamlms")) {
-        maxLives = GetCvar("sv_maxlives");
-    }
-}
 
 function void drawLives(int pln, int x, int y)
 {
