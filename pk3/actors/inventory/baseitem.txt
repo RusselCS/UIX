@@ -106,22 +106,38 @@ actor 8BDMItemRespawn
 	States
 	{
 	Spawn:
-		PUC0 A 0
-		PUC0 A 0 A_JumpIf(mass == 10 * 35, "10Seconds")
-		PUC0 A 0 A_JumpIf(mass == 15 * 35, "15Seconds")
-		PUC0 A 0 A_JumpIf(mass == 30 * 35, "30Seconds")
-		goto 5Seconds
+		PUCZ A 0
+		// Duration checkers
+		// These ranges are designed to capture "whatever's closest"
+		// Because pickup cooldowns are not a genericized thing atm.
+		// On average, 1 segment = 5 seconds.
+		PUCZ A 0 A_JumpIf(mass <= ( 5 + 2.5) * 35,  "5Seconds")
+		PUCZ A 0 A_JumpIf(mass <= (10 + 2.5) * 35, "10Seconds")
+		PUCZ A 0 A_JumpIf(mass <= (15 + 7.5) * 35, "15Seconds")
+		PUCZ A 0 A_JumpIf(mass <= (30 + 2.5) * 35, "30Seconds")
+		PUCZ A 0 A_JumpIf(mass <= (40 + 10) * 35, "40Seconds")
+		PUCZ A 0 A_JumpIf(mass <= (60) * 35, "60Seconds")
+		goto UnknownSeconds
 	5Seconds:
-		PUC2 A 0
+		PUC1 A 0
 		goto SpawnLoop
 	10Seconds:
-		PUC3 A 0
+		PUC2 A 0
 		goto SpawnLoop
 	15Seconds:
-		PUC4 A 0
+		PUC3 A 0
 		goto SpawnLoop
 	30Seconds:
-		PUC5 A 0
+		PUC6 A 0
+		goto SpawnLoop
+	40Seconds:
+		PUC4 A 0
+		goto SpawnLoop
+	60Seconds:
+		PUCC A 0
+		goto SpawnLoop
+	UnknownSeconds:
+		PUCZ A 0
 		goto SpawnLoop
 	SpawnLoop:
 		"####" A 0 ACS_NamedExecuteWithResult("uix_checkpickupcooldown")
@@ -140,7 +156,14 @@ actor 8BDMItemRespawnSmall : 8BDMItemRespawn
 	States
 	{
 	Spawn:
-		PUC1 A 0
+		PUZ1 A 0
+		PUZ1 A 0 A_JumpIf(mass <= (30) * 35,  "30Seconds")
+		goto 5Seconds
+	5Seconds:
+		PUZ1 A 0
+		goto Super::SpawnLoop
+	30Seconds:
+		PUZ6 A 0
 		goto Super::SpawnLoop
 	}
 }
