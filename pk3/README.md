@@ -92,5 +92,9 @@ v2b changelog:
 - Weapon Bar:
 --- Fixed a bug where second ammo bar would not properly display when orientation was horizontal
 --- 
+- Item Respawn Timers:
+--- Timers exist for 5s, 10s, 15s, 30s, 40s, 60s, and "Unknown."
+--- Timers now "round" to the closest time as opposed to assuming unknown when not found.
+--- Now "round" to the closest one.
+--- Sprites were renamed to indicate how many segments they have so it's known which counter is being looked at.
 - Several background organization changes
-- 

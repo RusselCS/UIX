@@ -49,19 +49,16 @@ Done:
 - Compress weapon bar
 
 == V2B TO DO ==
-- Cleanup: Remove constants unused
-- Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
-- Teaminfo: Trill's request: Add ability for the component to "wrap."
-- Teaminfo: Make it so weapons with no icon offset the bars
-- Teaminfo: Name squish defect for "The Saint of Hope or something"
-- Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
-- Teaminfo: Bottom-left default preset packs up too quick
-- Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
-- Staging: Get Xover staging script from SDM.
-- WeaponBar: Apparently doubleammo does not depopulate when overwritten
-- Killfeed: Fix when mugshot is not found.
-- Teaminfo: Add number toggles for everything
-- Pickup respawn: 1 minute timer
+(numbers indicate difficulty)
+1 Cleanup: Remove constants unused
+2 Teaminfo: Trill's request: Add ability for the component to "wrap."
+3 Teaminfo: Name squish defect for "The Saint of Hope or something"
+1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
+1 Teaminfo: Bottom-left default preset packs up too quick
+2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
+1 Staging: Get Xover staging script from SDM.
+2 WeaponBar: Apparently doubleammo does not depopulate when overwritten
+1 Killfeed: Fix when mugshot is not found.
 
 Done:
 - Cleanup: Move "bloat" tables into separate include files
@@ -73,6 +70,12 @@ Done:
 - weaponbar: bug fixes
 - give a full-size weapon bar
 - Teaminfo: Objective items should display.
+- Pickup respawn: 1 minute timer
+
+== V2C TO DO ==
+5 Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
+4 Teaminfo: Make it so weapons with no icon offset the bars
+3 Teaminfo: Add number toggles for everything
 
 == Future ==
 - Add a compass + location.
