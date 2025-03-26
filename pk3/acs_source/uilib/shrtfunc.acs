@@ -25,7 +25,7 @@
 
 global int 4: ServerMAX;
 
-function int getNewUIId(void) { return CallACS0("UIX_GetNewID"); }
+function int getNewUIId(void) { return 0; }
 
 function int displayIcon(str icon, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign)
 {
