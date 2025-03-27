@@ -88,6 +88,25 @@ int tiCache_Stack = MIN_INT;
 #define STACK_OFFS 36
 int tiStackOffs;
 
+#define STATUS_GONE -1
+#define STATUS_ALIVE 0
+#define STATUS_DEAD 1
+#define STATUS_GHOST 2
+
+function int getPlayerAlive(int pln)
+{
+    if(PlayerIsSpectator(pln) == 2)
+        return STATUS_GHOST;
+    
+    if(!PlayerInGame(pln))
+        return STATUS_GONE;
+    
+    if(GetActorProperty(pln+PLN_TID_SHRT, AProp_Health) <= 0)
+        return STATUS_DEAD;
+
+    return STATUS_ALIVE;   
+}
+
 script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
 {
     if(!GetCvar("UIX_SV_TEAMINFO"))
@@ -156,7 +175,8 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
                     continue;
 
             // Log(i:i, s:"in game? ", i:PlayerInGame(i));
-            if(!PlayerInGame(i))
+            int dead = getPlayerAlive(i);
+            if(dead == STATUS_GONE)
                 continue;
 
             // Log(i:i, s:" team: ", i:GetPlayerInfo(i, PLAYERINFO_TEAM), s:" == ", i:team);
@@ -166,12 +186,12 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             int baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
             int baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
 
-            drawMugshot(i, baseX, baseY, team);
+            drawMugshot(i, baseX, baseY, team, dead);
             drawName(i, baseX, baseY);
-            drawLocation(i, baseX, baseY);
-            drawHealth(i, baseX, baseY);
-            drawWeapon(i, baseX, baseY);
-            drawLives(i, baseX, baseY);
+            drawLocation(i, baseX, baseY, dead);
+            drawHealth(i, baseX, baseY, dead);
+            drawWeapon(i, baseX, baseY, dead);
+            drawLives(i, baseX, baseY, dead);
 
             drawnPlayers++;
         }
@@ -201,29 +221,64 @@ int mugScale;
 
 int mugShot_ObjX;
 int mugShot_ObjY;
+int mugShot_SkullY;
+int mugShot_ExplodeScale;
+int mugShot_ExplodeX;
+int mugShot_ExplodeY;
 
 #define MG_OBJ_X -4
 #define MG_OBJ_Y -4
 
-function void drawMugshot(int pln, int x, int y, int team)
+#define MG_SKULL_Y -4
+#define MG_EXPLODE_X 26
+#define MG_EXPLODE_Y 28
+
+// bool init
+// str  mug
+// bool dead
+// int  deadTime
+// bool diedOnce
+//
+str lastValidMug[MAX_PLAYERS_SHRT][4];
+#define MV_INIT 0
+#define MV_MUG 1
+#define MV_DEADTIME 2
+#define MV_DIEDONCE 3
+
+function void drawMugshot(int pln, int x, int y, int team, int dead)
 {
     if(!cvars[CV_SHOWMUGSHOT])
         return;
 
     str face = getMugshotGraphicFromTID(pln+PLN_TID_SHRT);
 
-    if(StrLen(face) == 0)
-        return;
+    if(StrLen(face) == 0) {
+        if(lastValidMug[pln][MV_INIT])
+            face = lastValidMug[pln][MV_MUG];
+        else
+            return;
+    } else {
+        if(!lastValidMug[pln][MV_INIT])
+            lastValidMug[pln][MV_INIT] = true;
+        lastValidMug[pln][MV_MUG] = face;
+    }
 
     if(mugCache_Scale != cvars[CV_SCALE]) {
         mugCache_Scale = cvars[CV_SCALE];
         mugScale = FixedMul(cvars[CV_SCALE], 4.0);
+        mugShot_ExplodeScale = FixedMul(mugScale, 0.25);
 
         mugShot_ObjX = fixedMul(mugScale, MG_OBJ_X);
         mugShot_ObjY = fixedMul(mugScale, MG_OBJ_Y);
+        
+        mugShot_SkullY = fixedMul(mugScale, MG_SKULL_Y);
+        mugShot_ExplodeX = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_X);
+        mugShot_ExplodeY = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_Y);
     }
 
-    drawMugshotObjective(pln, x, y, team);
+    drawMugshotDead(pln, x, y, team, dead);
+    if(dead == STATUS_ALIVE)
+        drawMugshotObjective(pln, x, y, team);
 
     displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 }
@@ -272,6 +327,43 @@ function void drawMugshotObjective(int pln, int x, int y, int team)
             displayIcon(blue, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
         }
     }
+}
+
+function void drawMugshotDead(int pln, int x, int y, int team, int dead)
+{
+    if(lastValidMug[pln][MV_DIEDONCE]) {
+        int explodeFrame = Timer() - lastValidMug[pln][MV_DEADTIME];
+        if(explodeFrame < FRAGMSG_EXPLODEFRAMES) {
+            displayIcon(explodeFrames[explodeFrame], getNewUIId(), x+mugShot_ExplodeX, y+mugShot_ExplodeY, mugShot_ExplodeScale, mugShot_ExplodeScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+        }
+    }
+
+    if(dead == STATUS_ALIVE)
+        return;
+
+    displayIcon(skullIcons[0][4], getNewUIId(), x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(skullIcons[1][200], getNewUIId(), x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon("UIXMGSCR", getNewUIId(), x, y, mugScale, mugScale, FixedMul(cvars[CV_ALPHA], 0.5), ALIGN_CENTER, ALIGN_CENTER);
+}
+
+script "UIXTeam_Mugshot_Death" DEATH CLIENTSIDE
+{
+    int pln = PlayerNumber();
+    str face = getMugshotGraphicFromTID(pln+PLN_TID_SHRT);
+
+    if(StrLen(face) == 0) {
+        if(lastValidMug[pln][MV_INIT]) {
+            face = lastValidMug[pln][MV_MUG];
+        }
+    } else {
+        if(!lastValidMug[pln][MV_INIT]) {
+            lastValidMug[pln][MV_INIT] = true;
+        }
+        lastValidMug[pln][MV_MUG] = face;
+    }
+
+    lastValidMug[pln][MV_DEADTIME] = timer();
+    lastValidMug[pln][MV_DIEDONCE] = true;
 }
 
 // Draw Name ========================================================================================================================================
@@ -368,7 +460,7 @@ int lv[6]; // location variables
 #define L_VALIGN 4
 #define L_LENGTH 5
 
-function void drawLocation(int pln, int x, int y)
+function void drawLocation(int pln, int x, int y, int dead)
 {
     if(!cvars[CV_SHOWLOCATION])
         return;
@@ -393,7 +485,7 @@ function void drawLocation(int pln, int x, int y)
         lv[L_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
 
-    str loc = findLocation(pln, cvars[CV_DIR], cvars[CV_FONTIDX]);
+    str loc = findLocation(pln, cvars[CV_DIR], cvars[CV_FONTIDX], dead);
 
     if(loc == -1)
         return;
@@ -445,11 +537,14 @@ int hv[7]; // health variables
 
 int healthBarDimensions[2] = {HP_L_CONST, HP_W_CONST};
 
-function void drawHealth(int pln, int x, int y)
+function void drawHealth(int pln, int x, int y, int dead)
 {
     if(!cvars[CV_SHOWHEALTH])
         return;
-
+    
+    if(dead == STATUS_GHOST)
+        return;
+    
     if(
         hc[HC_SCALE] != cvars[CV_SCALE] ||
         hc[HC_MIRROR] != cvars[CV_MIRROR] ||
@@ -602,9 +697,12 @@ int playerWeaponInfo[10];
 #define PI_CYAN2 8
 #define PI_BLUE2 9
 
-function void drawWeapon(int pln, int x, int y)
+function void drawWeapon(int pln, int x, int y, int dead)
 {
     if(!cvars[CV_SHOWWEAPON])
+        return;
+
+    if(dead == STATUS_GHOST)
         return;
 
     // int mwep = GetActorProperty(pln+PLN_TID_SHRT, AProp_SpawnWeapon);
@@ -751,8 +849,11 @@ int sv[10]; // lives variables
 #define S_TEXTHALIGN 8
 #define S_TEXTVALIGN 9
 
-function void drawLives(int pln, int x, int y)
+function void drawLives(int pln, int x, int y, int dead)
 {
+    if(dead == STATUS_GHOST)
+        return;
+
     if(maxLives == -1)
         return;
 
@@ -1063,10 +1164,19 @@ function void setLocNameWidth(int idx, int o, int r, int val) { locs[idx][4 + (o
 
 function int getLocWidthPlr(int plr, int o, int r) { return getLocNameWidth(playerLocs[plr][1], o, r); }
 
-function str findLocation(int plr, int o, int r) {
-    str loc = GetActorSectorLocation(plr+PLN_TID_SHRT, false);
+function str findLocation(int plr, int o, int r, int dead) {
+    str loc = -1;
 
-    if(StrLen(loc) == 0)
+    if(dead == STATUS_DEAD)
+        loc = "AWAITING RESPAWN...";
+
+    if(dead == STATUS_GHOST)
+        loc = "AWAITING NEXT ROUND...";
+
+    if(loc == -1)
+        loc = GetActorSectorLocation(plr+PLN_TID_SHRT, false);
+
+    if(loc == -1 || StrLen(loc) == 0)
         return "";
 
     if(StrCmp(playerLocs[plr][0], loc) == 0) {
