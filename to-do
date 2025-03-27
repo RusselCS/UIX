@@ -52,7 +52,7 @@ Done:
 (numbers indicate difficulty)
 1 Cleanup: Remove constants unused
 2 Teaminfo: Trill's request: Add ability for the component to "wrap."
-3 Teaminfo: Name squish defect for "The Saint of Hope or something"
+3 Teaminfo: Name squish sometimes does not work for vertical mode.
 1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 1 Teaminfo: Bottom-left default preset packs up too quick
 2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)

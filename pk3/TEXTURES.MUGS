@@ -1551,3 +1551,17 @@ texture UIXPS, 16, 16 {xscale 4.0 yscale 4.0 patch UIXPSI, 0, 0}
 texture UIXFLXX, 16, 16 {xscale 4.0 yscale 4.0 patch UIXFLIO, 0, 0}
 texture UIXHLXX, 16, 16 {xscale 4.0 yscale 4.0 patch UIXHLIO, 0, 0}
 texture UIXPSXX, 16, 16 {xscale 4.0 yscale 4.0 patch UIXPSO, 0, 0}
+
+texture UIXSTCHT, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTCHG, 0, 0}
+texture UIXSTLAG, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTLGG, 0, 0}
+
+texture UIXSTCO1, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTCNG1, 0, 0}
+texture UIXSTCO2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTCNG2, 0, 0}
+
+texture UIXSTMN1, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG1, 0, 0}
+texture UIXSTMN2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG2, 0, 0}
+texture UIXSTMN3, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG3, 0, 0}
+
+texture UIXSTVC1, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTVCG1, 0, 0}
+texture UIXSTVC2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTVCG2, 0, 0}
+texture UIXSTVC3, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTVCG3, 0, 0}

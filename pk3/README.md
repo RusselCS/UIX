@@ -88,7 +88,9 @@ v2b changelog:
 --- Bars for ammo and health are now thicker
 --- Fixed a possible cache miss with location and weapon name
 --- Put down some framework to make maths easier for a future change
---- Objective icons now appear over allied mugshots (only works with mugshots enabled)
+--- Now shows Objective icons over allied mugshots (only with mugshots enabled)
+--- Now shows "meta status" icons like typing in chat, speaking in voice, or menuing (only with mugshots enabled)
+--- Now shows dead allies, with an animation whenever they die (only with mugshots enabled)
 - Weapon Bar:
 --- Fixed a bug where second ammo bar would not properly display when orientation was horizontal
 --- 

@@ -221,6 +221,9 @@ int mugScale;
 
 int mugShot_ObjX;
 int mugShot_ObjY;
+int mugShot_StatusX;
+int mugShot_StatusY;
+int mugShot_VCY;
 int mugShot_SkullY;
 int mugShot_ExplodeScale;
 int mugShot_ExplodeX;
@@ -228,6 +231,10 @@ int mugShot_ExplodeY;
 
 #define MG_OBJ_X -4
 #define MG_OBJ_Y -4
+
+#define MG_STATUS_X 0
+#define MG_STATUS_Y -4
+#define MG_VC_Y 4
 
 #define MG_SKULL_Y -4
 #define MG_EXPLODE_X 26
@@ -270,12 +277,17 @@ function void drawMugshot(int pln, int x, int y, int team, int dead)
 
         mugShot_ObjX = fixedMul(mugScale, MG_OBJ_X);
         mugShot_ObjY = fixedMul(mugScale, MG_OBJ_Y);
+
+        mugShot_StatusX = fixedMul(mugScale, MG_STATUS_X);
+        mugShot_StatusY = fixedMul(mugScale, MG_STATUS_Y);
+        mugShot_VCY = fixedMul(mugScale, MG_VC_Y);
         
         mugShot_SkullY = fixedMul(mugScale, MG_SKULL_Y);
         mugShot_ExplodeX = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_X);
         mugShot_ExplodeY = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_Y);
     }
 
+    drawMugshotStatus(pln, x, y);
     drawMugshotDead(pln, x, y, team, dead);
     if(dead == STATUS_ALIVE)
         drawMugshotObjective(pln, x, y, team);
@@ -294,6 +306,25 @@ function str getMugshotGraphicFromTID(int tid) {
 	Thing_Remove(u);
 
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
+}
+
+function void drawMugshotStatus(int pln, int x, int y)
+{
+    int status = GetPlayerStatus(pln);
+
+    if(status == 0)
+        return;
+
+    if(status & PLAYERSTATUS_CHATTING)
+        displayIcon("UIXSTCHT", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+    if(status & PLAYERSTATUS_TALKING)
+        displayIcon("UIXSTVC1", getNewUIId(), x+mugShot_StatusX, y+mugShot_VCY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_BOTTOM);
+    if(status & PLAYERSTATUS_INCONSOLE)
+        displayIcon("UIXSTCO1", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+    if(status & PLAYERSTATUS_INMENU)
+        displayIcon("UIXSTMN1", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+    if(status & PLAYERSTATUS_LAGGING)
+        displayIcon("UIXSTLAG", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
 }
 
 function void drawMugshotDead(int pln, int x, int y, int team, int dead)
