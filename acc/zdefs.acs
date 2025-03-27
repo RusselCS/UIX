@@ -1266,3 +1266,11 @@
 #define SPROP_TYPE_BOOL 2
 #define SPROP_TYPE_FLOAT 3
 #define SPROP_TYPE_STRING 4
+
+// [AK] Player status flags, indicating what the player is doing. (GetPlayerStatus)
+#define PLAYERSTATUS_CHATTING (1 << 0) // Player is chatting.
+#define PLAYERSTATUS_TALKING (1 << 1) // Player is talking on the microphone.
+#define PLAYERSTATUS_INCONSOLE (1 << 2) // Player is in the console.
+#define PLAYERSTATUS_INMENU (1 << 3) // Player is in the menu.
+#define PLAYERSTATUS_LAGGING (1 << 4) // Player is lagging to the server?
+#define PLAYERSTATUS_READYTOGOON (1 << 5) // Player is ready for the next map? (intermission).

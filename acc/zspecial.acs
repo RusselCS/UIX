@@ -466,6 +466,7 @@ special
 	-182:GetControlPointInfo(2),
 	-183:SetControlPointInfo(3),
 	-184:GetSkinProperty(2, 4),
+	-185:IsPlayerContestingControlPoint(2),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
