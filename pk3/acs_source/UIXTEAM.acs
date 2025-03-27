@@ -296,39 +296,6 @@ function str getMugshotGraphicFromTID(int tid) {
 	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
-function void drawMugshotObjective(int pln, int x, int y, int team)
-{
-    if(objective == OBJ_IDC)
-        return;
-    
-    if(objectiveDrawn)
-        return;
-
-    for(int i = 0; i < maxTeams; i++) {
-        if(i == team)
-            continue;
-        if(CheckActorInventory(pln+PLN_TID_SHRT, objectiveItems[objective][i]) == 0)
-            continue;
-
-        objectiveDrawn = true;
-        if(lastPickup == -1)
-            lastPickup = Timer();
-
-        if(((Timer()-lastPickup) / 35) % 2 == 1) {
-            displayIcon(getObjectiveIcon(objective, 2, 0), getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
-        }
-
-        str cyan = getObjectiveIcon(objective, 0, CallACS2("core_getteampalette", i, 0));
-        str blue = getObjectiveIcon(objective, 1, CallACS2("core_getteampalette", i, 1));
-
-        displayIcon(cyan, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
-
-        if(cyan != blue) {
-            displayIcon(blue, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
-        }
-    }
-}
-
 function void drawMugshotDead(int pln, int x, int y, int team, int dead)
 {
     if(lastValidMug[pln][MV_DIEDONCE]) {
@@ -364,6 +331,39 @@ script "UIXTeam_Mugshot_Death" DEATH CLIENTSIDE
 
     lastValidMug[pln][MV_DEADTIME] = timer();
     lastValidMug[pln][MV_DIEDONCE] = true;
+}
+
+function void drawMugshotObjective(int pln, int x, int y, int team)
+{
+    if(objective == OBJ_IDC)
+        return;
+    
+    if(objectiveDrawn)
+        return;
+
+    for(int i = 0; i < maxTeams; i++) {
+        if(i == team)
+            continue;
+        if(CheckActorInventory(pln+PLN_TID_SHRT, objectiveItems[objective][i]) == 0)
+            continue;
+
+        objectiveDrawn = true;
+        if(lastPickup == -1)
+            lastPickup = Timer();
+
+        if(((Timer()-lastPickup) / 35) % 2 == 1) {
+            displayIcon(getObjectiveIcon(objective, 2, 0), getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        }
+
+        str cyan = getObjectiveIcon(objective, 0, CallACS2("core_getteampalette", i, 0));
+        str blue = getObjectiveIcon(objective, 1, CallACS2("core_getteampalette", i, 1));
+
+        displayIcon(cyan, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+
+        if(cyan != blue) {
+            displayIcon(blue, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        }
+    }
 }
 
 // Draw Name ========================================================================================================================================
