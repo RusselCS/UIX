@@ -69,19 +69,6 @@ script "uix_cameraplayernumber" (int pln)
     SetResultValue(PlayerNumber());
 }
 
-// Mugshot data pull, from pingbutton
-function str getMugshotGraphicFromTID(int tid) {
-	str class = GetActorClass(tid);
-
-	int u = UniqueTID();
-	if(!SpawnForced(StrParam(s:"PBMug_", s:class), 0, 0, 0, u, 0)) {
-		return "";
-	}
-	Thing_Remove(u);
-
-	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
-}
-
 #define FRAGMSG_TIME 87
 #define FRAGMSG_FADETIME 18
 
@@ -228,11 +215,6 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
         delay(1);
     }
     while(true);
-}
-
-function int lerp(int a, int b, int alpha)
-{
-    return FixedMul(a, 1.0 - alpha) + FixedMul(b, alpha);
 }
 
 function int bound(int n, int cap, int sign)

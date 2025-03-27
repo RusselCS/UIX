@@ -28,12 +28,23 @@ str objectiveItems[OBJ_MODES][4] = {
 };
 int objective = OBJ_IDC;
 int maxTeams = -1;
-int objectiveDrawn = false; // /!\ MANIPULATED IN DRAWMUGSHOT /!\
-int lastPickup = -1; // /!\ MANIPULATED IN DRAWMUGSHOT /!\
+// /!\ MANIPULATED IN DRAWMUGSHOT /!\
+int objectiveDrawn = false;
+int lastPickup = -1;
+// ----------------------------------
 
 #define SURVIVAL 3
 str survivalModes[SURVIVAL] = { "teamlms", "lastmanstanding", "survival" };
 int maxLives = -1;
+
+function int getPlayerTeam(int pln) {
+	
+	if(GetCvar("cooperative") || GetCvar("invasion") || GetCvar("survival")) {
+        return 1;
+    }
+	
+	return GetPlayerInfo(pln, PLAYERINFO_TEAM);
+}
 
 script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
 {
@@ -41,7 +52,7 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
     int i;
 
     for(i = 0; i < OBJ_MODES; i++) {
-        if(StrICmp(objectiveModes[i], mode) == 0) {
+        if(StrMatches(objectiveModes[i], mode)) {
             objective = i;
             maxTeams = GetCvar("sv_maxteams");
             terminate;
@@ -49,7 +60,7 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
     }
 
     for(i = 0; i < SURVIVAL; i++) {
-        if(StrICmp(survivalModes[i], mode) == 0) {
+        if(StrMatches(survivalModes[i], mode)) {
             maxLives = GetCvar("sv_maxlives");
             break;
         }
@@ -293,19 +304,6 @@ function void drawMugshot(int pln, int x, int y, int team, int dead)
         drawMugshotObjective(pln, x, y, team);
 
     displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-}
-
-// Mugshot data pull, from pingbutton
-function str getMugshotGraphicFromTID(int tid) {
-	str class = GetActorClass(tid);
-
-	int u = UniqueTID();
-	if(!SpawnForced(StrParam(s:"PBMug_", s:class), 0, 0, 0, u, 0)) {
-		return "";
-	}
-	Thing_Remove(u);
-
-	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
 function void drawMugshotStatus(int pln, int x, int y)
@@ -1123,7 +1121,7 @@ function bool needsReset(int plr, str name)
         return true;
     }
 
-    if(StrCmp(name, getCacheName(plr, 0, 0)) != 0) {
+    if(!StrEqual(name, getCacheName(plr, 0, 0))) {
         return true;
     }
 
@@ -1178,7 +1176,7 @@ int playerLocs[MAX_PLAYERS_SHRT][2];
 //
 function int findLoc(int id) {
     for(int i = 0; i < LOC_SIZE; i++) {
-        if(StrCmp(getLocId(i), id) == 0)
+        if(StrEqual(getLocId(i), id))
             return i;
     }
     return -1;
@@ -1210,7 +1208,7 @@ function str findLocation(int plr, int o, int r, int dead) {
     if(loc == -1 || StrLen(loc) == 0)
         return "";
 
-    if(StrCmp(playerLocs[plr][0], loc) == 0) {
+    if(StrEqual(playerLocs[plr][0], loc)) {
         return getLocName(playerLocs[plr][1], o, r);
     }
 
@@ -1295,42 +1293,6 @@ int weapon_colors[MAX_WEAPONS_GLOBAL_LIMIT][5];
 #define WC_CYAN2 3
 #define WC_BLUE2 4
 
-int readBlue1, readCyan1, readBlue2, readCyan2;
-function void readWeaponBars(str weap) {
-    // Log(s:"Called read weapon bars for weapon: ", s:weap);
-    readCyan1 = -1;
-    readBlue1 = -1;
-    readCyan2 = -1;
-    readBlue2 = -1;
-
-    int obj;
-    obj = new(StrParam(s:weap, s:"_NormalBar"));
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_MugshotColor"));
-    }
-
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
-    }
-
-    if(obj) {
-        readCyan1 = GetActorArg(obj, 0);
-        readBlue1 = GetActorArg(obj, 1);
-        destroy(obj);
-    }
-
-    obj = new(StrParam(s:weap, s:"_SecondBar"));
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
-    }
-
-    if(obj) {
-        readCyan2 = GetActorArg(obj, 0);
-        readBlue2 = GetActorArg(obj, 1);
-        destroy(obj);
-    }
-    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
-}
 
 // core function
 function int getWeaponColor(int idx, int prop)
@@ -1357,13 +1319,13 @@ function int findWeaponInDTs(str weap) {
 
 	for(i = 0; i < MAX_WEAPONS_GLOBAL; i++)
     {
-        if(StrICmp(weap, getWeaponActor(i)) == 0)
+        if(StrMatches(weap, getWeaponActor(i)))
             return i+1;
     }
 
     for(i = 0; i < MAX_BUSTERUPGRADES; i++)
     {
-        if(StrICmp(weap, getBusterActor(i)) == 0)
+        if(StrMatches(weap, getBusterActor(i)))
             return -(i+1);
     }
 

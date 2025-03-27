@@ -2,9 +2,9 @@
 
 #include "zcommon.acs"
 
-#include "SHRTFUNC.acs"
-
 #import "8BDT.acs"
+
+#include "SHRTFUNC.acs"
 
 #include "UXTBWBAR.acs"
 #include "UXTBWOVR.acs"
@@ -485,44 +485,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
         slotCounts[slot] = 0;
     }
-}
-
-int readBlue1, readCyan1, readBlue2, readCyan2;
-
-function void readWeaponBars(str weap) {
-    // Log(s:"Called read weapon bars for weapon: ", s:weap);
-    readCyan1 = -1;
-    readBlue1 = -1;
-    readCyan2 = -1;
-    readBlue2 = -1;
-
-    int obj;
-    obj = new(StrParam(s:weap, s:"_NormalBar"));
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_MugshotColor"));
-    }
-
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
-    }
-
-    if(obj) {
-        readCyan1 = GetActorArg(obj, 0);
-        readBlue1 = GetActorArg(obj, 1);
-        destroy(obj);
-    }
-
-    obj = new(StrParam(s:weap, s:"_SecondBar"));
-    if(!obj) {
-        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
-    }
-
-    if(obj) {
-        readCyan2 = GetActorArg(obj, 0);
-        readBlue2 = GetActorArg(obj, 1);
-        destroy(obj);
-    }
-    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
 }
 
 // 0: init

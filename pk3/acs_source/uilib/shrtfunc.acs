@@ -188,43 +188,11 @@ function int CallACS2(str scr, int a1, int a2) { return CallACS4(scr, a1, a2, 0,
 function int CallACS3(str scr, int a1, int a2, int a3) { return CallACS4(scr, a1, a2, a3, 0); }
 function int CallACS4(str scr, int a1, int a2, int a3, int a4) { return ACS_NamedExecuteWithResult(scr, a1, a2, a3, a4); }
 
-// Player number functions
-function bool isPlayerPln(int id) { return id > -1 && id < MAX_PLAYERS_SHRT; }
-function bool isPlayerTID(int id) { return id >= PLN_TID_SHRT && id < PLN_TID_SHRT+MAX_PLAYERS_SHRT; }
-
 function bool StrEqual(str str1, str str2) { return StrCmp(str1, str2) == 0; }
 function bool StrMatches(str str1, str str2) { return StrICmp(str1, str2) == 0; }
 
 function int max(int x, int y) { return x > y ? x : y; }
 function int min(int x, int y) { return x < y ? x : y; }
-
-function int clamp(int n, int x, int y) {
-    if(n < x)
-        n = x;
-    if(n > y)
-        n = y;
-    return n;
-}
-
-function int intToBool(int n) {
-	if(n > 0)
-		return false;
-	return true;
-}
-
-script "shrt_getplrweapon" (int who) {
-	SetActivatorToPlayer(who);
-	SetResultValue(GetWeapon());
-}
-
-function str getPlayerWeapon(int who) { return callAcs1("shrt_getplrweapon", who); }
-
-script "shrt_getplrammocapacity" (int who, int amo) {
-	SetActivatorToPlayer(who);
-	SetResultValue(GetAmmoCapacity(amo));
-}
-
-function str getPlayerAmmoCapacity(int who, str amo) { return callAcs2("shrt_getplrammocapacity", who, amo); }
 
 function int dist3D (int tid1, int tid2)
 {
@@ -316,13 +284,54 @@ function bool isv6b(void) {
 	return isv6bFlag;
 }
 
-function int getPlayerTeam(int pln) {
-	
-	if(GetCvar("cooperative") || GetCvar("invasion") || GetCvar("survival")) {
-        return 1;
-    }
-	
-	return GetPlayerInfo(pln, PLAYERINFO_TEAM);
+function void resetActivator(void) { SetActivator(0, AAPTR_NULL); }
+
+// Mugshot data pull, from pingbutton
+function str getMugshotGraphicFromTID(int tid) {
+	str class = GetActorClass(tid);
+
+	int u = UniqueTID();
+	if(!SpawnForced(StrParam(s:"PBMug_", s:class), 0, 0, 0, u, 0)) {
+		return "";
+	}
+	Thing_Remove(u);
+
+	return ACS_NamedExecuteWithResult(StrParam(s:"PBMug_", s:class), tid);
 }
 
-function void resetActivator(void) { SetActivator(0, AAPTR_NULL); }
+int readBlue1, readCyan1, readBlue2, readCyan2;
+function void readWeaponBars(str weap) {
+    // Log(s:"Called read weapon bars for weapon: ", s:weap);
+    readCyan1 = -1;
+    readBlue1 = -1;
+    readCyan2 = -1;
+    readBlue2 = -1;
+
+    int obj;
+    obj = new(StrParam(s:weap, s:"_NormalBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_MugshotColor"));
+    }
+
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_ArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan1 = GetActorArg(obj, 0);
+        readBlue1 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+
+    obj = new(StrParam(s:weap, s:"_SecondBar"));
+    if(!obj) {
+        obj = new(StrParam(s:weap, s:"_SecondArsenalBar"));
+    }
+
+    if(obj) {
+        readCyan2 = GetActorArg(obj, 0);
+        readBlue2 = GetActorArg(obj, 1);
+        destroy(obj);
+    }
+    // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
+}
