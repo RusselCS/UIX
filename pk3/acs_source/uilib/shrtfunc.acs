@@ -74,7 +74,7 @@ function void calcMessageDisplayOffsets(int offsX, int offsY, int scaleX, int sc
 function void displayMessage(str msg, int id, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign)
 {
 	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
-	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 }
 
 #define BAR_DISPLAY_NONE 0
@@ -105,13 +105,13 @@ function void drawLayeredBar(str bar1, str bar2, str empty, int offsx, int offsy
     }
 
 	SetFont(bar1);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetFont(bar2);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar2Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, bar2Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
     // SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, width, height);
     SetHudClipRect(0, 0, 0, 0, 0);
     SetFont(empty);
-    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetHudClipRect(0,0,0,0);
 }
 
@@ -136,11 +136,11 @@ function void drawBar(str bar1, str empty, int offsx, int offsy, int width, int 
     }
 
 	SetFont(bar1);
-	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+	HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, bar1Id, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
     // SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, width, height);
     SetHudClipRect(0, 0, 0, 0, 0);
     SetFont(empty);
-    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+    HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_LAYER_UNDERHUD, backId, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 	SetHudClipRect(0,0,0,0);
 }
 
