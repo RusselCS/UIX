@@ -91,6 +91,8 @@ v2b changelog:
 --- Now shows Objective icons over allied mugshots (only with mugshots enabled)
 --- Now shows "meta status" icons like typing in chat, speaking in voice, or menuing (only with mugshots enabled)
 --- Now shows dead allies, with an animation whenever they die (only with mugshots enabled)
+--- Users can now adjust the separation distance between ally pieces.
+--- Users can now choose to have their ally info "wrap" after a given number of allies is shown.
 - Weapon Bar:
 --- Fixed a bug where second ammo bar would not properly display when orientation was horizontal
 --- 

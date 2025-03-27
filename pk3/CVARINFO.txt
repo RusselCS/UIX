@@ -39,6 +39,10 @@ user bool UIX_CL_TEAMINFOSHOWLOCATION = true;
 user bool UIX_CL_TEAMINFOSHOWLIVES = true;
 user bool UIX_CL_TEAMINFOSHOWWEAPON = true;
 user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
+user int UIX_CL_TEAMINFOSEPARATION = 0;
+user int UIX_CL_TEAMINFOWRAPAMOUNT = 0;
+user bool UIX_CL_TEAMINFOWRAPDIR = false; // false = down/right; true = up/left
+user int UIX_CL_TEAMINFOWRAPSEPARATION = 0;
 
 server noarchive bool UIX_SV_DRAWKILLFEED = true;
 user bool UIX_CL_DRAWKILLFEED = true;

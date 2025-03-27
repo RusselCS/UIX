@@ -72,7 +72,7 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
 #define horizontal 0
 #define vertical 1
 
-int cvars[17];
+int cvars[21];
 #define CV_OFFSX        0
 #define CV_OFFSY        1
 #define CV_SCALE        2
@@ -90,14 +90,23 @@ int cvars[17];
 #define CV_FONTIDX      14
 #define CV_REVERSETEXT  15
 #define CV_SHOWWEAPON   16
+#define CV_SEPARATION   17
+#define CV_WRAPAMOUNT   18
+#define CV_WRAPDIR      19
+#define CV_WRAPSEPARATION   20
 
 int dbShowSelf;
 
 int tiCache_Scale = MIN_INT;
 int tiCache_Stack = MIN_INT;
+int tiCache_Separation = MIN_INT;
+int tiCache_WrapSeparation = MIN_INT;
+int tiCache_WrapDir = MIN_INT;
 
 #define STACK_OFFS 36
+#define WRAP_OFFS  120
 int tiStackOffs;
+int tiWrapOffs;
 
 #define STATUS_GONE -1
 #define STATUS_ALIVE 0
@@ -161,20 +170,35 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvars[CV_SHOWLIVES] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWLIVES");
         cvars[CV_SHOWMUGSHOT] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWMUGSHOT");
         cvars[CV_SHOWWEAPON] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWWEAPON");
+        cvars[CV_SEPARATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSEPARATION");
+        cvars[CV_WRAPAMOUNT] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPAMOUNT");
+        cvars[CV_WRAPDIR] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPDIR");
+        cvars[CV_WRAPSEPARATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPSEPARATION");
 
         cvars[CV_FONTIDX] = cvars[CV_FONTDIR] ^ cvars[CV_DIR];
         cvars[CV_REVERSETEXT] = cvars[CV_DIR] && !cvars[CV_FONTDIR];
 
-        if(tiCache_Scale != cvars[CV_SCALE] || tiCache_Stack != cvars[CV_STACK])
-        {
+        if(
+            tiCache_Scale != cvars[CV_SCALE] ||
+            tiCache_Stack != cvars[CV_STACK] ||
+            tiCache_WrapDir != cvars[CV_WRAPDIR] ||
+            tiCache_Separation != cvars[CV_SEPARATION] ||
+            tiCache_WrapSeparation != cvars[CV_WRAPSEPARATION]
+        ) {
             tiCache_Scale = cvars[CV_SCALE];
             tiCache_Stack = cvars[CV_STACK];
+            tiCache_WrapDir = cvars[CV_WRAPDIR];
+            tiCache_Separation = cvars[CV_SEPARATION];
+            tiCache_WrapSeparation = cvars[CV_WRAPSEPARATION];
 
-            if(cvars[CV_STACK]) {
-                tiStackOffs = -1 * FixedMul(STACK_OFFS, cvars[CV_SCALE]);
-            } else {
-                tiStackOffs = FixedMul(STACK_OFFS, cvars[CV_SCALE]);
-            }
+            tiStackOffs = FixedMul(STACK_OFFS+tiCache_Separation, cvars[CV_SCALE]);
+            tiWrapOffs = FixedMul(WRAP_OFFS+tiCache_WrapSeparation, cvars[CV_SCALE]);
+
+            if(cvars[CV_STACK])
+                tiStackOffs *= -1;
+
+            if(cvars[CV_WRAPDIR])
+                tiWrapOffs *= -1;
         }
 
         int drawnPlayers = 0;
@@ -194,8 +218,21 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
             if(getPlayerTeam(i) != team)
                 continue;
 
-            int baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
-            int baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
+            int baseX, baseY;
+
+            if(cvars[CV_WRAPAMOUNT] > 0) {
+                int stackCount = drawnPlayers % cvars[CV_WRAPAMOUNT];
+                int wrapCount = drawnPlayers / cvars[CV_WRAPAMOUNT];
+
+                baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? stackCount * tiStackOffs : 0);
+                baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? stackCount * tiStackOffs : 0);
+
+                baseX += (!cvars[CV_DIR] ? wrapCount * tiWrapOffs : 0);
+                baseY += (cvars[CV_DIR] ? wrapCount * tiWrapOffs : 0);
+            } else {
+                baseX = cvars[CV_OFFSX] + (cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
+                baseY = cvars[CV_OFFSY] + (!cvars[CV_DIR] ? drawnPlayers * tiStackOffs : 0);
+            }
 
             drawMugshot(i, baseX, baseY, team, dead);
             drawName(i, baseX, baseY);

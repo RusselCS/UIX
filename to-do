@@ -50,8 +50,6 @@ Done:
 
 == V2B TO DO ==
 (numbers indicate difficulty)
-1 Cleanup: Remove constants unused
-2 Teaminfo: Trill's request: Add ability for the component to "wrap."
 3 Teaminfo: Name squish sometimes does not work for vertical mode.
 1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 1 Teaminfo: Bottom-left default preset packs up too quick
@@ -61,6 +59,8 @@ Done:
 1 Killfeed: Fix when mugshot is not found.
 
 Done:
+1 Cleanup: Remove constants unused
+2 Teaminfo: Trill's request: Add ability for the component to "wrap."
 - Cleanup: Move "bloat" tables into separate include files
 - Killfeed: Fix mugshots in self-destruct scenarios.
 - Killfeed: Should work for spectators.
