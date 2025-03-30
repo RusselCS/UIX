@@ -10,6 +10,9 @@ UIX_UNKNOWN_LOC_2 = "Node Graph out of Date. Rebuilding...";
 UIX_UNKNOWN_LOC_3 = "A bomb's a bad choice for close-range combat.";
 UIX_UNKNOWN_LOC_4 = "ONE THIRD OF THE PUZZLE HAS BEEN SOLVED.";
 
+UIX_LOC_DEAD = "AWAITING RESPAWN...";
+UIX_LOC_GHOST = "AWAITING NEXT ROUND...";
+
 UIX_MENU_TEXT = "\c--\cdUI Extensions\c--";
 
 // "bloat" implies something is useless
