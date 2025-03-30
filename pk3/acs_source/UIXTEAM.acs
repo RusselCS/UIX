@@ -1166,8 +1166,8 @@ function void setCacheInit(int plr, int val) { namesCache[plr][0] = val; }
 function str getCacheName(int plr, int o, int r) { return namesCache[plr][1 + (o ? o + r : 0)]; }
 function void setCacheName(int plr, int o, int r, str val) { namesCache[plr][1 + (o ? o + r : 0)] = val; }
 
-function int getCacheNameWidth(int plr, int o, int r) { return namesCache[plr][5 + (o ? o + r : 0)]; }
-function void setCacheNameWidth(int plr, int o, int r, int val) { namesCache[plr][5 + (o ? o + r : 0)] = val; }
+function int getCacheNameWidth(int plr, int o, int r) { return namesCache[plr][4 + (o ? o + r : 0)]; }
+function void setCacheNameWidth(int plr, int o, int r, int val) { namesCache[plr][4 + (o ? o + r : 0)] = val; }
 
 function bool needsReset(int plr, str name)
 {
