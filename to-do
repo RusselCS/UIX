@@ -52,12 +52,12 @@ Done:
 (numbers indicate difficulty)
 1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 1 Teaminfo: Bottom-left default preset packs up too quick
-1 Killfeed: Fix when mugshot is not found.
 1 Remove SafeCommand from the presets.
 2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
 1 Staging: Get Xover staging script from SDM.
 
 Done:
+1 Killfeed: Fix when mugshot is not found. (Invalid)
 3 Teaminfo: Name squish sometimes does not work for vertical mode.
 2 WeaponBar: Apparently doubleammo does not depopulate when overwritten
 1 Cleanup: Remove constants unused

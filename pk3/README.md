@@ -102,4 +102,7 @@ v2b changelog:
 --- Timers now "round" to the closest time as opposed to assuming unknown when not found.
 --- Now "round" to the closest one.
 --- Sprites were renamed to indicate how many segments they have so it's known which counter is being looked at.
+- Killfeed Mugshots:
+--- Background functionality no longer runs for anyone not involved in the frag exchange.
+--- Now displays when coop spying those involved in the frag exchange.
 - Several background organization changes
