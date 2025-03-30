@@ -1561,6 +1561,7 @@ texture UIXSTCO2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTCNG2, 0, 0}
 texture UIXSTMN1, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG1, 0, 0}
 texture UIXSTMN2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG2, 0, 0}
 texture UIXSTMN3, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG3, 0, 0}
+texture UIXSTMN4, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTMNG2, 0, 0}
 
 texture UIXSTVC1, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTVCG1, 0, 0}
 texture UIXSTVC2, 16, 16 {xscale 4.0 yscale 4.0 patch UXSTVCG2, 0, 0}

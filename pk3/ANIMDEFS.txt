@@ -1,4 +1,4 @@
 // Player Status icons
 texture	UIXSTCO1  	range	UIXSTCO2  	tics 9
-texture	UIXSTMN1  	range	UIXSTMN3  	tics 10
+texture	UIXSTMN1  	range	UIXSTMN4  	tics 10
 texture	UIXSTVC1  	range	UIXSTVC3  	tics 5
