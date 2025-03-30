@@ -50,8 +50,9 @@ Done:
 
 == V2B TO DO ==
 (numbers indicate difficulty)
-1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
-1 Teaminfo: Bottom-left default preset packs up too quick
+1 Presets: Default name squish needs adjustment for new health bar (+update when default)
+1 Presets: Bottom-left default preset packs up too quick
+4 Add a "layer" option for all components
 1 Remove SafeCommand from the presets.
 2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
 1 Staging: Get Xover staging script from SDM.
