@@ -441,6 +441,8 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    slotVals[slot][weap][WEAP_AMMO2_AMT],
                                    slotVals[slot][weap][WEAP_AMMO2_MAX],
                                    !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                    slotVals[slot][weap][WEAP_AMMO2_MAX] = 0; // Because the weapon array is not cleared
+
                     // Draw the bar1 based on whether the bar2 will be drawn.
                     // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
@@ -454,6 +456,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
                                         !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                        slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 } else {
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
@@ -467,6 +470,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
                                         !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                        slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 }
             }
