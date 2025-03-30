@@ -50,7 +50,6 @@ Done:
 
 == V2B TO DO ==
 (numbers indicate difficulty)
-3 Teaminfo: Name squish sometimes does not work for vertical mode.
 1 Teaminfo: Default name squish needs adjustment for new health bar (+update when default)
 1 Teaminfo: Bottom-left default preset packs up too quick
 1 Killfeed: Fix when mugshot is not found.
@@ -59,6 +58,7 @@ Done:
 1 Staging: Get Xover staging script from SDM.
 
 Done:
+3 Teaminfo: Name squish sometimes does not work for vertical mode.
 2 WeaponBar: Apparently doubleammo does not depopulate when overwritten
 1 Cleanup: Remove constants unused
 2 Teaminfo: Trill's request: Add ability for the component to "wrap."

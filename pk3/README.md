@@ -86,10 +86,11 @@ v2a changelog:
 v2b changelog:
 - Teaminfo:
 --- Bars for ammo and health are now thicker
---- Fixed a possible cache miss with location and weapon name
+--- Fixed a possible cache miss with location and weapon name that could cause a string table leak
+--- Possibly fixed a bug where player names were sometimes not getting properly squished in certain settings
 --- Put down some framework to make maths easier for a future change
---- Now shows Objective icons over allied mugshots (only with mugshots enabled)
---- Now shows "meta status" icons like typing in chat, speaking in voice, or menuing (only with mugshots enabled)
+--- Now shows Objective icons over allied mugshots
+--- Now shows "meta status" icons like typing in chat, speaking in voice, or menuing
 --- Now shows dead allies, with an animation whenever they die (only with mugshots enabled)
 --- Users can now adjust the separation distance between ally pieces.
 --- Users can now choose to have their ally info "wrap" after a given number of allies is shown.
