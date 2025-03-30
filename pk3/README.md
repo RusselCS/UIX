@@ -95,7 +95,7 @@ v2b changelog:
 --- Users can now choose to have their ally info "wrap" after a given number of allies is shown.
 - Weapon Bar:
 --- Fixed a bug where second ammo bar would not properly display when orientation was horizontal
---- 
+--- Fixed a bug where second ammo bar would "stick" to the user's UI when the attached weapon was removed
 - Item Respawn Timers:
 --- Timers exist for 5s, 10s, 15s, 30s, 40s, 60s, and "Unknown."
 --- Timers now "round" to the closest time as opposed to assuming unknown when not found.
