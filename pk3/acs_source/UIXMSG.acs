@@ -99,6 +99,8 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
     if(strLen(mug) == 0)
         terminate;
 
+    int layer = hudLayers[GetUserCvar(ConsolePlayerNumber(), "UIX_CL_KILLFEEDLAYER")];
+
     int pln = cam;
 
     int fragTime = lastFrag[pln];
@@ -186,7 +188,7 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
 
         if(!dead) {
             if(infiniteRespawns) {
-                displayIcon(respawnFrames[FRAGMSG_RESPAWNFRAMES-1], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                displayIcon(layer, respawnFrames[FRAGMSG_RESPAWNFRAMES-1], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
             } else {
                 if(timer() >= startTime + FRAGMSG_EXPLODE) {
                 
@@ -196,21 +198,21 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
                             int explodeScale = FixedMul(scale, 0.25);
                             int explodeOffsX = FixedMul(explodeScale, 28);
                             int explodeOffsY = FixedMul(explodeScale, 26);
-                            displayIcon(explodeFrames[explodeFrame], getNewUIId(), x+explodeOffsX, y+explodeOffsY, explodeScale, explodeScale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                            displayIcon(layer, explodeFrames[explodeFrame], x+explodeOffsX, y+explodeOffsY, explodeScale, explodeScale, alpha, ALIGN_CENTER, ALIGN_CENTER);
                         }
-                        displayIcon(skullIcons[0][cyan], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-                        displayIcon(skullIcons[1][blue], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-                        displayIcon("UIXMGSCR", getNewUIId(), x, y, scale, scale, FixedMul(alpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
+                        displayIcon(layer, skullIcons[0][cyan], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                        displayIcon(layer, skullIcons[1][blue], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                        displayIcon(layer, "UIXMGSCR", x, y, scale, scale, FixedMul(alpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
                     } else {
-                        displayIcon(respawnFrames[min(explodeFrame, FRAGMSG_RESPAWNFRAMES-1)], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                        displayIcon(layer, respawnFrames[min(explodeFrame, FRAGMSG_RESPAWNFRAMES-1)], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
                     }
                 }
             }
-            displayIcon(skullIcons[0][cyan], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-            displayIcon(skullIcons[1][blue], getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIcon(layer, skullIcons[0][cyan], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIcon(layer, skullIcons[1][blue], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
         }
 
-        displayIcon(mug, getNewUIId(), x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+        displayIcon(layer, mug, x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
 
         delay(1);
     }

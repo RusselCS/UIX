@@ -72,7 +72,7 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
 #define horizontal 0
 #define vertical 1
 
-int cvars[25];
+int cvars[26];
 #define CV_OFFSX        0
 #define CV_OFFSY        1
 #define CV_SCALE        2
@@ -98,6 +98,7 @@ int cvars[25];
 #define CV_SHOWDEATHANIM    22
 #define CV_SHOWMENUSTATUS   23
 #define CV_SHOWOBJECTIVES   24
+#define CV_LAYER            25
 
 int dbShowSelf;
 
@@ -182,6 +183,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvars[CV_SHOWDEATHANIM] = GetUserCvar(cpn, "UIX_CV_SHOWDEATHANIM");
         cvars[CV_SHOWMENUSTATUS] = GetUserCvar(cpn, "UIX_CV_SHOWMENUSTATUS");
         cvars[CV_SHOWOBJECTIVES] = GetUserCvar(cpn, "UIX_CV_SHOWOBJECTIVES");
+        cvars[CV_LAYER] = hudLayers[GetUserCvar(cpn, "UIX_CL_TEAMINFOLAYER")];
 
         cvars[CV_FONTIDX] = cvars[CV_FONTDIR] ^ cvars[CV_DIR];
         cvars[CV_REVERSETEXT] = cvars[CV_DIR] && !cvars[CV_FONTDIR];
@@ -352,7 +354,7 @@ function void drawMugshot(int pln, int x, int y, int team, int dead)
 
     drawMugshotDead(pln, x, y, team, dead);
 
-    displayIcon(face, getNewUIId(), x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], face, x, y, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 }
 
 function void drawStatus(int pln, int x, int y)
@@ -366,15 +368,15 @@ function void drawStatus(int pln, int x, int y)
         return;
 
     if(status & PLAYERSTATUS_CHATTING)
-        displayIcon("UIXSTCHT", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        displayIcon(cvars[CV_LAYER], "UIXSTCHT", x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
     if(status & PLAYERSTATUS_TALKING)
-        displayIcon("UIXSTVC1", getNewUIId(), x+mugShot_StatusX, y+mugShot_VCY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_BOTTOM);
+        displayIcon(cvars[CV_LAYER], "UIXSTVC1", x+mugShot_StatusX, y+mugShot_VCY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_BOTTOM);
     if(status & PLAYERSTATUS_INCONSOLE)
-        displayIcon("UIXSTCO1", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        displayIcon(cvars[CV_LAYER], "UIXSTCO1", x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
     if(status & PLAYERSTATUS_INMENU)
-        displayIcon("UIXSTMN1", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        displayIcon(cvars[CV_LAYER], "UIXSTMN1", x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
     if(status & PLAYERSTATUS_LAGGING)
-        displayIcon("UIXSTLAG", getNewUIId(), x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        displayIcon(cvars[CV_LAYER], "UIXSTLAG", x+mugShot_StatusX, y+mugShot_StatusY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
 }
 
 function void drawMugshotDead(int pln, int x, int y, int team, int dead)
@@ -382,16 +384,16 @@ function void drawMugshotDead(int pln, int x, int y, int team, int dead)
     if(cvars[CV_SHOWDEATHANIM] && lastValidMug[pln][MV_DIEDONCE]) {
         int explodeFrame = Timer() - lastValidMug[pln][MV_DEADTIME];
         if(explodeFrame < FRAGMSG_EXPLODEFRAMES) {
-            displayIcon(explodeFrames[explodeFrame], getNewUIId(), x+mugShot_ExplodeX, y+mugShot_ExplodeY, mugShot_ExplodeScale, mugShot_ExplodeScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+            displayIcon(cvars[CV_LAYER], explodeFrames[explodeFrame], x+mugShot_ExplodeX, y+mugShot_ExplodeY, mugShot_ExplodeScale, mugShot_ExplodeScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
         }
     }
 
     if(dead == STATUS_ALIVE)
         return;
 
-    displayIcon(skullIcons[0][4], getNewUIId(), x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(skullIcons[1][200], getNewUIId(), x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon("UIXMGSCR", getNewUIId(), x, y, mugScale, mugScale, FixedMul(cvars[CV_ALPHA], 0.5), ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], skullIcons[0][4], x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], skullIcons[1][200], x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], "UIXMGSCR", x, y, mugScale, mugScale, FixedMul(cvars[CV_ALPHA], 0.5), ALIGN_CENTER, ALIGN_CENTER);
 }
 
 script "UIXTeam_Mugshot_Death" DEATH CLIENTSIDE
@@ -436,16 +438,16 @@ function void drawObjective(int pln, int x, int y, int team)
             lastPickup = Timer();
 
         if(((Timer()-lastPickup) / 35) % 2 == 1) {
-            displayIcon(getObjectiveIcon(objective, 2, 0), getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+            displayIcon(cvars[CV_LAYER], getObjectiveIcon(objective, 2, 0), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
         }
 
         str cyan = getObjectiveIcon(objective, 0, CallACS2("core_getteampalette", i, 0));
         str blue = getObjectiveIcon(objective, 1, CallACS2("core_getteampalette", i, 1));
 
-        displayIcon(cyan, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+        displayIcon(cvars[CV_LAYER], cyan, x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
 
         if(cyan != blue) {
-            displayIcon(blue, getNewUIId(), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+            displayIcon(cvars[CV_LAYER], blue, x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
         }
     }
 }
@@ -514,7 +516,7 @@ function void drawName(int pln, int x, int y)
     int nameScaleY = !cvars[CV_DIR] ? nv[N_SCALE] : FixedMul(nv[N_SCALE], nameLengthScale);
     
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
-    displayMessage(name, getNewUIId(), x + nv[N_X], y + nv[N_Y], nameScaleX, nameScaleY, cvars[CV_ALPHA], nv[N_HALIGN], nv[N_VALIGN]);
+    displayMessage(cvars[CV_LAYER], name, x + nv[N_X], y + nv[N_Y], nameScaleX, nameScaleY, cvars[CV_ALPHA], nv[N_HALIGN], nv[N_VALIGN]);
 }
 
 // Draw Location ========================================================================================================================================
@@ -586,7 +588,7 @@ function void drawLocation(int pln, int x, int y, int dead)
     int locScaleY = !cvars[CV_DIR] ? lv[L_SCALE] : FixedMul(lv[L_SCALE], locLengthScale);
     
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
-    displayMessage(loc, getNewUIId(), x + lv[L_X], y + lv[L_Y], locScaleX, locScaleY, cvars[CV_ALPHA], lv[L_HALIGN], lv[L_VALIGN]);
+    displayMessage(cvars[CV_LAYER], loc, x + lv[L_X], y + lv[L_Y], locScaleX, locScaleY, cvars[CV_ALPHA], lv[L_HALIGN], lv[L_VALIGN]);
 }
 
 // Draw Health ======================================================================================================================================
@@ -659,13 +661,14 @@ function void drawHealth(int pln, int x, int y, int dead)
     }
     
     drawBar(
+        cvars[CV_LAYER],
         healthBars[0][cvars[CV_DIR]],
         healthBars[1][cvars[CV_DIR]],
         x+hv[H_X], y+hv[H_Y],
         hv[H_WIDTH], hv[H_HEIGHT],
         hv[H_SCALE], hv[H_SCALE], cvars[CV_ALPHA],
         chp, mhp,
-        !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(),
+        !cvars[CV_DIR]+1, false,
         hv[H_HALIGN], hv[H_VALIGN]
     );
 }
@@ -839,54 +842,58 @@ function void drawWeapon(int pln, int x, int y, int dead)
 
     if(playerWeaponInfo[PI_AMMO_MAX1] > 0 && playerWeaponInfo[PI_AMMO_MAX2] > 0) {
         drawLayeredBar(
+            cvars[CV_LAYER],
             getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
             getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
             getAmmoBar(2+cvars[CV_DIR],2,0),
             X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
             wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
             playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
-            !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+            !cvars[CV_DIR]+1, false,
             wv[W_HALIGN], wv[W_VALIGN]
         );
         drawLayeredBar(
+            cvars[CV_LAYER],
             getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]),
             getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]),
             getAmmoBar(2+cvars[CV_DIR],2,0),
             X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
             wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
             playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],
-            !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+            !cvars[CV_DIR]+1, false,
             wv[W_HALIGN], wv[W_VALIGN]
         );
     } else {
         if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
             drawLayeredBar(
+                cvars[CV_LAYER],
                 getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
                 getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
                 getAmmoBar(4+cvars[CV_DIR],2,0),
                 X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
                 wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
                 playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
-                !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+                !cvars[CV_DIR]+1, false,
                 wv[W_HALIGN], wv[W_VALIGN]
             );
         }
         
         if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
             drawLayeredBar(
+                cvars[CV_LAYER],
                 getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
                 getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
                 getAmmoBar(4+cvars[CV_DIR],2,0),
                 X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
                 wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
                 playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],
-                !cvars[CV_DIR]+1, false, getNewUIId(), getNewUIId(), getNewUIId(),
+                !cvars[CV_DIR]+1, false,
                 wv[W_HALIGN], wv[W_VALIGN]
             );
         }
     }
 
-    displayIcon(playerWeaponInfo[PI_ICON], getNewUIId(), x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA], wv[W_HALIGN], wv[W_VALIGN]);
+    displayIcon(cvars[CV_LAYER], playerWeaponInfo[PI_ICON], x+wv[W_ICONX], y+wv[W_ICONY], wv[W_ICONSCALE], wv[W_ICONSCALE], cvars[CV_ALPHA], wv[W_HALIGN], wv[W_VALIGN]);
 }
 
 // Draw Lives =======================================================================================================================================
@@ -975,11 +982,11 @@ function void drawLives(int pln, int x, int y, int dead)
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
     
-    displayIcon(livesIcons[0][cyan], getNewUIId(), x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(livesIcons[1][blue], getNewUIId(), x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], livesIcons[0][cyan], x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+    displayIcon(cvars[CV_LAYER], livesIcons[1][blue], x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
 
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
-    displayMessage(livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], getNewUIId(), x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);
+    displayMessage(cvars[CV_LAYER], livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);
 }
 
 // Player name cache ================================================================================================================================

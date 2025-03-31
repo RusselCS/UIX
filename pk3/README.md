@@ -106,3 +106,5 @@ v2b changelog:
 --- Background functionality no longer runs for anyone not involved in the frag exchange.
 --- Now displays when coop spying those involved in the frag exchange.
 - Several background organization changes
+--- In SHRTFUNC.acs, removed use of GetNewUIID. Engine now sets the hudmessage IDs on its own.
+--- Added an option to select the "layer" the new UI elements are attached to.

@@ -109,6 +109,8 @@ int overflowScale;
 int HAlign;
 int OverflowHAlign;
 
+int layer;
+
 // Columns
 #define WEIGHTOFFS_X_00 0
 #define WEIGHTOFFS_Y_00 -12
@@ -269,6 +271,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     cvOffsX = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSX");
     cvOffsY = GetUserCvar(cpn, "UIX_CL_WEAPBAROFFSY");
     cvMaxRow = GetUserCvar(cpn, "UIX_CL_WEAPBARROWMAX");
+    layer = hudLayers[GetUserCvar(cpn, "UIX_CL_WEAPBARLAYER")];
 
     if(
         cacheCvMirror != cvMirror ||
@@ -415,14 +418,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 } else {
                     iconX = baseX + weightOffsX * (i-1);
                     iconY = baseY + weightOffsY * (i-1);
-                    displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
+                    displayIcon(layer, "UXICA0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
                 }
             } else {
                 weap = i;
 
                 iconX = baseX + weightOffsX * i;
                 iconY = baseY + weightOffsY * i;
-                displayIcon("UXICA0", GetNewUIID(), iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
+                displayIcon(layer, "UXICA0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
             }
 
             if(!slotVals[slot][weap][WEAP_TYPE]) {
@@ -431,7 +434,8 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 icon = getWeaponIcon(slotVals[slot][weap][WEAP_IDX]);
 
                 if(slotVals[slot][weap][WEAP_AMMO2_MAX] > 0) {
-                    drawLayeredBar(slotVals[slot][weap][WEAP_CYAN2],
+                    drawLayeredBar(layer,
+                                   slotVals[slot][weap][WEAP_CYAN2],
                                    slotVals[slot][weap][WEAP_BLUE2],
                                    UIXAmmoBars[cvDir][2][0],
                                    iconX + barX2,
@@ -440,13 +444,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    barScale, barScale, cvAlpha,
                                    slotVals[slot][weap][WEAP_AMMO2_AMT],
                                    slotVals[slot][weap][WEAP_AMMO2_MAX],
-                                   !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                                   !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
                     slotVals[slot][weap][WEAP_AMMO2_MAX] = 0; // Because the weapon array is not cleared
 
                     // Draw the bar1 based on whether the bar2 will be drawn.
                     // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
-                        drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
+                        drawLayeredBar(layer,
+                                        slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
                                         UIXAmmoBars[cvDir][2][0],
                                         iconX + barX1,
@@ -455,12 +460,13 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barScale, barScale, cvAlpha,
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
-                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                                        !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
                         slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 } else {
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
-                        drawLayeredBar(slotVals[slot][weap][WEAP_CYAN1],
+                        drawLayeredBar(layer,
+                                        slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
                                         UIXAmmoBars[cvDir][2][0],
                                         iconX + barX,
@@ -469,21 +475,21 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barScale, barScale, cvAlpha,
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
-                                        !cvDir+1, false, GetNewUIID(), GetNewUIID(), GetNewUIID(), ALIGN_LEFT, ALIGN_TOP);
+                                        !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
                         slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 }
             }
-            displayIcon(icon, GetNewUIID(), iconX, iconY, cvScale, cvScale, cvAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIcon(layer, icon, iconX, iconY, cvScale, cvScale, cvAlpha, ALIGN_CENTER, ALIGN_CENTER);
         }
 
         if(slotCounts[slot]) {
             SetFont("SMALLFONT");
             if(cvShowSlots)
-                displayMessage(StrParam(s:col, k:slotBinds[slot]), GetNewUIID(), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
+                displayMessage(layer, StrParam(s:col, k:slotBinds[slot]), baseX + slotX, baseY + slotY, cvScale, cvScale, cvAlpha, HAlign, 0);
 
             if(slotCounts[slot] > cvMaxRow) {
-                displayMessage(UIXWEAP_OverflowNums[slotCounts[slot]-i], GetNewUIID(), baseX + overflowX, baseY + overflowY, overflowScale, overflowScale, cvAlpha, OverflowHAlign, 0);
+                displayMessage(layer, UIXWEAP_OverflowNums[slotCounts[slot]-i], baseX + overflowX, baseY + overflowY, overflowScale, overflowScale, cvAlpha, OverflowHAlign, 0);
             }
         }
 
