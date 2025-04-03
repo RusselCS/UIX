@@ -50,11 +50,9 @@ Done:
 
 == V2B TO DO ==
 (numbers indicate difficulty)
-2 MENUDEF: Organizational updated.
-2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
-1 Staging: Get Xover staging script from SDM.
 
 Done:
+2 MENUDEF: Organizational updated.
 1 Presets: Default name squish needs adjustment for new health bar (+update when default)
 1 Presets: Bottom-left default preset packs up too quick
 1 MENUDEF: Remove SafeCommand from the presets.
@@ -76,6 +74,8 @@ Done:
 - Pickup respawn: 1 minute timer
 
 == V2C TO DO ==
+2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
+1 Staging: Get Xover staging script from SDM.
 3 X/Y Stack / Wrap Up/Down
 5 Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
 4 Teaminfo: Make it so weapons with no icon offset the bars
