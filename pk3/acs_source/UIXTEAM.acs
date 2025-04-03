@@ -37,11 +37,14 @@ int lastPickup = -1;
 str survivalModes[SURVIVAL] = { "teamlms", "lastmanstanding", "survival" };
 int maxLives = -1;
 
+#define COOP_MODES 3
+str coopModes[COOP_MODES] = { "cooperative", "survival", "invasion" };
+int isCoopMode = false;
+
 function int getPlayerTeam(int pln) {
 	
-	if(GetCvar("cooperative") || GetCvar("invasion") || GetCvar("survival")) {
-        return 1;
-    }
+	if(isCoopMode)
+        return 4;
 	
 	return GetPlayerInfo(pln, PLAYERINFO_TEAM);
 }
@@ -50,6 +53,13 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
 {
     str mode = GetCurrentGamemode();
     int i;
+
+    for(i = 0; i < COOP_MODES; i++) {
+        if(StrMatches(coopModes[i], mode)) {
+            isCoopMode = true;
+            break;
+        }
+    }
 
     for(i = 0; i < OBJ_MODES; i++) {
         if(StrMatches(objectiveModes[i], mode)) {
