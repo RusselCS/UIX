@@ -179,10 +179,10 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvars[CV_WRAPAMOUNT] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPAMOUNT");
         cvars[CV_WRAPDIR] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPDIR");
         cvars[CV_WRAPSEPARATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPSEPARATION");
-        cvars[CV_SHOWDEAD] = GetUserCvar(cpn, "UIX_CV_SHOWDEAD");
-        cvars[CV_SHOWDEATHANIM] = GetUserCvar(cpn, "UIX_CV_SHOWDEATHANIM");
-        cvars[CV_SHOWMENUSTATUS] = GetUserCvar(cpn, "UIX_CV_SHOWMENUSTATUS");
-        cvars[CV_SHOWOBJECTIVES] = GetUserCvar(cpn, "UIX_CV_SHOWOBJECTIVES");
+        cvars[CV_SHOWDEAD] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWDEAD");
+        cvars[CV_SHOWDEATHANIM] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWDEATHANIM");
+        cvars[CV_SHOWMENUSTATUS] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWMENUSTATUS");
+        cvars[CV_SHOWOBJECTIVES] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWOBJECTIVES");
         cvars[CV_LAYER] = hudLayers[GetUserCvar(cpn, "UIX_CL_TEAMINFOLAYER")];
 
         cvars[CV_FONTIDX] = cvars[CV_FONTDIR] ^ cvars[CV_DIR];
@@ -499,7 +499,7 @@ function void drawName(int pln, int x, int y)
         nv[N_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_X_00 : NAME_X_01) : (!cvars[CV_MIRROR] ? NAME_X_10 : NAME_X_11)));
         nv[N_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? NAME_Y_00 : NAME_Y_01) : (!cvars[CV_MIRROR] ? NAME_Y_10 : NAME_Y_11)));
         nv[N_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        nv[N_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], nv[N_SCALE]);
+        nv[N_LENGTH] = cvars[CV_NAMESIZE];
         nv[N_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
         nv[N_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
@@ -566,7 +566,7 @@ function void drawLocation(int pln, int x, int y, int dead)
         lv[L_X] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_X_00 : LOC_X_01) : (!cvars[CV_MIRROR] ? LOC_X_10 : LOC_X_11)));
         lv[L_Y] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? LOC_Y_00 : LOC_Y_01) : (!cvars[CV_MIRROR] ? LOC_Y_10 : LOC_Y_11)));
         lv[L_SCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
-        lv[L_LENGTH] = FixedDiv(cvars[CV_NAMESIZE], lv[L_SCALE]);
+        lv[L_LENGTH] = FixedMul(cvars[CV_NAMESIZE], lv[L_SCALE]);
         lv[L_HALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : (cvars[CV_MIRROR] ? ALIGN_RIGHT : ALIGN_LEFT);
         lv[L_VALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : (!cvars[CV_MIRROR] ? ALIGN_TOP : ALIGN_BOTTOM);
     }
