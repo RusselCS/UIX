@@ -24,6 +24,8 @@ script "UIX_KillfeedDispatch" DEATH CLIENTSIDE
 
     if(!GetCVar("UIX_SV_DRAWKILLFEED"))
         terminate;
+    if(!GetCvar("cl_showlargefragmessages"))
+        terminate;
     if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_DRAWKILLFEED"))
         terminate;
     if(GetGamemodeState() != GAMESTATE_INPROGRESS)

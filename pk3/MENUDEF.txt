@@ -43,20 +43,32 @@ OptionMenu "UIXOptions"
 	Title "UI Extensions"
 
 	StaticText " "
-	StaticText "Notification Option", 1
+	StaticText "---------------", 1
+	StaticText "Notification", 1
+	StaticText "---------------", 1
 	Option "UI Extensions Notification", "UIX_CL_notification", "OnOff"
 	StaticText " "
+	StaticText "---------------", 1
 	StaticText "If lagging, turn these off first", 1
+	StaticText "---------------", 1
 	Option "Team Info: Show Ally Weapons", "UIX_CL_TEAMINFOSHOWWEAPON", "OnOff"
 	Option "Team Info Enabled", "UIX_CL_TEAMINFO", "OnOff"
 	StaticText " "
-	StaticText "Widgets", 1
+	StaticText "---------------", 1
+	StaticText "Components", 1
+	StaticText "---------------", 1
 	Submenu "SR50 Options", "UIXOptions_SR50"
 	Submenu "Team Info Options", "UIXOptions_TeamInfo"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
+	Submenu "Kill Feed Options", "UIXOptions_KillFeed"
 	StaticText " "
+	Submenu "Server Settings", "UIXOptions_ServerMenu"
+	StaticText " "
+	StaticText "---------------", 1
 	StaticText "Global Toggle", 1
+	StaticText "---------------", 1
 	Option "Toggle All UI Extensions", "UIX_CL_Enable", "OnOff"
+	StaticText " "
 	StaticText " "
 	Command "Reset to Defaults", "uix_default_presets"
 }
@@ -65,6 +77,9 @@ OptionMenu "UIXOptions_SR50"
 {
 	Title "SR50 SETTINGS"
 	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Button Settings", 1
+	StaticText "---------------", 1
 	StaticText "$UIX_MNU_SR50_1", 1
 	Option "Enable SR50", "UIX_CL_UsingSR50", "OnOff"
 	StaticText " "
@@ -73,73 +88,95 @@ OptionMenu "UIXOptions_SR50"
 	Control "Strafe Right (SR50)", "+right2"
 	Control "Activate SR50", "+sr"
 	StaticText " "
-	Option "SR Tailwind Visual", "UIX_CL_SR50Visual", "OnOff"
-	Slider "SR Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
+	StaticText "---------------", 1
+	StaticText "Overall Settings", 1
+	StaticText "---------------", 1
+	Option "SR50 Tailwind", "UIX_CL_SR50Visual", "OnOff"
+	Slider "Tailwind Alpha", "UIX_CL_SR50VisualAlpha", 0.0, 1.0, 0.05, 2
+	StaticText " "
 }
 
 OptionMenu "UIXOptions_TeamInfo"
 {
 	Title "TEAM INFO SETTINGS"
 	StaticText " "
+	StaticText "---------------", 1
 	StaticText "Clashing Items", 1
+	StaticText "---------------", 1
 	StaticText "$UIX_MNU_CLASHES", 1
 	Option "Default Coop Info", "cl_drawcoopinfo", "OnOff"
 	StaticText " "
-	StaticText "Team Info Settings", 1
+	StaticText "---------------", 1
+	StaticText "Overall Settings", 1
+	StaticText "---------------", 1
 	Option "Team Info Enabled", "UIX_CL_TEAMINFO", "OnOff"
 	StaticText " "
-	StaticText "Position Settings", 1
+	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
+	Slider "Team Info Scale", "UIX_CL_TEAMINFOSCALE", 0.25, 5.00, 0.25, 2
 	Slider "Team Info X", "UIX_CL_TEAMINFOOFFSX", -640, 640, 10
 	Slider "Team Info Y", "UIX_CL_TEAMINFOOFFSY", -640, 640, 10
-	StaticText " "
-	Slider "Team Info Scale", "UIX_CL_TEAMINFOSCALE", 0.25, 5.00, 0.25, 2
 	Slider "Team Info Alpha", "UIX_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
-	StaticText "Element Settings", 1
-	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
-	Slider "Name Max Length", "UIX_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
+	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
 	StaticText " "
+	StaticText "Horizontal Bar Stack & Wrap", 2
+	Slider "Stack Distance", "UIX_CL_TEAMINFOSEPARATION", 0, 255, 1, 0
+	Option "Stack Direction", "UIX_CL_TEAMINFOSTACK", "TeamStackHorz"
+	Slider "Wrap Allies (0=INF)", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
+	Slider "Wrap Distance", "UIX_CL_TEAMINFOWRAPSEPARATION", 0, 255, 1, 0
+	Option "Wrap Direction", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackVert"
+	StaticText " "
+	StaticText "Vertical Bar Stack & Wrap", 2
+	Slider "Stack Distance", "UIX_CL_TEAMINFOSEPARATION", 0, 255, 1, 0
+	Option "Stack Direction", "UIX_CL_TEAMINFOSTACK", "TeamStackVert"
+	Slider "Wrap Allies (0=INF)", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
+	Slider "Wrap Distance", "UIX_CL_TEAMINFOWRAPSEPARATION", 0, 255, 1, 0
+	Option "Wrap Direction", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackHorz"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Element Settings", 1
+	StaticText "---------------", 1
+	Option "Show Names", "UIX_CL_TEAMINFOSHOWNAME", "OnOff"
 	Option "Show Locations", "UIX_CL_TEAMINFOSHOWLOCATION", "OnOff"
+	Slider "Max Text Length", "UIX_CL_TEAMINFONAMESIZE", 0, 255, 1, 0
+	Option "Swap Font Orientation", "UIX_CL_TEAMINFOFONTDIR", "OnOff"
+	StaticText " "
 	Option "Show Healthbars", "UIX_CL_TEAMINFOSHOWHEALTH", "OnOff"
 	Option "Show Weapons", "UIX_CL_TEAMINFOSHOWWEAPON", "OnOff"
 	Option "Show Lives", "UIX_CL_TEAMINFOSHOWLIVES", "OnOff"
 	Option "Show Mugshots", "UIX_CL_TEAMINFOSHOWMUGSHOT", "OnOff"
-	StaticText " "
-	StaticText "Distribution Settings", 1
-	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
-	Slider "Stack Distance", "UIX_CL_TEAMINFOSEPARATION", 0, 255, 1, 0
-	Option "Bar Orientation", "UIX_CL_TEAMINFODIR", "TeamOrientation"
-	Option "Swap Font Orientation", "UIX_CL_TEAMINFOFONTDIR", "OnOff"
-	StaticText " "
-	Option "Stack Direction (Horizontal)", "UIX_CL_TEAMINFOSTACK", "TeamStackHorz"
-	Option "Stack Direction (Vertical)", "UIX_CL_TEAMINFOSTACK", "TeamStackVert"
-	StaticText " "
-	Slider "Wrap Allies", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
-	Slider "Wrap Distance", "UIX_CL_TEAMINFOWRAPSEPARATION", 0, 255, 1, 0
-	StaticText " "
-	Option "Wrap Direction (Horizontal)", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackVert"
-	Option "Wrap Direction (Vertical)", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackHorz"
-	StaticText " "
 	Option "Show Dead Allies", "UIX_CV_TEAMINFOSHOWDEAD", "OnOff"
 	Option "Animate Ally Deaths", "UIX_CV_TEAMINFOSHOWDEATHANIM", "OnOff"
 	Option "Show Ally Meta Status", "UIX_CV_TEAMINFOSHOWMENUSTATUS", "OnOff"
 	Option "Show Ally Objectives", "UIX_CV_TEAMINFOSHOWOBJECTIVES", "OnOff"
 	StaticText " "
+	StaticText "---------------", 1
 	StaticText "Presets", 1
-	Command "Top Middle (Default)", "uix_teaminfo_preset0"
+	StaticText "---------------", 1
+	Command "(Default) Top Middle", "uix_teaminfo_preset0"
 	Command "Bottom Left", "uix_teaminfo_preset1"
 	Command "Bottom Right", "uix_teaminfo_preset2"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Advanced", 1
+	StaticText "---------------", 1
+	Option "Layer", "UIX_CL_TEAMINFOLAYER", "UIXLayers"
+	StaticText " "
 }
 
 OptionMenu "UIXOptions_WeaponBar"
 {
 	Title "WEAPON BAR SETTINGS"
 	StaticText " "
+	StaticText "---------------", 1
 	StaticText "Clashing Items", 1
+	StaticText "---------------", 1
 	StaticText "$UIX_MNU_CLASHES", 1
 	Option "LMS Loadout Display", "mm8bdm_drawlmsweapons", "OnOff"
 	StaticText " "
-	StaticText "Weapon Bar Settings", 1
+	StaticText "---------------", 1
+	StaticText "Settings", 1
+	StaticText "---------------", 1
 	Option "Weapon Bar Enabled", "UIX_CL_WEAPBAR", "OnOff"
 	StaticText " "
 	Option "Mirror Orientation", "UIX_CL_WEAPBARMIRROR", "OnOff"
@@ -153,12 +190,59 @@ OptionMenu "UIXOptions_WeaponBar"
 	StaticText " "
 	Slider "Max Weapons Per Slot", "UIX_CL_WEAPBARROWMAX", 2, 10, 1, 0
 	StaticText " "
-	Option "Show Slots", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
+	Option "Show Slot Binds", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
 	StaticText " "
+	StaticText "---------------", 1
 	StaticText "Presets", 1
-	Command "Middle Right (Default)", "uix_weaponbar_preset0"
+	StaticText "---------------", 1
+	Command "(Default) Middle Right", "uix_weaponbar_preset0"
 	Command "Middle Left", "uix_weaponbar_preset1"
 	Command "Bottom Middle", "uix_weaponbar_preset2"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Advanced", 1
+	StaticText "---------------", 1
+	Option "Layer", "UIX_CL_WEAPBARLAYER", "UIXLayers"
+	StaticText " "
+}
+
+OptionMenu "UIXOptions_KillFeed"
+{
+	Title "SR50 SETTINGS"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Pre-requisites", 1
+	StaticText "---------------", 1
+	StaticText "$UIX_MNU_KILLFEEDPRE", 1
+	Option "Large Frag Messages", "cl_showlargefragmessages", "OnOff"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Settings", 1
+	StaticText "---------------", 1
+	StaticText " "
+	Option "Show Frag Mugshots", "UIX_CL_DRAWKILLFEED", "OnOff"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Advanced", 1
+	StaticText "---------------", 1
+	Option "Frag Mugshots Layer", "UIX_CL_KILLFEEDLAYER", "UIXLayers"
+	StaticText " "
+}
+
+OptionMenu "UIXOptions_ServerMenu"
+{
+	RequiresRconAccess
+	NetGameOnly
+	Title "UIX SERVER SETTINGS"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Settings", 1
+	StaticText "---------------", 1
+	Option "SR50 Visual Enabled", "UIX_SV_SR50Visual", "YesNo"
+	Option "Team Info Enabled", "UIX_SV_TEAMINFO", "YesNo"
+	Option "Weapon Bar Enabled", "UIX_SV_WEAPBAR", "YesNo"
+	Option "Frag Mugshots Enabled", "UIX_SV_DRAWKILLFEED", "YesNo"
+	StaticText " "
 }
 
 OptionValue "TeamOrientation"
@@ -177,4 +261,10 @@ OptionValue "TeamStackVert"
 {
 	0, "Left-To-Right"
 	1, "Right-To-Left"
+}
+
+OptionValue "UIXLayers"
+{
+	0, "Over Status Bar"
+	1, "Under Status Bar"
 }

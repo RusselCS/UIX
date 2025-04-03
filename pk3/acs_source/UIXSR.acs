@@ -25,9 +25,6 @@ script "UIXSR_SRINIT" OPEN CLIENTSIDE
 // 
 script "UIXSR_ENTER" ENTER
 {
-    if(!GetCvar("UIX_SV_SR50Visual"))
-        terminate;
-
     int pln = PlayerNumber();
     bool srOn = false;
 
@@ -96,6 +93,10 @@ script "UIXSR_MOMVEC" (void)
 //
 script "UIXSR_SRParticles" (void) CLIENTSIDE
 {
+    if(!GetCvar("UIX_SV_SR50Visual")) {
+        Thing_Remove(0);
+        terminate;
+    }
     if(!GetUserCvar(ConsolePlayerNumber(), "UIX_CL_Enable")) {
         Thing_Remove(0);
         terminate;
