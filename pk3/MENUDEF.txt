@@ -58,7 +58,7 @@ OptionMenu "UIXOptions"
 	StaticText "Global Toggle", 1
 	Option "Toggle All UI Extensions", "UIX_CL_Enable", "OnOff"
 	StaticText " "
-	SafeCommand "Reset to Defaults", "uix_default_presets"
+	Command "Reset to Defaults", "uix_default_presets"
 }
 
 OptionMenu "UIXOptions_SR50"
@@ -126,9 +126,9 @@ OptionMenu "UIXOptions_TeamInfo"
 	Option "Show Ally Objectives", "UIX_CV_TEAMINFOSHOWOBJECTIVES", "OnOff"
 	StaticText " "
 	StaticText "Presets", 1
-	SafeCommand "Top Middle (Default)", "uix_teaminfo_preset0"
-	SafeCommand "Bottom Left", "uix_teaminfo_preset1"
-	SafeCommand "Bottom Right", "uix_teaminfo_preset2"
+	Command "Top Middle (Default)", "uix_teaminfo_preset0"
+	Command "Bottom Left", "uix_teaminfo_preset1"
+	Command "Bottom Right", "uix_teaminfo_preset2"
 }
 
 OptionMenu "UIXOptions_WeaponBar"
@@ -156,9 +156,9 @@ OptionMenu "UIXOptions_WeaponBar"
 	Option "Show Slots", "UIX_CL_WEAPBARSHOWSLOTS", "OnOff"
 	StaticText " "
 	StaticText "Presets", 1
-	SafeCommand "Middle Right (Default)", "uix_weaponbar_preset0"
-	SafeCommand "Middle Left", "uix_weaponbar_preset1"
-	SafeCommand "Bottom Middle", "uix_weaponbar_preset2"
+	Command "Middle Right (Default)", "uix_weaponbar_preset0"
+	Command "Middle Left", "uix_weaponbar_preset1"
+	Command "Bottom Middle", "uix_weaponbar_preset2"
 }
 
 OptionValue "TeamOrientation"

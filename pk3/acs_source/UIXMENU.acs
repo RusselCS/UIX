@@ -17,9 +17,18 @@ script "UITweaks_DefaultPresets" (void) NET CLIENTSIDE
 }
 
 // Built-in presets
-#define TEAMINFO_CVARS_MAX 14
+#define TEAMINFO_CVARS_MAX 23
 str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
+    "UIX_CV_TEAMINFOSHOWOBJECTIVES",
+    "UIX_CV_TEAMINFOSHOWMENUSTATUS",
+    "UIX_CV_TEAMINFOSHOWDEATHANIM",
+    "UIX_CV_TEAMINFOSHOWDEAD",
+    "UIX_CL_TEAMINFOWRAPSEPARATION",
+    "UIX_CL_TEAMINFOWRAPDIR",
+    "UIX_CL_TEAMINFOWRAPAMOUNT",
+    "UIX_CL_TEAMINFOSEPARATION",
     "UIX_CL_TEAMINFOSHOWMUGSHOT",
+    "UIX_CL_TEAMINFOSHOWWEAPON",
     "UIX_CL_TEAMINFOSHOWLIVES",
     "UIX_CL_TEAMINFOSHOWLOCATION",
     "UIX_CL_TEAMINFOSHOWHEALTH",
@@ -39,9 +48,9 @@ str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
 // 1 - bottom left
 // 2 - bottom right
 int TeamInfo_Presets[3][TEAMINFO_CVARS_MAX] = {
-    {true,true,true,true,true,false,false,true,false,96,1.0,1.5,-440,-416},
-    {true,true,true,true,true,true,false,false,false,96,1.0,2.0,240,-540},
-    {true,true,true,true,true,true,false,false,true,96,1.0,2.0,240,600},
+    {true,true,true,true,3,false,18,1,true,true,true,true,true,true,false,false,true,false,118,1.0,1.5,-416,-416},
+    {true,true,true,true,4,false,11,1,true,true,true,true,true,true,true,false,false,false,118,1.0,1.25,378,-610},
+    {true,true,true,true,4,true,11,1,true,true,true,true,true,true,true,false,false,true,118,1.0,1.25,378,620},
 };
 
 script "UITweaks_TeaminfoPreset" (int which) NET CLIENTSIDE {
@@ -108,7 +117,7 @@ script "UITweaks_WeaponBarPreset" (int which) NET CLIENTSIDE {
 // #define VERSIONNUM v1ch
 // #define VERSIONNUM v1d
 // #define VERSIONNUM v1e
-#define VERSIONNUM v2a
+#define VERSIONNUM v2b
 
 script "UIX_CurrentVersion" OPEN CLIENTSIDE
 {
@@ -133,7 +142,10 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
         }
 
         if(oldVersion < v2b) {
-
+            // Health bars got bigger this patch, so there's a wee bit more room for the name.
+            if(GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE") == 96) {
+                SetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE", 118);
+            }
         }
 
         SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
