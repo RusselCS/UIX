@@ -125,6 +125,15 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
     int cpn = ConsolePlayerNumber();
     int oldVersion = GetUserCvar(cpn, "UIX_CL_LATESTVERSION");
     if(oldVersion < VERSIONNUM) {
+        updateSettings(cpn, oldVersion);        
+
+        SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
+        Log(s:"\c[gold]UI Extensions settings updated!");
+    }
+}
+
+function void updateSettings(int cpn, int oldVersion)
+{
         if(oldVersion < v2a) {
             SetUserCvar(cpn, "UIX_CL_Enable", true);
             SetUserCvar(cpn, "UIX_CL_SR50Visual", true);
@@ -139,6 +148,7 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
             {
                 SetUserCvar(cpn, TeamInfo_Cvars[i], TeamInfo_Presets[0][i]);
             }
+            return;
         }
 
         if(oldVersion < v2b) {
@@ -146,9 +156,6 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
             if(GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE") == 96) {
                 SetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE", 118);
             }
+            return;
         }
-
-        SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
-        Log(s:"\c[gold]UI Extensions settings updated!");
-    }
 }
