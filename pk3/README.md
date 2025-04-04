@@ -9,6 +9,10 @@ by Russel
 - SR50 tailwind.
 - Enhanced pickup respawn indicators.
 
+Optional: If you have a mugshot wad for pingbutton installed, mugshots appear in the following contexts:
+- Above large frag messages.
+- Next to ally names on the teaminfo.
+
 ## Asset Credits:
 - SR50 Tailwind graphics adapted from SRB2.
 - Killfeed skull icon edited from Mega Man 2.
@@ -16,6 +20,8 @@ by Russel
 ## Modder notes:
 - Currently only works with v6b.
 - Due to the way weapons are implemented in v6b, this mod manually has to support mods to work with the weapon bar.
+- Some weapons also do not have NormalBar or SecondBar definitions, opting only to use ScriptBars.
+  - This mod defines "ArsenalBar" actors for these so WeapBar knows what colors to draw.
 - The following mods are implemented:
   - Armory of Evil (by Ecl1p5e)
   - Mega Man DOS Reborn weapons (by Trill, et al.)
@@ -34,6 +40,44 @@ with the necessary integrations, so they do not need to be implemented directly 
 If your mod is not on this list and you want it to be, raise an issue on github.com/russelcs/uix or ping me on discord.
 I typically hang out in the MM8BDM unofficial discord (linked from the forums), TSPG discord, or in the Gondola discord.
 My name is Russel, or RusselCS. Please describe me with he/him or they/them pronouns.
+
+Alternatively you can choose to support this mod yourself in your project.
+To do that, just define a clientside script that checks if there's a network game and call your table definition functions from there.
+It would probably look like this:
+```
+// ACS
+script "UIX_CoreExtras" OPEN CLIENTSIDE
+{
+    if(IsNetworkGame()) {
+        DefineBusterUpgrade("TAG_MEGABUSTER", "MegaBuster", "", "", "WEAPX0", false, false, false);
+    }
+}
+```
+or, like this:
+```
+// ACS
+script "UIX_CORE" OPEN CLIENTSIDE
+{
+    if(IsNetworkGame()) {
+        ACS_NamedExecuteWithResult("core_ammos");
+        ACS_NamedExecuteWithResult("core_busters");
+    }
+}
+```
+
+From the DECORATE side, if you're using ScriptBars for your weapons and adding bars or some other UI element using their DrawBar scripts, to
+support UIX weapon bar, you'd need to add actors called "WeaponName_ArsenalBar" and/or "WeaponName_SecondArsenalBar".
+
+For example:
+```
+// DECORATE
+actor AtomicFireWep_ArsenalBar : ArsenalBar { args 229,41 }
+actor NoiseCrushWep_ArsenalBar : ArsenalBar { args 204,61 }
+actor WildCoilWep_ArsenalBar : ArsenalBar { args 106,251 }
+
+actor AssaultRifleWep_ArsenalBar : ArsenalBar { args 89, 110 }
+actor AssaultRifleWep_SecondArsenalBar : SecondArsenalBar { args 4, 221 }
+```
 
 ## v1b changelog:
 - Added VileWeps, Encore Weps, and MM6 Busters to the supported mods
