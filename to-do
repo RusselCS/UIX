@@ -76,21 +76,19 @@ Done:
 == V2C TO DO ==
 2 Staging: Check The Big List of mods again to make sure all the data is properly staged (busters too)
 1 Staging: Get Xover staging script from SDM.
-3 X/Y Stack / Wrap Up/Down
+3 Teaminfo: X/Y Stack / Wrap Up/Down
 5 Teaminfo: MegaVile's request - Elements dynamically scale with disabled elements.
 4 Teaminfo: Make it so weapons with no icon offset the bars
 3 Teaminfo: Add number toggles for everything
 
 == Future ==
 - Add a compass + location.
+- Directed Camera. (Stretch goal: 3rd person)
+- Final Frag Camera. (Slow down time orbit around between the final two players. Should not override map-side final frag events.)
 - Assist message?
 - Look into Hexen's inventory cycler
 - Wire UI element
 - Debuff Icons/Timers
 - Map stuff
-- Show how many stocks on the TeamUI
-- Show your own stocks!! on the UI
 - Exit Unit UI element
-- Error with Strlen someplace. Check for null strings.
-- Manually stage copywep class busters for CBM
 - Weapon bar appear/disappear when switching weapons
