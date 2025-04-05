@@ -1,0 +1,250 @@
+#library "UIXCAM"
+
+#include "zcommon.acs"
+
+/*
+// TO DO:
+Manual camera "leave" clause and auto camera "leave" clause are weirdly entangled
+
+*/
+
+#include "shrtfunc.acs"
+
+#define TICKRATE 35
+
+// Camera events
+#define CEV_MAX 2
+#define CEV_COMBAT 0
+#define CEV_MOVING 1
+
+#define CEV_INFO_MAX 5
+#define CEV_INFO_TIME 0
+#define CEV_INFO_FIRST 1
+#define CEV_INFO_ATTACKER CEV_INFO_FIRST
+#define CEV_INFO_SECOND 2
+#define CEV_INFO_VICTIM CEV_INFO_SECOND
+#define CEV_INFO_READY 3
+
+str CameraEvents[CEV_MAX][CEV_INFO_MAX] = {
+    {0, -1, -1, 0},
+    {0, -1, -1, 0},
+};
+
+int lastChanged = 0;
+int currCam = -1;
+int manualCamera = false;
+
+#define TEST_SECONDS 5
+
+script "UIX_ActionCam_Active" OPEN CLIENTSIDE
+{
+    int cpn = ConsolePlayerNumber();
+    int cam, inCombat;
+    currCam = cpn;
+    while(true)
+    {
+        delay(1);
+
+        // Only activate if the player is spectating.
+        if(PlayerInGame(cpn)) {
+            lastChanged = Timer();
+            continue;
+        }
+        
+        // Get the camera's player number.
+        // If camera is not a player, do nothing.
+        SetActivatorToPlayer(cpn);
+        SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+        cam = PlayerNumber();
+
+        if(cam == -1) continue;
+
+        inCombat = CheckInventory("InCombat_PU");
+        SetActivatorToPlayer(cpn);
+
+        if(cam != currCam) {
+            currCam = cam;
+            manualCamera = true;
+        }
+
+        if(cam == cpn) {
+            if(manualCamera) { // lol
+                checkTelespy(cam);
+            }
+            manualCamera = false;
+        }
+
+        // If the player is active, don't automate their camera.
+        if(hasAnyInput(cpn)) {
+            if(currCam != cpn) {
+                ChangeCamera(0, 0, 0);
+                checkTelespy(cam);
+            }
+            lastChanged = Timer();
+            currCam = cpn;
+            manualCamera |= true;
+        }
+
+        if(manualCamera)
+            lastChanged = Timer();
+
+        SetActivator(0, AAPTR_NULL);
+        
+        // If the time passed is not enough, do nothing.
+        if(Timer()-lastChanged < TEST_SECONDS*TICKRATE)
+            continue;
+
+        if(inCombat) continue;
+
+        if(combatCamera(cam)) continue;
+    }
+}
+
+script "UIX_ActionCam_ChangeAnim" (void) CLIENTSIDE
+{
+    int startTime = Timer();
+    int introEnd = startTime + 4;
+    int leaveTime = startTime + 2 * TICKRATE;
+    int endTime = leaveTime + 3 * TICKRATE;
+
+    int scale, scaleDest, scaleIter;
+    int alpha, alphaDest, alphaIter;
+    int iterFrames;
+
+    // Starting iteration
+    iterFrames = introEnd-startTime;
+
+    scaleDest = 7.0;
+    scale = fixedMul(scaleDest, 0.4);
+    scaleIter = (scaleDest-scale)/iterFrames;
+    scale -= scaleIter;
+    
+    alphaDest = 1.0;
+    alpha = 0.0;
+    alphaIter = alphaDest / iterFrames;
+
+    while(Timer() < endTime) {
+
+        // Grow and fade out
+        if(Timer() == leaveTime) {
+            iterFrames = 12;
+
+            scaleDest = FixedMul(scaleDest, 1.5);
+            scaleIter = (scaleDest-scale)/iterFrames;
+
+            alphaDest = 0;
+            alphaIter = (alphaDest-alpha)/iterFrames;
+        }
+        
+        scale = bound(scale + scaleIter, scaleDest, scaleIter);
+        alpha = bound(alpha + alphaIter, alphaDest, alphaIter);
+
+        if(alpha <= 0)
+            terminate;
+        if(manualCamera)
+            terminate;
+
+        displayIcon(HUDMSG_LAYER_OVERHUD, "UXCAM0", 0, 0, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+
+        delay(1);
+    }
+}
+
+function int bound(int n, int cap, int sign)
+{
+    return sign < 0 ? max(n, cap) : min(n, cap);
+}
+
+function int combatCamera(int cam)
+{
+    if(lastChanged > CameraEvents[CEV_COMBAT][CEV_INFO_TIME])
+        return false;
+
+    if(cam == CameraEvents[CEV_COMBAT][CEV_INFO_ATTACKER])
+        return false;
+
+    updateCamera(CameraEvents[CEV_COMBAT][CEV_INFO_ATTACKER], true);
+    return true;
+}
+
+function void checkTelespy(int pln)
+{
+    if(!GetCvar("cl_telespy"))
+        return;
+    
+    int tid = pln+PLN_TID_SHRT;
+    if(ThingCount(T_NONE, tid) == 0)
+        return;
+    
+    int x = GetActorX(tid);
+    int y = GetActorY(tid);
+    int z = GetActorZ(tid);
+    int yaw = GetActorAngle(tid);
+    int pitch = GetActorPitch(tid);
+
+    SetActorPosition(0, x, y, z, 0);
+    SetActorAngle(0, yaw);
+    SetActorPitch(0, pitch);
+}
+
+function void updateCamera(int cam, int auto)
+{
+    ChangeCamera(cam+1000, 0, 0);
+    currCam = cam;
+    lastChanged = timer();
+    CallACS0("UIX_ActionCam_ChangeAnim");
+}
+
+function int hasAnyInput(int pln)
+{
+    if(!(GetPlayerInput(pln, INPUT_BUTTONS) & BT_SHOWSCORES))
+        if(GetPlayerInput(pln, INPUT_BUTTONS) != 0)
+            return true;
+    if(GetPlayerInput(pln, INPUT_FORWARDMOVE) != 0)
+        return true;
+    if(GetPlayerInput(pln, INPUT_SIDEMOVE) != 0)
+        return true;
+    if(GetPlayerInput(pln, INPUT_PITCH) != 0)
+        return true;
+    if(GetPlayerInput(pln, INPUT_YAW) != 0)
+        return true;
+    if(GetPlayerInput(pln, INPUT_UPMOVE) != 0)
+        return true;
+    if(GetPlayerInput(pln, INPUT_ROLL) != 0)
+        return true;
+    return false;
+}
+
+script "UIXCAM_EVENT_MANAGE" ENTER CLIENTSIDE
+{
+    int health, oldHealth;
+    int pln = PlayerNumber();
+    do
+    {
+        health = PlayerHealth();
+
+        if(oldHealth != health) {
+            if(health < oldHealth) {
+                SetActivator(CallACS1("core_getptrtid", AAPTR_TARGET));
+                int apln = PlayerNumber();
+                if(apln >= 0) {
+                    GiveInventory("InCombat_PU", 1);
+                    CameraEvents[CEV_COMBAT][CEV_INFO_TIME] = Timer();
+                    CameraEvents[CEV_COMBAT][CEV_INFO_ATTACKER] = PlayerNumber();
+                    CameraEvents[CEV_COMBAT][CEV_INFO_VICTIM] = pln;
+                    SetActivatorToPlayer(pln);
+                    GiveInventory("InCombat_PU", 1);
+                } else {
+                    SetActivatorToPlayer(pln);
+                }
+            }
+
+            oldHealth = health;
+        }
+
+        delay(1);
+    }
+    while(health > 0);
+}
+
+script "UIXCAM_EVENT_MANAGE_RESPAWN" RESPAWN CLIENTSIDE { CallACS0("UIXCAM_EVENT_MANAGE"); }

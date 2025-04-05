@@ -54,5 +54,7 @@ server noarchive bool UIX_SV_DRAWKILLFEED = true;
 user bool UIX_CL_DRAWKILLFEED = true;
 user int UIX_CL_KILLFEEDLAYER = 0;
 
+user bool UIX_CL_ACTIONCAM = true;
+
 // debug stuff
 user noarchive bool UIX_DEBUG_SHOWSELF = false;
