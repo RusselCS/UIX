@@ -21,6 +21,7 @@ user bool UIX_CL_WEAPBARDIR = true; // false = horizontal, true = vertical
 user float UIX_CL_WEAPBARALPHA = 1.0;
 user bool UIX_CL_WEAPBARSHOWSLOTS = true;
 user int UIX_CL_WEAPBARROWMAX = 5;
+user int UIX_CL_WEAPBARLAYER = 0;
 
 server noarchive bool UIX_SV_TEAMINFO = true;
 user bool UIX_CL_TEAMINFO = true;
@@ -47,12 +48,10 @@ user bool UIX_CV_TEAMINFOSHOWDEAD = true;
 user bool UIX_CV_TEAMINFOSHOWDEATHANIM = true;
 user bool UIX_CV_TEAMINFOSHOWMENUSTATUS = true;
 user bool UIX_CV_TEAMINFOSHOWOBJECTIVES = true;
+user int UIX_CL_TEAMINFOLAYER = 0;
 
 server noarchive bool UIX_SV_DRAWKILLFEED = true;
 user bool UIX_CL_DRAWKILLFEED = true;
-
-user int UIX_CL_WEAPBARLAYER = 0;
-user int UIX_CL_TEAMINFOLAYER = 0;
 user int UIX_CL_KILLFEEDLAYER = 0;
 
 // debug stuff
