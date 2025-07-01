@@ -31,6 +31,8 @@ int whichIds[MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT];
 #define SELECT_X ICON_X
 #define SELECT_Y ICON_Y
 
+#define LAYER_DEFAULT 0
+
 #define bits 8
 
 script "uixitem_activate" (void) NET CLIENTSIDE
@@ -95,7 +97,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                 int ang = (1.0/bits) * i;
                 int tposx = FixedMul(cos(ang), mouseScale);
                 int tposy = FixedMul(sin(ang), mouseScale);
-                displayIcon("UXICB0", getNewUIId(), tposx+iconX, tposy+iconY, iconScale, iconScale, userAlpha);
+                displayIcon(LAYER_DEFAULT, "UXICB0", tposx+iconX, tposy+iconY, iconScale, iconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             }
 
             oldPosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
@@ -146,8 +148,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                 int item = whichIds[i];
                 int posx = FixedMul(cos(iAng), range);
                 int posy = FixedMul(sin(iAng), range);
-                int curId = getNewUIId();
-                int curId2 = getNewUIId();
 
                 if(!inBuster) {
                     if(lastId > item) {
@@ -156,17 +156,19 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                     lastId = item;
                 }
                 
-                if(!inBuster) {
-                    displayIcon(getAssistItemIcon(item), curId, posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha);
-                    setFont("INDEXFONT");
-                    displayMessage(StrParam(i:CheckInventory(getAssistItemActor(item))), getNewUIId(), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, 0, 0);
-                } else {
-                    displayIcon(getBusterIcon(item), curId, posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha);
-                    setFont("INDEXFONT");
-                    displayMessage(StrParam(i:CheckInventory(getBusterUpgrade(item))), getNewUIId(), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, 0, 0);
-                }
+                if(oldSelected != i) {
+                    if(!inBuster) {
+                        displayIcon(LAYER_DEFAULT, getAssistItemIcon(item), posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                        setFont("INDEXFONT");
+                        displayMessage(LAYER_DEFAULT, StrParam(i:CheckInventory(getAssistItemActor(item))), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                    } else {
+                        displayIcon(LAYER_DEFAULT, getBusterIcon(item), posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                        setFont("INDEXFONT");
+                        displayMessage(LAYER_DEFAULT, StrParam(i:CheckInventory(getBusterUpgrade(item))), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                    }
 
-                displayIcon("UXICA0", curId2, posx+iconX, posy+iconY, iconScale, iconScale, userAlpha);
+                    displayIcon(LAYER_DEFAULT, "UXICA0", posx+iconX, posy+iconY, iconScale, iconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                }
                 
                 int dist = VectorLength(posx-oldPosX, posy-oldPosY);
                 if(selectionActive) {
@@ -174,8 +176,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                         oldDist = dist;
                         selected = item;
                         slot = i;
-                        selectedId = curId;
-                        selectedId2 = curId2;
                         lPosX = posx;
                         lPosY = posY;
                         selectedBuster = inBuster;
@@ -192,8 +192,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                 // displayIcon("UXICB0", getNewUIId(), FixedMul(cos(ngDiff*selected), range*2)+ICON_X, FixedMul(sin(ngDiff*selected), range*2)+ICON_Y, 5.0, 5.0, 1.0);
                 
                 if(!selectedBuster) {
-                    displayIcon(getAssistItemIcon(selected), selectedId, lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha);
-                    removeMessage(selectedId2);
+                    displayIcon(LAYER_DEFAULT, getAssistItemIcon(selected), lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
                     setFont("SMALLFONT");
                     str cnt = "";
                     int chk = CheckInventory(getAssistItemActor(selected));
@@ -201,11 +200,10 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                         cnt = StrParam(s:" \cf(", i:chk, s:")");
                     }
                     
-                    displayMessage(StrParam(l:getAssistItemTag(selected), s:cnt), getNewUIId(), 0, sIconY/4, 3.0, 3.0, userAlpha, 0, 0);
-                    displayIcon(getAssistItemIcon(selected), getNewUIId(), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha);
+                    displayMessage(LAYER_DEFAULT, StrParam(l:getAssistItemTag(selected), s:cnt), 0, sIconY/4, 3.0, 3.0, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                    displayIcon(LAYER_DEFAULT, getAssistItemIcon(selected), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
                 } else {
-                    displayIcon(getBusterIcon(selected), selectedId, lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha);
-                    removeMessage(selectedId2);
+                    displayIcon(LAYER_DEFAULT, getBusterIcon(selected), lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
                     setFont("SMALLFONT");
                     cnt = "";
                     chk = CheckInventory(getBusterUpgrade(selected));
@@ -213,11 +211,11 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                         cnt = StrParam(s:" \cf(", i:chk, s:")");
                     }
                     
-                    displayMessage(StrParam(l:getBusterUpgradeTag(selected), s:cnt), getNewUIId(), 0, sIconY/4, 3.0, 3.0, userAlpha, 0, 0);
-                    displayIcon(getBusterIcon(selected), getNewUIId(), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha);
+                    displayMessage(LAYER_DEFAULT, StrParam(l:getBusterUpgradeTag(selected), s:cnt), 0, sIconY/4, 3.0, 3.0, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                    displayIcon(LAYER_DEFAULT, getBusterIcon(selected), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
                 }
-    
-                displayIcon("UXICB0", getNewUIId(), FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, iconScale, iconScale, userAlpha);
+                
+                displayIcon(LAYER_DEFAULT, "UXICB0", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             }
         }
         
@@ -281,3 +279,11 @@ script "uix_useitem" (void) NET
     }
 }
 
+function int clamp(int x, int n, int m)
+{
+    if(x > m)
+        return m;
+    if(x < n)
+        return n;
+    return x;
+}
