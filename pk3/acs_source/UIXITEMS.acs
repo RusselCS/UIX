@@ -1,0 +1,283 @@
+#library "UIXITEMS"
+
+#include "zcommon.acs"
+#include "shrtfunc.acs"
+
+#import "8BDT.acs"
+
+int wheelActive = false;
+int wheelTime = 0;
+int whichIds[MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT];
+
+#define INV_MOUSE_MINRANGE 0.01
+
+// script "uixitem_enter" ENTER
+// {
+//     until(timer()>=3)
+//         delay(1);
+    
+//     for(int i = 0; i < MAX_ITEMS_GLOBAL; i++)
+//         GiveInventory(getAssistItemActor(i), getAssistItemAmount(i));
+// }
+
+// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_enter"); }
+
+#define ICON_PX 16
+
+#define ICON_X 16
+#define ICON_Y 32
+
+#define BASE_SCALE 2.0
+#define SELECT_X ICON_X
+#define SELECT_Y ICON_Y
+
+#define bits 8
+
+script "uixitem_activate" (void) NET CLIENTSIDE
+{
+    Log(i:Timer());
+    int cln = ConsolePlayerNumber();
+    int pln = PlayerNumber();
+    int cam = ActivatorTID();
+
+    if(pln == -1)
+        terminate;
+    if(pln != cln)
+        terminate;
+    if(!playerInGame(pln))
+        terminate;
+
+    int INV_USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
+
+    
+    
+    int userAlpha = 1.0;
+    int iconAlpha = FixedMul(0.5, userAlpha);
+
+    wheelActive = true;
+    wheelTime = Timer();
+
+    int sPosY = GetActorPitch(0);
+    int sPosX = GetActorAngle(0);
+
+    int oldPosY, oldPosX;
+    int selectRange = 0.15;
+
+    int selected = -1;
+    int oldSelected = selected;
+    bool selectionActive = false;
+    int i;
+
+    while(wheelActive) {
+        int baseScale = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
+
+        int iconScale = baseScale;
+        int iconX = FixedMul(ICON_PX / 2, iconScale);
+        int iconY = FixedMul(ICON_PX, iconScale);
+        int sIconScale = iconScale + iconScale/4;
+        int sIconX = FixedMul(ICON_PX / 2, sIconScale);
+        int sIconY = FixedMul(ICON_PX, sIconScale);
+        int messageScale = 2 * iconScale / 4;
+        int mouseScale = baseScale / 4;
+
+        int posyFactor = FixedMul(FixedMul(3.0, FixedDiv(GetScreenWidth(), GetScreenHeight())), iconScale);
+        int posxFactor = FixedMul((3.0), iconScale);
+
+        if(IsNetworkGame()) {
+            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
+        } else {
+            SetActorPitch(0, sPosY);
+            SetActorAngle(0, sPosX);
+        }
+
+        if(Timer()-wheelTime >= INV_USE_BUFFER) {
+            for(i = 0; i < bits; i++) {
+                int ang = (1.0/bits) * i;
+                int tposx = FixedMul(cos(ang), mouseScale);
+                int tposy = FixedMul(sin(ang), mouseScale);
+                displayIcon("UXICB0", getNewUIId(), tposx+iconX, tposy+iconY, iconScale, iconScale, userAlpha);
+            }
+
+            oldPosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
+            oldPosX -= FixedMul(GetPlayerInput(cln, INPUT_YAW), posxFactor);
+            if(!selectionActive) {
+                if(abs(oldPosX) > selectRange || abs(oldPosX) > selectRange) {
+                    selectionActive = true;
+                }
+            }
+            int range = FixedMul(96, baseScale);
+
+            int clampAng = VectorAngle(oldPosX, oldPosY);
+
+            int botX = min(0, FixedMul(cos(clampAng), mouseScale));
+            int topX = max(0, FixedMul(cos(clampAng), mouseScale));
+            int botY = min(0, FixedMul(sin(clampAng), mouseScale));
+            int topY = max(0, FixedMul(sin(clampAng), mouseScale));
+
+            oldPosY = clamp(oldPosY, botY, topY);
+            oldPosX = clamp(oldPosX, botX, topX);
+
+            int count = 0;
+
+            for(i = 0; i < MAX_ITEMS_GLOBAL; i++) {
+                if(CheckActorInventory(cam, getAssistItemActor(i)) > 0) {
+                    whichIds[count++] = i;
+                }
+            }
+
+            for(i = 0; i < MAX_BUSTERUPGRADES; i++) {
+                if(CheckActorInventory(cam, getBusterUpgrade(i)) > 0) {
+                    whichIds[count++] = i;
+                }
+            }
+
+            int ngDiff = 1.0 / count;
+            int oldDist = MAX_INT;
+            int slot = -1;
+            int selectedId, selectedId2;
+            int lPosX, lPosY;
+            int selectedBuster;
+
+            int inBuster = false;
+            int lastId = -1;
+
+            for(i = 0; i < count; i++) {                
+                int iAng = ngDiff * i;
+                int item = whichIds[i];
+                int posx = FixedMul(cos(iAng), range);
+                int posy = FixedMul(sin(iAng), range);
+                int curId = getNewUIId();
+                int curId2 = getNewUIId();
+
+                if(!inBuster) {
+                    if(lastId > item) {
+                        inBuster = true;
+                    }
+                    lastId = item;
+                }
+                
+                if(!inBuster) {
+                    displayIcon(getAssistItemIcon(item), curId, posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha);
+                    setFont("INDEXFONT");
+                    displayMessage(StrParam(i:CheckInventory(getAssistItemActor(item))), getNewUIId(), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, 0, 0);
+                } else {
+                    displayIcon(getBusterIcon(item), curId, posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha);
+                    setFont("INDEXFONT");
+                    displayMessage(StrParam(i:CheckInventory(getBusterUpgrade(item))), getNewUIId(), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, 0, 0);
+                }
+
+                displayIcon("UXICA0", curId2, posx+iconX, posy+iconY, iconScale, iconScale, userAlpha);
+                
+                int dist = VectorLength(posx-oldPosX, posy-oldPosY);
+                if(selectionActive) {
+                    if(dist < oldDist) {
+                        oldDist = dist;
+                        selected = item;
+                        slot = i;
+                        selectedId = curId;
+                        selectedId2 = curId2;
+                        lPosX = posx;
+                        lPosY = posY;
+                        selectedBuster = inBuster;
+                        // displayIcon("UXICB0", selectedId, posx+SELECT_X, posy+SELECT_Y, ICON_SCALE, ICON_SCALE, 1.0);
+                    }
+                }
+            }
+            
+            if(selectionActive) {
+                if(selected != oldSelected) {
+                    oldSelected = selected;
+                    LocalAmbientSound("ui/itemwheelshift", 128);
+                }
+                // displayIcon("UXICB0", getNewUIId(), FixedMul(cos(ngDiff*selected), range*2)+ICON_X, FixedMul(sin(ngDiff*selected), range*2)+ICON_Y, 5.0, 5.0, 1.0);
+                
+                if(!selectedBuster) {
+                    displayIcon(getAssistItemIcon(selected), selectedId, lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha);
+                    removeMessage(selectedId2);
+                    setFont("SMALLFONT");
+                    str cnt = "";
+                    int chk = CheckInventory(getAssistItemActor(selected));
+                    if(chk > 1) {
+                        cnt = StrParam(s:" \cf(", i:chk, s:")");
+                    }
+                    
+                    displayMessage(StrParam(l:getAssistItemTag(selected), s:cnt), getNewUIId(), 0, sIconY/4, 3.0, 3.0, userAlpha, 0, 0);
+                    displayIcon(getAssistItemIcon(selected), getNewUIId(), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha);
+                } else {
+                    displayIcon(getBusterIcon(selected), selectedId, lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha);
+                    removeMessage(selectedId2);
+                    setFont("SMALLFONT");
+                    cnt = "";
+                    chk = CheckInventory(getBusterUpgrade(selected));
+                    if(chk > 1) {
+                        cnt = StrParam(s:" \cf(", i:chk, s:")");
+                    }
+                    
+                    displayMessage(StrParam(l:getBusterUpgradeTag(selected), s:cnt), getNewUIId(), 0, sIconY/4, 3.0, 3.0, userAlpha, 0, 0);
+                    displayIcon(getBusterIcon(selected), getNewUIId(), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha);
+                }
+    
+                displayIcon("UXICB0", getNewUIId(), FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, iconScale, iconScale, userAlpha);
+            }
+        }
+        
+        delay(1);
+    }
+    NamedRequestScriptPuke("uixitem_selectitem", selected+1, selectedBuster);
+
+    if(IsNetworkGame()) {
+        SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
+    }
+}
+
+script "uixitem_selectitem" (int selected, int buster) NET
+{
+    if(selected < 1)
+        terminate;
+
+    selected--;
+
+    for(int i = 0; i < MAX_ITEMS_GLOBAL; i++) {
+        if(!buster && i == selected)
+            continue;
+        
+        str inv = GetAssistItemActor(i);
+        int count = CheckInventory(inv);
+        if(count > 0) {
+            TakeInventory(inv, count);
+            GiveInventory(inv, count);
+        }
+    }
+
+    for(i = 0; i < MAX_BUSTERUPGRADES; i++) {
+        if(buster && i == selected)
+            continue;
+        
+        inv = GetBusterUpgrade(i);
+        count = CheckInventory(inv);
+        if(count > 0) {
+            TakeInventory(inv, count);
+            GiveInventory(inv, count);
+        }
+    }
+}
+
+script "uixitem_deactivate" (void) NET CLIENTSIDE
+{
+    if(wheelActive) {
+        wheelActive = false;
+        if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
+            Log(i:Timer());
+            ConsoleCommand("invuse"); // [Russ] idk a better way to do this atm
+        }
+    }
+}
+
+script "uix_useitem" (void) NET
+{
+    str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
+    if(CheckInventory(item) > 0) {
+        UseInventory(item);
+    }
+}
+

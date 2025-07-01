@@ -19,3 +19,6 @@ alias uix_weaponbar_preset2 "closemenu; pukename UITweaks_WeaponBarPreset 2"
 alias uix_default_presets "closemenu; pukename UITweaks_DefaultPresets"
 
 alias "freezebots" "pukename UIT_FREEZEBOTS"
+
+alias +iw "pukename \"uixitem_activate\""
+alias -iw "pukename \"uixitem_deactivate\""

@@ -1,0 +1,29 @@
+#library "coreitem"
+#include "zcommon.acs"
+
+#include "DTADD.acs"
+
+Script "core_items" OPEN
+{
+    bool mapTrue = GetCVar("mm8bdm_sv_enableitemdefs");
+
+    DefineAssistItem("TAG_ITEM1", "Item1", "WEA2A0", 3, DTADD_GRP_JUMP, mapTrue);
+    DefineAssistItem("TAG_ITEM2", "Item2", "WEA2D0", 2, DTADD_GRP_DASH, mapTrue);
+    DefineAssistItem("TAG_ITEM3", "Item3", "ITM3A0", 2, DTADD_GRP_JUMP, mapTrue);
+    DefineAssistItem("TAG_RUSHCOIL", "RushCoil", "WEAPB0", 1, DTADD_GRP_JUMP, mapTrue);
+    DefineAssistItem("TAG_RUSHJET", "RushJet", "WEA2B0", 1, DTADD_GRP_FLIGHT, mapTrue);
+    DefineAssistItem("TAG_RUSHMARINE", "RushMarine", "RUSHN0", 1, DTADD_GRP_FLIGHT, mapTrue && (ThingCountName("MM8BDM_Water", T_NONE)>0));
+    DefineAssistItem("TAG_WIREADAPTOR", "WireAdaptor", "WADPA0", 2, DTADD_GRP_FLIGHT, mapTrue);
+    DefineAssistItem("TAG_BEATCALL", "BeatBoostItem", "WEA3I0", 1, DTADD_GRP_JUMP, mapTrue);
+    DefineAssistItem("TAG_BEATSUPPORT", "BeatSupport", "WEA4O0", 1, DTADD_GRP_WEAPON, mapTrue);
+    DefineAssistItem("TAG_EDDIE", "EddieSummon", "WEAPQ0", 1, DTADD_GRP_GIFT, mapTrue);
+    DefineAssistItem("TAG_EDDIEBOMBER", "EddieBomber", "EDDIQ0", 1, DTADD_GRP_ATTACK, mapTrue);
+    DefineAssistItem("TAG_TREBLESENTRY", "TrebleSentry", "TRBIA0", 1, DTADD_GRP_ATTACK, mapTrue);
+    DefineAssistItem("TAG_TANGOSUMMON", "TangoSummon", "WEA3B0", 1, DTADD_GRP_ATTACK, mapTrue);
+    DefineAssistItem("TAG_REGGAECALL", "ReggaeCall", "WEA9Z0", 1, DTADD_GRP_ATTACK, mapTrue);
+    DefineAssistItem("TAG_EXITUNIT", "ExitUnitItem", "EXITA0", 1, DTADD_GRP_ESCAPE, mapTrue);
+    DefineAssistItem("TAG_ETANK", "ETank", "EBALF0", 1, DTADD_GRP_HEAL, mapTrue);
+    DefineAssistItem("TAG_WTANK", "WTank", "EBALH0", 1, DTADD_GRP_RELOAD, mapTrue);
+    DefineAssistItem("TAG_MTANK", "MTank", "EBALG0", 1, DTADD_GRP_FULLRESTORE, mapTrue);
+    DefineAssistItem("TAG_ENERGYBALANCER", "EnergyBalancer", "NRGBA0", 1, DTADD_GRP_PASSIVE, mapTrue);
+}

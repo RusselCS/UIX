@@ -65,6 +65,7 @@ script "UIX_CORE" (void)
 {
     CallACS0("core_ammos");
     CallACS0("core_busters");
+    CallACS0("core_items");
 }
 
 script "UIX_UKI" (void)

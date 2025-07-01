@@ -5,6 +5,8 @@ user bool UIX_CL_notification = true;
 user bool UIX_CL_Enable = true;
 user float UIX_CL_LATESTVERSION = 2.01;
 
+user noarchive bool UIX_CL_Temp_ItemWheelActive = false;
+
 user bool UIX_CL_UsingSR50 = true;
 user noarchive bool UIX_TempStore_SR50Checked = false;
 user bool UIX_CL_SR50Visual = true;
@@ -56,3 +58,8 @@ user int UIX_CL_KILLFEEDLAYER = 0;
 
 // debug stuff
 user noarchive bool UIX_DEBUG_SHOWSELF = false;
+
+// item wheel
+server noarchive bool UIX_SV_ITEMWHEEL = true;
+user int UIX_CL_ITEMWHEELBUFFER = 5;
+user float UIX_CL_ITEMWHEELSCALE = 3.0;

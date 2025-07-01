@@ -204,6 +204,7 @@ OptionMenu "UIXOptions_WeaponBar"
 	StaticText "---------------", 1
 	Option "Layer", "UIX_CL_WEAPBARLAYER", "UIXLayers"
 	StaticText " "
+	Slider "Item Wheel Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
 }
 
 OptionMenu "UIXOptions_KillFeed"
