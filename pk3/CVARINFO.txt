@@ -63,3 +63,6 @@ user noarchive bool UIX_DEBUG_SHOWSELF = false;
 server noarchive bool UIX_SV_ITEMWHEEL = true;
 user int UIX_CL_ITEMWHEELBUFFER = 5;
 user float UIX_CL_ITEMWHEELSCALE = 3.0;
+
+// pb-skinsupport
+user noarchive int pbskins_maestromug = -1;

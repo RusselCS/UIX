@@ -1,0 +1,89 @@
+#library "PBSKINS"
+
+#include "zcommon.acs"
+
+// Skin mugshot grabber ===============================================================================================
+script "PBMug_Megaman" (int tid)
+{
+	SetActivator(tid);
+	int pln = PlayerNumber();
+	SetResultValue(getMegamanMug(pln));
+}
+
+function str getMegamanMug(int pln)
+{
+	int sid = GetPlayerSkin(pln, PLAYERSKIN_VISIBLE);
+
+    if(GetSkinProperty(sid, "name", true) != SPROP_TYPE_STRING) {
+        // Log(s:"Failed state: skin does not have a valid name");
+        return defaultMug(pln);
+    }
+
+	if(StrCmp(GetSkinProperty(sid, "name"), "Base") == 0) {
+		// Log(s:"Failed state: skin not found");
+		return defaultMug(pln);
+	}
+	
+	if(GetSkinProperty(sid, "face", true) != SPROP_TYPE_STRING) {
+		// Log(s:"Failed state: face value is not a string");
+		return defaultMug(pln);
+	}
+
+	str mug = StrParam(s:GetSkinProperty(sid, "face"), s:"ST00");
+	
+	if(!CheckFont(mug)) {
+		// Log(s:"Failed state: face texture is not a texture");
+		return defaultMug(pln);
+	}
+	
+	return mug;
+}
+
+// Default Maestro Mugshots ===========================================================================================
+#define MAX_MAESTROMUGS 36
+#define MAX_SECRETMUGS 1
+
+str maestroMugs[MAX_MAESTROMUGS+MAX_SECRETMUGS] = {
+	"PBOCMG1A","PBOCMG1B","PBOCMG1C","PBOCMG1D",
+	"PBOCMG1E","PBOCMG1F","PBOCMG1G","PBOCMG1H",
+	"PBOCMG1I","PBOCMG1J","PBOCMG1K","PBOCMG1L",
+
+	"PBOCMG2A","PBOCMG2B","PBOCMG2C","PBOCMG2D",
+	"PBOCMG2E","PBOCMG2F","PBOCMG2G","PBOCMG2H",
+	"PBOCMG2I","PBOCMG2J","PBOCMG2K","PBOCMG2L",
+
+	"PBOCMG3A","PBOCMG3B","PBOCMG3C","PBOCMG3D",
+	"PBOCMG3E","PBOCMG3F","PBOCMG3G","PBOCMG3H",
+	"PBOCMG3I","PBOCMG3J","PBOCMG3K","PBOCMG3L",
+
+	// shh
+	"PBFNMG01",
+};
+int secretMugs[MAX_SECRETMUGS] = {-2006};
+
+function int findSecret(int val)
+{
+	if(random(1, 1000) == 1)
+		return random(0, MAX_SECRETMUGS-1);
+
+	for(int i = 0; i < MAX_SECRETMUGS; i++)
+		if(secretMugs[i] == val)
+			return i;
+
+	return -1;
+}
+
+function str defaultMug(int pln)
+{
+	int mug = GetUserCvar(pln, "pbskins_maestromug");
+	if(mug < 0 || mug >= MAX_MAESTROMUGS+MAX_SECRETMUGS) {
+		int secret = findSecret(mug);
+		if(secret > -1) {
+			mug = MAX_MAESTROMUGS + secret;
+		} else {
+			mug = random(0, MAX_MAESTROMUGS-1);
+		}
+		SetUserCvar(pln, "pbskins_maestromug", mug);
+	}
+	return maestroMugs[mug];
+}

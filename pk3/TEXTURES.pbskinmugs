@@ -1,0 +1,50 @@
+// pb-skinsupport
+// "Vanilla" Maestro mugshot, from MM8BDM v6b.
+// Pose by Ian Dimas. Sprite by Pegg.
+graphic PBOCMG1A,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=229:299", "198:198=41:41"}}
+graphic PBOCMG1B,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=65:65", "198:198=251:251"}}
+graphic PBOCMG1C,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=144:144", "198:198=119:119"}}
+graphic PBOCMG1D,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=48:48", "198:198=255:255"}}
+graphic PBOCMG1E,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=160:160", "198:198=116:116"}}
+graphic PBOCMG1F,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=196:196", "198:198=70:70"}}
+graphic PBOCMG1G,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=139:139", "198:198=195:195"}}
+graphic PBOCMG1H,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=160:160", "198:198=225:225"}}
+graphic PBOCMG1I,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=225:225", "198:198=62:62"}}
+graphic PBOCMG1J,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=33:33", "198:198=231:231"}}
+graphic PBOCMG1K,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=204:204", "198:198=115:115"}}
+graphic PBOCMG1L,32,32{XScale 4.0 YScale 4.0 Patch PBMOC01,0,0{Translation "192:192=250:250", "198:198=45:45"}}
+
+// "Leaning Forward" Maestro mugshot, used in MaGMML.
+// Pose by Capcom. Sprite by Molly.
+graphic PBOCMG2A,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=229:299", "198:198=41:41"}}
+graphic PBOCMG2B,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=65:65", "198:198=251:251"}}
+graphic PBOCMG2C,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=144:144", "198:198=119:119"}}
+graphic PBOCMG2D,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=48:48", "198:198=255:255"}}
+graphic PBOCMG2E,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=160:160", "198:198=116:116"}}
+graphic PBOCMG2F,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=196:196", "198:198=70:70"}}
+graphic PBOCMG2G,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=139:139", "198:198=195:195"}}
+graphic PBOCMG2H,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=160:160", "198:198=225:225"}}
+graphic PBOCMG2I,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=225:225", "198:198=62:62"}}
+graphic PBOCMG2J,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=33:33", "198:198=231:231"}}
+graphic PBOCMG2K,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=204:204", "198:198=115:115"}}
+graphic PBOCMG2L,32,32{XScale 4.0 YScale 4.0 Patch PBMOC02,0,0{Translation "192:192=250:250", "198:198=45:45"}}
+
+// "Title Screen" Maestro mugshot.
+// Pose by Pegg and Hansungkee. Sprite by Hansungkee.
+graphic PBOCMG3A,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=229:299", "198:198=41:41"}}
+graphic PBOCMG3B,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=65:65", "198:198=251:251"}}
+graphic PBOCMG3C,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=144:144", "198:198=119:119"}}
+graphic PBOCMG3D,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=48:48", "198:198=255:255"}}
+graphic PBOCMG3E,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=160:160", "198:198=116:116"}}
+graphic PBOCMG3F,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=196:196", "198:198=70:70"}}
+graphic PBOCMG3G,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=139:139", "198:198=195:195"}}
+graphic PBOCMG3H,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=160:160", "198:198=225:225"}}
+graphic PBOCMG3I,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=225:225", "198:198=62:62"}}
+graphic PBOCMG3J,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=33:33", "198:198=231:231"}}
+graphic PBOCMG3K,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=204:204", "198:198=115:115"}}
+graphic PBOCMG3L,32,32{XScale 4.0 YScale 4.0 Patch PBMOC03,0,0{Translation "192:192=250:250", "198:198=45:45"}}
+
+// "NormNavi" mugshot.
+// Original by Capcom. Sprite by Korby.
+graphic PBFNMG01,32,32{XScale 4.0 YScale 4.0 Patch PBMFUN01,0,0{Translation "192:192=250:250", "198:198=45:45"}}
+
