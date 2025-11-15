@@ -2,7 +2,7 @@
 
 #include "zcommon.acs"
 
-#include "shrtfunc.acs"
+#include "SHRTFUNC.acs"
 #include "BARLIB.acs"
 
 // [Russ] Sets `turnspeeds` to 0 if the user has SR50 enabled.
