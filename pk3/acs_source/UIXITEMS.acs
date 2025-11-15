@@ -1,7 +1,7 @@
 #library "UIXITEMS"
 
 #include "zcommon.acs"
-#include "shrtfunc.acs"
+#include "SHRTFUNC.acs"
 
 #import "8BDT.acs"
 
