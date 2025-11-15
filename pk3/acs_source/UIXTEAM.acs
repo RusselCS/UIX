@@ -1155,7 +1155,7 @@ function void rebuildString(str name) {
 
     cacheVertReverse = StrParam(a:(nameBuilder, 0, nidx));
     cacheWidth = nameWidth;
-    cacheHeight = colorLessSize * 11;
+    cacheHeight = colorLessSize * 9;
     cacheHeightReverse = colorLessSize * 9;
 
     // Log(s:"===== Final Cache =====");
