@@ -5,22 +5,202 @@
 
 #import "8BDT.acs"
 
+// Preliminary data preparatation =====================================================================================
+
+#define UIX_INV_LMT MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT
+
+int UIX_INV = 0;
+int UIX_BUSTERS = 0;
+
+#define IT_IDX        0
+#define IT_TYPE       1 // 0 - buster / 1 - item - atm unsure what's needed
+#define IT_ACTOR      2
+#define IT_TAG        3
+#define IT_GROUP      4
+#define IT_AMOUNT     5
+// #define IT_INGROUPIDX 6 // defined by the population logic
+
+int itemStore[6] = {-1};
+// int groupIndex[UIX_INV_LMT]; // populated by the open script
+
+function int getItemProperty(int type, int idx)
+{
+    if(idx != itemStore[IT_IDX]) {
+        itemStore[IT_IDX] = idx;
+        if(idx < UIX_BUSTERS) {
+            itemStore[IT_TYPE]  = 0;
+            itemStore[IT_ACTOR] = getBusterUpgrade(idx);
+            itemStore[IT_TAG]   = getBusterUpgradeTag(idx);
+            itemStore[IT_GROUP] = 0;
+            itemStore[IT_AMOUNT] = 1;
+            // itemStore[IT_INGROUPIDX] = groupIndex[itemStore[IT_IDX]];
+        } else {
+            idx -= UIX_BUSTERS;
+            itemStore[IT_TYPE]  = 1;
+            itemStore[IT_ACTOR] = getAssistItemActor(idx);
+            itemStore[IT_TAG]   = getAssistItemTag(idx);
+            itemStore[IT_GROUP] = 1+getAssistItemGroup(idx);
+            itemStore[IT_AMOUNT] = getAssistItemAmount(idx);
+            // itemStore[IT_INGROUPIDX] = groupIndex[itemStore[IT_IDX]];
+        }
+    }
+    return itemStore[type];
+}
+
 int wheelActive = false;
 int wheelTime = 0;
-int whichIds[MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT];
+int whichIds[UIX_INV_LMT];
+
+/*
+GRP_JUMP 0
+GRP_DASH 1
+GRP_FLIGHT 2
+GRP_WEAPON 3
+GRP_GIFT 4
+GRP_ATTACK 5
+GRP_ESCAPE 6
+GRP_HEAL 7
+GRP_RELOAD 8
+GRP_FULLRESTORE 9
+GRP_PASSIVE 10
+*/
+
+// Item Groups
+// Assume there can be an arbitrary number of groups in case these change in the future
+//
+#DEFINE GROUP_COUNT_LIMIT 100
+int GROUP_COUNT = 0;
+int GROUP_ANG = 1.0;
+// str groupItems[GROUP_COUNT_LIMIT][UIX_INV_LMT];
+int groupCounts[GROUP_COUNT_LIMIT];
+int wheelInitialized = false;
+
+script "UIX_ItemWheelInit" OPEN CLIENTSIDE
+{
+    delay(3);
+    while(MAX_ITEMS_GLOBAL == 0 && MAX_BUSTERUPGRADES == 0) delay(1);
+
+    UIX_BUSTERS = MAX_BUSTERUPGRADES;
+    UIX_INV = UIX_BUSTERS + MAX_ITEMS_GLOBAL;
+
+    int i, idx;
+
+    for(i = 0; i < UIX_INV; i++) {
+        int grp = getItemProperty(IT_GROUP, i);
+        // groupItems[grp][groupCounts[grp]] = getItemProperty(IT_ACTOR, i);
+        // groupIndex[i] = groupCounts[grp];
+        groupCounts[grp]++;
+
+        if(groupCounts[grp] == 1)
+            GROUP_COUNT++;
+    }
+    // reset this in case the next access is somehow the last access.
+    // since not all data was initialized before this point, it could, in a 1/N chance, produce a shitty result.
+    // so. just do this to force it to use the fully initialized data.
+    itemStore[0] = -1;
+    wheelInitialized = true;
+}
+
+// Inventory Stack Big Brother ========================================================================================
+
+// myInventory
+#define MI_ITEM 0
+#define MI_IDX  1
+str myInventory[UIX_INV_LMT][2];
+
+int myInvCount = 0;
+
+script "uix_items_inventory" ENTER CLIENTSIDE
+{
+    while(!wheelInitialized) delay(1);
+    int i;
+
+    while(true) {
+        // rebuild inventory if something is missing
+        str myNewInventory[UIX_INV_LMT][2];
+        int myHoldById[UIX_INV_LMT];
+        int myNewInvCount = 0;
+        for(i = 0; i < myInvCount; i++) {
+            if(checkInventory(myInventory[i][MI_ITEM]) > 0) {
+                myNewInventory[myNewInvCount][MI_ITEM] = myInventory[i][MI_ITEM];
+                myNewInventory[myNewInvCount][MI_IDX] = myInventory[i][MI_IDX];
+                myHoldById[myInventory[i][MI_IDX]] = true;
+                myNewInvCount++;
+            }
+        }
+
+        if(myNewInvCount != myInvCount) {
+            Log(s:"Rebuilding: new size = ", i:myNewInvCount);
+            myInvCount = myNewInvCount;
+            for(i = 0; i < myNewInvCount; i++) {
+                myInventory[i][MI_ITEM] = myNewInventory[i][MI_ITEM];
+                myInventory[i][MI_IDX] = myNewInventory[i][MI_IDX];
+            }
+        }
+
+        // now that we've dealt with what the player had and left behind...
+        // let's handle the new items!
+        for(i = 0; i < UIX_INV; i++) {
+            // per the first loop, we already know that this item is held. Skip!
+            if(myHoldById[i])
+                continue;
+
+            // Check if the player has this other thing now.
+            str act = getItemProperty(IT_ACTOR, i);
+            int c = CheckInventory(act);
+            if(c > 0) {
+                Log(s:"Found new item: ", s:act);
+                myInventory[myInvCount][MI_ITEM] = act;
+                myInventory[myInvCount][MI_IDX] = i;
+                myInvCount++;
+
+                // Take the item and immediately give it back so we can ensure consistent ordering
+                // this only affects scenarios where 2 items are picked up at once, since that
+                // ordering is based on the actor's lifetime and thus cannot be read by ACS easily
+                TakeInventory(act, c);
+                GiveInventory(act, c);
+            }
+        }
+
+        delay(1);
+    }
+}
+
+script "uix_items_inventory_respawn" RESPAWN CLIENTSIDE { CallACS0("uix_items_inventory"); }
+
+// Select an Item =====================================================================================================
+
+// takes in the index of the selected item from myInventory.
+//
+script "selectitem" (int selected) //NET CLIENTSIDE
+{
+    if(selected >= myInvCount)
+        terminate;
+    if(selected < 0)
+        terminate;
+
+    int i;
+    // because the only real way to select an item is to take away everything and give it back...
+    // that is done here.
+    // to preserve order, this cycles around, taking all the player's items in order
+    // and returning them immediately in the same order, skipping the item we want selected
+    for(i = selected+1; i < selected+myInvCount; i++) {
+        int idx = i%myInvCount;
+
+        int act = myInventory[idx][MI_ITEM];
+        int c = CheckInventory(act);
+        TakeInventory(act, c);
+        GiveInventory(act, c);
+    }
+}
+
+// all of that, so i can make sure the items are activated one tick sooner than what consolecommand can do
+// please enjoy 🐊👍
+// (it also had the added benefit of putting all the necessary data in an easier-to-gather spot, so, double boon ig)
+
+// The Actual Widget ==================================================================================================
 
 #define INV_MOUSE_MINRANGE 0.01
-
-// script "uixitem_enter" ENTER
-// {
-//     until(timer()>=3)
-//         delay(1);
-    
-//     for(int i = 0; i < MAX_ITEMS_GLOBAL; i++)
-//         GiveInventory(getAssistItemActor(i), getAssistItemAmount(i));
-// }
-
-// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_enter"); }
 
 #define ICON_PX 16
 
@@ -37,7 +217,10 @@ int whichIds[MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT];
 
 script "uixitem_activate" (void) NET CLIENTSIDE
 {
-    Log(i:Timer());
+    if(!wheelInitialized)
+        terminate;
+    
+    print_time("uixitem_activate", Timer());
     int cln = ConsolePlayerNumber();
     int pln = PlayerNumber();
     int cam = ActivatorTID();
@@ -49,9 +232,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     if(!playerInGame(pln))
         terminate;
 
-    int INV_USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
-
-    
+    int INV_USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");    
     
     int userAlpha = 1.0;
     int iconAlpha = FixedMul(0.5, userAlpha);
@@ -221,63 +402,42 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         
         delay(1);
     }
-    NamedRequestScriptPuke("uixitem_selectitem", selected+1, selectedBuster);
+    ACS_NamedExecuteWithResult("uixitem_selectitem", selected+1, selectedBuster);
 
     if(IsNetworkGame()) {
         SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
     }
 }
 
-script "uixitem_selectitem" (int selected, int buster) NET
-{
-    if(selected < 1)
-        terminate;
-
-    selected--;
-
-    for(int i = 0; i < MAX_ITEMS_GLOBAL; i++) {
-        if(!buster && i == selected)
-            continue;
-        
-        str inv = GetAssistItemActor(i);
-        int count = CheckInventory(inv);
-        if(count > 0) {
-            TakeInventory(inv, count);
-            GiveInventory(inv, count);
-        }
-    }
-
-    for(i = 0; i < MAX_BUSTERUPGRADES; i++) {
-        if(buster && i == selected)
-            continue;
-        
-        inv = GetBusterUpgrade(i);
-        count = CheckInventory(inv);
-        if(count > 0) {
-            TakeInventory(inv, count);
-            GiveInventory(inv, count);
-        }
-    }
-}
-
 script "uixitem_deactivate" (void) NET CLIENTSIDE
 {
+    print_time("uixitem_deactivate", Timer());
     if(wheelActive) {
         wheelActive = false;
         if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
-            Log(i:Timer());
-            ConsoleCommand("invuse"); // [Russ] idk a better way to do this atm
+            // Log(i:Timer());
+            // ConsoleCommand("invuse"); // [Russ] idk a better way to do this atm
+            UseInventory("item1");
         }
     }
 }
 
-script "uix_useitem" (void) NET
+script "uix_useitem1" (void) NET
 {
-    str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
-    if(CheckInventory(item) > 0) {
-        UseInventory(item);
-    }
+    // str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
+    // if(CheckInventory(item) > 0) {
+        UseInventory("item1");
+    // }
 }
+
+script "uix_useitem2" (void) NET
+{
+    // str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
+    // if(CheckInventory(item) > 0) {
+        ConsoleCommand("invuse");
+    // }
+}
+
 
 function int clamp(int x, int n, int m)
 {
@@ -286,4 +446,28 @@ function int clamp(int x, int n, int m)
     if(x < n)
         return n;
     return x;
+}
+
+// Test functions =====================================================================================================
+
+script "uixitem_giver" (void)
+{
+    until(timer()>=3)
+        delay(1);
+    
+    for(int i = 0; i < UIX_INV_LMT; i++)
+        GiveInventory(getItemProperty(IT_ACTOR, i), getItemProperty(IT_AMOUNT, i));
+}
+
+// script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
+// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
+
+script "uix_timer" (void)
+{
+    print_time(GetActorClass(0), timer());
+}
+
+function void print_time(str source, int time)
+{
+    Log(s:source, s:": ", i:time);
 }
