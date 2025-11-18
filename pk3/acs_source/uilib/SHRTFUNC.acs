@@ -81,6 +81,12 @@ function void displayMessage(int layer, str msg, int offsX, int offsY, int scale
 	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
 }
 
+function void displayMessageColor(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+}
+
 #define BAR_DISPLAY_NONE 0
 #define BAR_DISPLAY_VERT 1
 #define BAR_DISPLAY_HORI 2

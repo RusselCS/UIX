@@ -7,6 +7,30 @@
 
 // Preliminary data preparatation =====================================================================================
 
+#define IWGRP_NULL      -1
+#define IWGRP_BUSTER     0
+#define IWGRP_RECOV      1
+#define IWGRP_MOBILITY   2
+#define IWGRP_MISC       3
+#define IWGRP_ATTACK     4
+#define IWGRP_MAX        5
+
+#define MAX_GROUPS 11
+
+int groupMapping[MAX_GROUPS] = {
+    IWGRP_MOBILITY, // DTADD_GRP_JUMP
+    IWGRP_MOBILITY, // DTADD_GRP_DASH
+    IWGRP_MOBILITY, // DTADD_GRP_FLIGHT
+    IWGRP_MISC,     // DTADD_GRP_WEAPON
+    IWGRP_MISC,     // DTADD_GRP_GIFT
+    IWGRP_ATTACK,   // DTADD_GRP_ATTACK
+    IWGRP_MISC,     // DTADD_GRP_ESCAPE
+    IWGRP_RECOV,    // DTADD_GRP_HEAL
+    IWGRP_RECOV,    // DTADD_GRP_RELOAD
+    IWGRP_RECOV,    // DTADD_GRP_FULLRESTORE
+    IWGRP_NULL      // DTADD_GRP_PASSIVE
+};
+
 #define UIX_INV_LMT MAX_ITEMS_GLOBAL_LIMIT+MAX_BUSTER_LIMIT
 
 int UIX_INV = 0;
@@ -18,30 +42,41 @@ int UIX_BUSTERS = 0;
 #define IT_TAG        3
 #define IT_GROUP      4
 #define IT_AMOUNT     5
-// #define IT_INGROUPIDX 6 // defined by the population logic
+#define IT_ICON       6
+#define IT_INGROUPIDX 7 // determined by the open script
 
-int itemStore[6] = {-1};
-// int groupIndex[UIX_INV_LMT]; // populated by the open script
+int itemStore[8] = {-1};
+int groupIndex[UIX_INV_LMT]; // populated by the open script
 
 function int getItemProperty(int type, int idx)
 {
     if(idx != itemStore[IT_IDX]) {
         itemStore[IT_IDX] = idx;
         if(idx < UIX_BUSTERS) {
+            itemStore[IT_INGROUPIDX] = groupIndex[idx];
+
             itemStore[IT_TYPE]  = 0;
             itemStore[IT_ACTOR] = getBusterUpgrade(idx);
             itemStore[IT_TAG]   = getBusterUpgradeTag(idx);
-            itemStore[IT_GROUP] = 0;
+            itemStore[IT_GROUP] = IWGRP_BUSTER;
             itemStore[IT_AMOUNT] = 1;
-            // itemStore[IT_INGROUPIDX] = groupIndex[itemStore[IT_IDX]];
+            itemStore[IT_ICON] = getBusterIcon(idx);
         } else {
+            itemStore[IT_INGROUPIDX] = groupIndex[idx];
+
             idx -= UIX_BUSTERS;
+            int group = getAssistItemGroup(idx);
+            if(group <= MAX_GROUPS)
+                group = groupMapping[group];
+            else
+                group -= IWGRP_MAX;
+
             itemStore[IT_TYPE]  = 1;
             itemStore[IT_ACTOR] = getAssistItemActor(idx);
             itemStore[IT_TAG]   = getAssistItemTag(idx);
-            itemStore[IT_GROUP] = 1+getAssistItemGroup(idx);
+            itemStore[IT_GROUP] = group;
             itemStore[IT_AMOUNT] = getAssistItemAmount(idx);
-            // itemStore[IT_INGROUPIDX] = groupIndex[itemStore[IT_IDX]];
+            itemStore[IT_ICON] = getAssistItemIcon(idx);
         }
     }
     return itemStore[type];
@@ -52,6 +87,7 @@ int wheelTime = 0;
 int whichIds[UIX_INV_LMT];
 
 /*
+-- busters also
 GRP_JUMP 0
 GRP_DASH 1
 GRP_FLIGHT 2
@@ -86,14 +122,27 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
     int i, idx;
 
     for(i = 0; i < UIX_INV; i++) {
+        int act = getItemProperty(IT_ACTOR, i);
+        if(StrLen(act) == 0)
+            continue;
+
         int grp = getItemProperty(IT_GROUP, i);
+        if(grp == IWGRP_NULL)
+            continue;
+
         // groupItems[grp][groupCounts[grp]] = getItemProperty(IT_ACTOR, i);
-        // groupIndex[i] = groupCounts[grp];
+        groupIndex[i] = groupCounts[grp];
         groupCounts[grp]++;
+        Log(s:act, s:" group id: ", i:groupIndex[i], s:"/", i:groupCounts[grp]);
 
         if(groupCounts[grp] == 1)
             GROUP_COUNT++;
     }
+
+    for(i = 0; i < GROUP_COUNT; i++) {
+        Log(i:groupCounts[i]);
+    }
+
     // reset this in case the next access is somehow the last access.
     // since not all data was initialized before this point, it could, in a 1/N chance, produce a shitty result.
     // so. just do this to force it to use the fully initialized data.
@@ -105,15 +154,20 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 // Inventory Stack Big Brother ========================================================================================
 
 // myInventory
-#define MI_ITEM 0
-#define MI_IDX  1
-str myInventory[UIX_INV_LMT][2];
+#define MI_ITEM  0
+#define MI_IDX   1
+#define MI_GROUP 2
+str myInventory[UIX_INV_LMT][3];
+// int myInventoryGroup[]
 
 int myInvCount = 0;
-int mySelection = 0;
+int mySelection = -1;
 
 script "uix_items_inventory" ENTER CLIENTSIDE
 {
+    if(PlayerNumber() != ConsolePlayerNumber())
+        terminate;
+
     while(!wheelInitialized) delay(1);
     int i;
 
@@ -122,6 +176,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
         str myNewInventory[UIX_INV_LMT][2];
         int myHoldById[UIX_INV_LMT];
         int myNewInvCount = 0;
+
         for(i = 0; i < myInvCount; i++) {
             if(checkInventory(myInventory[i][MI_ITEM]) > 0) {
                 myNewInventory[myNewInvCount][MI_ITEM] = myInventory[i][MI_ITEM];
@@ -149,12 +204,19 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                 continue;
             }
 
+            int grp = getItemProperty(IT_GROUP, i);
+            if(grp == IWGRP_NULL)
+                continue;
+
             // Check if the player has this other thing now.
             str act = getItemProperty(IT_ACTOR, i);
             int c = CheckInventory(act);
             if(c > 0) {
                 myInventory[myInvCount][MI_ITEM] = act;
                 myInventory[myInvCount][MI_IDX] = i;
+                myInventory[myInvCount][MI_GROUP] = grp;
+                if(mySelection == -1)
+                    mySelection = myInvCount;
                 myInvCount++;
                 // Log(s:"Adding ", s:act, s:"... new size: ", i:myInvCount);
 
@@ -168,15 +230,17 @@ script "uix_items_inventory" ENTER CLIENTSIDE
 
         delay(1);
     }
+    mySelection = -1;
 }
 
 script "uix_items_inventory_respawn" RESPAWN CLIENTSIDE { CallACS0("uix_items_inventory"); }
+script "uix_items_inventory_disconnect" (int who) DISCONNECT { if(who == ConsolePlayerNumber()) mySelection = -1; }
 
 // Select an Item =====================================================================================================
 
 // takes in the index of the selected item from myInventory.
 //
-script "selectitem" (int selected) //NET CLIENTSIDE
+script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
 {
     if(selected >= myInvCount)
         terminate;
@@ -196,6 +260,7 @@ script "selectitem" (int selected) //NET CLIENTSIDE
         TakeInventory(act, c);
         GiveInventory(act, c);
     }
+    mySelection = selected;
 }
 
 // all of that, so i can make sure the items are activated one tick sooner than what consolecommand can do
@@ -203,7 +268,8 @@ script "selectitem" (int selected) //NET CLIENTSIDE
 // (it also had the added benefit of putting all the necessary data in an easier-to-gather spot, so, double boon ig)
 
 // The Actual Widget ==================================================================================================
-
+// ironic that all the stuff before this was the easy part
+//
 #define INV_MOUSE_MINRANGE 0.01
 
 #define ICON_PX 16
@@ -215,7 +281,7 @@ script "selectitem" (int selected) //NET CLIENTSIDE
 #define SELECT_X ICON_X
 #define SELECT_Y ICON_Y
 
-#define LAYER_DEFAULT 0
+#define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
 #define bits 8
 
@@ -250,18 +316,22 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     int oldPosY, oldPosX;
     int selectRange = 0.15;
 
-    int selected = -1;
+    int selected = mySelection;
     int oldSelected = selected;
     bool selectionActive = false;
-    int i;
+    int i, ii;
+    int ang;
+    int baseAng = 0.25;
+
+    bool drawMouse = false;
 
     while(wheelActive) {
         int baseScale = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
 
-        int iconScale = baseScale;
+        int iconScale = 3*baseScale/4;
         int iconX = FixedMul(ICON_PX / 2, iconScale);
         int iconY = FixedMul(ICON_PX, iconScale);
-        int sIconScale = iconScale + iconScale/4;
+        int sIconScale = iconScale + iconScale/2;
         int sIconX = FixedMul(ICON_PX / 2, sIconScale);
         int sIconY = FixedMul(ICON_PX, sIconScale);
         int messageScale = 2 * iconScale / 4;
@@ -277,8 +347,10 @@ script "uixitem_activate" (void) NET CLIENTSIDE
             SetActorAngle(0, sPosX);
         }
 
-        if(Timer()-wheelTime < INV_USE_BUFFER)
+        if(Timer()-wheelTime < INV_USE_BUFFER) {
+            delay(1);
             continue;
+        }
 
         // for(i = 0; i < bits; i++) {
         //     int ang = (1.0/bits) * i;
@@ -287,127 +359,140 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         //     displayIcon(LAYER_DEFAULT, "UXICB0", tposx+iconX, tposy+iconY, iconScale, iconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
         // }
 
+        // Mouse logic --------------------------
         oldPosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
         oldPosX -= FixedMul(GetPlayerInput(cln, INPUT_YAW), posxFactor);
-        if(!selectionActive) {
-            if(abs(oldPosX) > selectRange || abs(oldPosX) > selectRange) {
-                selectionActive = true;
-            }
-        }
-        int range = FixedMul(96, baseScale);
 
-        int clampAng = VectorAngle(oldPosX, oldPosY);
-
-        int botX = min(0, FixedMul(cos(clampAng), mouseScale));
-        int topX = max(0, FixedMul(cos(clampAng), mouseScale));
-        int botY = min(0, FixedMul(sin(clampAng), mouseScale));
-        int topY = max(0, FixedMul(sin(clampAng), mouseScale));
-
-        oldPosY = clamp(oldPosY, botY, topY);
-        oldPosX = clamp(oldPosX, botX, topX);
-
-        int count = 0;
-
-        for(i = 0; i < MAX_ITEMS_GLOBAL; i++) {
-            if(CheckActorInventory(cam, getAssistItemActor(i)) > 0) {
-                whichIds[count++] = i;
-            }
+        if(!drawMouse) {
+            if(abs(oldPosY) > 0.03 || abs(oldPosX) > 0.03)
+                drawMouse = true;
         }
 
-        for(i = 0; i < MAX_BUSTERUPGRADES; i++) {
-            if(CheckActorInventory(cam, getBusterUpgrade(i)) > 0) {
-                whichIds[count++] = i;
+        if(drawMouse) {
+            if(!selectionActive) {
+                if(abs(oldPosX) > selectRange || abs(oldPosX) > selectRange) {
+                    selectionActive = true;
+                }
+            }
+            int range = FixedMul(96, baseScale);
+
+            int clampAng = VectorAngle(oldPosX, oldPosY);
+
+            int botX = min(0, FixedMul(cos(clampAng), mouseScale));
+            int topX = max(0, FixedMul(cos(clampAng), mouseScale));
+            int botY = min(0, FixedMul(sin(clampAng), mouseScale));
+            int topY = max(0, FixedMul(sin(clampAng), mouseScale));
+
+            oldPosY = clamp(oldPosY, botY, topY);
+            oldPosX = clamp(oldPosX, botX, topX);
+
+            displayIcon(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+        }
+        // --------------------------------------
+
+        // Sector divisions ---------------------
+        for(i = 0; i < GROUP_COUNT; i++) {
+            ang = (GROUP_ANG * i) + baseAng;
+            int dotRange = 500;
+            int dotCount = 30;
+            int dotBase = 80;
+            for(ii = 1; ii<dotCount; ii++){
+                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
+                int dotx = (dotDist * cos(ang)) >> 16;
+                int doty = (dotDist * sin(ang)) >> 16;
+                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
+
+                displayIcon(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            }
+
+            // dotx = (dotRange * cos(ang)) >> 16;
+            // doty = (dotRange * sin(ang)) >> 16;
+            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
+
+            // displayIcon(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
+        }
+        // --------------------------------------
+
+        // TODO: move these to defines
+        i = 0;
+        int IP_X = i++;
+        int IP_Y = i++;
+        int IP_ICON = i++;
+        int IP_COUNT = i++;
+        int IP_TAG = i++;
+        int iconPositions[UIX_INV_LMT+1][5];
+
+        int iconRange = 300;
+        int iconArc = 4*GROUP_ANG/5;
+
+        int closestInv = -1;
+        int closestDist = MAX_INT;
+
+        for(i = 0; i < myInvCount; i++) {
+            int idx = myInventory[i][MI_IDX];
+
+            iconPositions[i][IP_ICON] = getItemProperty(IT_ICON, idx);
+            iconPositions[i][IP_TAG] = getItemProperty(IT_TAG, idx);
+            iconPositions[i][IP_COUNT] = checkInventory(getItemProperty(IT_ACTOR, idx));
+
+            int group = myInventory[i][MI_GROUP];
+
+            // Log(s:"centerrange: ", s:getItemProperty(IT_ACTOR, idx), s:" - ", i:iconArc, s:" ", i:getItemProperty(IT_INGROUPIDX, idx), s:" ", i:groupCounts[group]);
+
+            ang = baseAng
+                  + (GROUP_ANG * group)
+                  + (GROUP_ANG >> 1)
+                  + centerRange(iconArc, getItemProperty(IT_INGROUPIDX, idx), groupCounts[group])
+                  ;
+            iconPositions[i][IP_X] = (iconRange * cos(ang)) >> 16;
+            iconPositions[i][IP_Y] = (iconRange * sin(ang)) >> 16;
+
+            int mouseDist = VectorLength(oldPosX - iconPositions[i][IP_X], oldPosY - iconPositions[i][IP_Y]);
+            if(drawMouse) {
+                if(mouseDist < closestDist) {
+                    closestDist = mouseDist;
+                    closestInv = i;
+                    selected = closestInv;
+                }
             }
         }
 
-        int ngDiff = 1.0 / count;
-        int oldDist = MAX_INT;
-        int slot = -1;
-        int selectedId, selectedId2;
-        int lPosX, lPosY;
-        int selectedBuster;
-
-        int inBuster = false;
-        int lastId = -1;
-
-        for(i = 0; i < count; i++) {
-            int iAng = ngDiff * i;
-            int item = whichIds[i];
-            int posx = FixedMul(cos(iAng), range);
-            int posy = FixedMul(sin(iAng), range);
-
-            if(!inBuster) {
-                if(lastId > item) {
-                    inBuster = true;
-                }
-                lastId = item;
-            }
-
-            if(oldSelected != i) {
-                if(!inBuster) {
-                    displayIcon(LAYER_DEFAULT, getAssistItemIcon(item), posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                    setFont("INDEXFONT");
-                    displayMessage(LAYER_DEFAULT, StrParam(i:CheckInventory(getAssistItemActor(item))), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                } else {
-                    displayIcon(LAYER_DEFAULT, getBusterIcon(item), posx+iconX, posy+iconY, iconScale, iconScale, iconAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                    setFont("INDEXFONT");
-                    displayMessage(LAYER_DEFAULT, StrParam(i:CheckInventory(getBusterUpgrade(item))), posx+iconX, posy+iconY, messageScale, messageScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                }
-
-                displayIcon(LAYER_DEFAULT, "UXICA0", posx+iconX, posy+iconY, iconScale, iconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-            }
-
-            int dist = VectorLength(posx-oldPosX, posy-oldPosY);
-            if(selectionActive) {
-                if(dist < oldDist) {
-                    oldDist = dist;
-                    selected = item;
-                    slot = i;
-                    lPosX = posx;
-                    lPosY = posY;
-                    selectedBuster = inBuster;
-                    // displayIcon("UXICB0", selectedId, posx+SELECT_X, posy+SELECT_Y, ICON_SCALE, ICON_SCALE, 1.0);
-                }
-            }
-        }
-
-        if(selectionActive) {
-            if(selected != oldSelected) {
-                oldSelected = selected;
-                LocalAmbientSound("ui/itemwheelshift", 128);
-            }
-            // displayIcon("UXICB0", getNewUIId(), FixedMul(cos(ngDiff*selected), range*2)+ICON_X, FixedMul(sin(ngDiff*selected), range*2)+ICON_Y, 5.0, 5.0, 1.0);
-
-            if(!selectedBuster) {
-                displayIcon(LAYER_DEFAULT, getAssistItemIcon(selected), lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                setFont("SMALLFONT");
-                str cnt = "";
-                int chk = CheckInventory(getAssistItemActor(selected));
-                if(chk > 1) {
-                    cnt = StrParam(s:" \cf(", i:chk, s:")");
-                }
-
-                displayMessage(LAYER_DEFAULT, StrParam(l:getAssistItemTag(selected), s:cnt), 0, sIconY/4, 3.0, 3.0, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                displayIcon(LAYER_DEFAULT, getAssistItemIcon(selected), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+        for(i = 0; i < myInvCount; i++) {
+            if(i == closestInv) {
+                int amtColor = CR_GOLD;
+                displayIcon(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+sIconX, iconPositions[i][IP_Y]+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             } else {
-                displayIcon(LAYER_DEFAULT, getBusterIcon(selected), lPosX+sIconX, lPosY+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                setFont("SMALLFONT");
-                cnt = "";
-                chk = CheckInventory(getBusterUpgrade(selected));
-                if(chk > 1) {
-                    cnt = StrParam(s:" \cf(", i:chk, s:")");
-                }
-
-                displayMessage(LAYER_DEFAULT, StrParam(l:getBusterUpgradeTag(selected), s:cnt), 0, sIconY/4, 3.0, 3.0, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-                displayIcon(LAYER_DEFAULT, getBusterIcon(selected), sIconX, sIconY/2, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                amtColor = CR_DARKGREEN;
+                displayIcon(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha/2, ALIGN_CENTER, ALIGN_CENTER);
+                displayIcon(LAYER_DEFAULT, "UXICB0", iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             }
 
-            displayIcon(LAYER_DEFAULT, "UXICB0", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            if(iconPositions[i][IP_COUNT] > 1) {
+                SetFont("INDEXFONT");
+                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[i][IP_COUNT]), 5*iconPositions[i][IP_X]/6, 5*iconPositions[i][IP_Y]/6, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, amtColor);
+            }
         }
+
+        if(selected != -1) {
+            displayIcon(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-18, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            SetFont("SMALLFNT");
+            displayMessageColor(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, 18, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD);
+
+            if(iconPositions[selected][IP_COUNT] > 1) {
+                SetFont("INDEXFONT");
+                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-64, sIconY-72, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE);
+            }
+        }
+
+        if(selected != oldSelected) {
+            LocalAmbientSound("ui/itemwheelshift", 64);
+        }
+
+        oldSelected = selected;
 
         delay(1);
     }
-    ACS_NamedExecuteWithResult("uixitem_selectitem", selected+1, selectedBuster);
+    ACS_NamedExecuteWithResult("uixitem_selectitem", selected);
 
     if(IsNetworkGame()) {
         SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
@@ -422,7 +507,7 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
         if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
             // Log(i:Timer());
             // ConsoleCommand("invuse"); // [Russ] idk a better way to do this atm
-            UseInventory("item1");
+            UseInventory(myInventory[mySelection][MI_ITEM]);
         }
     }
 }
@@ -453,6 +538,11 @@ function int clamp(int x, int n, int m)
     return x;
 }
 
+function int centerRange(int range, int dividend, int divisor)
+{
+    return ((range/divisor) >> 1) + dividend*range/divisor - (range >> 1);
+}
+
 // Test functions =====================================================================================================
 
 script "uixitem_giver" (void)
@@ -460,12 +550,15 @@ script "uixitem_giver" (void)
     until(timer()>=3)
         delay(1);
 
-    for(int i = 0; i < UIX_INV_LMT; i++)
+    for(int i = 0; i < UIX_INV_LMT; i++) {
+        if(StrLen(getItemProperty(IT_ACTOR, i)) == 0)
+            continue;
         GiveInventory(getItemProperty(IT_ACTOR, i), getItemProperty(IT_AMOUNT, i));
+    }
 }
 
-// script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
-// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
+script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
+script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
 
 script "uix_timer" (void)
 {
@@ -474,5 +567,5 @@ script "uix_timer" (void)
 
 function void print_time(str source, int time)
 {
-    Log(s:source, s:": ", i:time);
+    // Log(s:source, s:": ", i:time);
 }
