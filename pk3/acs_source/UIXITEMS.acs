@@ -133,14 +133,14 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
         // groupItems[grp][groupCounts[grp]] = getItemProperty(IT_ACTOR, i);
         groupIndex[i] = groupCounts[grp];
         groupCounts[grp]++;
-        Log(s:act, s:" group id: ", i:groupIndex[i], s:"/", i:groupCounts[grp]);
+        // Log(s:act, s:" group id: ", i:groupIndex[i], s:"/", i:groupCounts[grp]);
 
         if(groupCounts[grp] == 1)
             GROUP_COUNT++;
     }
 
     for(i = 0; i < GROUP_COUNT; i++) {
-        Log(i:groupCounts[i]);
+        // Log(i:groupCounts[i]);
     }
 
     // reset this in case the next access is somehow the last access.
@@ -172,6 +172,15 @@ script "uix_items_inventory" ENTER CLIENTSIDE
     int i;
 
     while(true) {
+        if(ClassifyActor(0) == ACTOR_NONE)
+            terminate;
+        if(ClassifyActor(0) & ACTOR_WORLD)
+            terminate;
+        if(PlayerNumber() < 0)
+            terminate;
+        if(GetActorProperty(0, APROP_Health) <= 0)
+            terminate;
+
         // rebuild inventory if something is missing
         str myNewInventory[UIX_INV_LMT][2];
         int myHoldById[UIX_INV_LMT];
@@ -187,6 +196,28 @@ script "uix_items_inventory" ENTER CLIENTSIDE
         }
 
         if(myNewInvCount != myInvCount) {
+            if(mySelection > -1) {
+                if(myNewInvCount == 0) {
+                    mySelection = -1;
+                } else {
+                    while(true) { // 👻
+                        if(CheckInventory(myInventory[mySelection][MI_ITEM]) > 0)
+                            break;
+
+                        mySelection++;
+                        mySelection = mySelection < myInvCount ? mySelection : 0;
+                    }
+
+                    for(i = 0; i < myNewInvCount; i++) {
+                        if(StrCmp(myNewInventory[i][MI_ITEM], myInventory[mySelection][MI_ITEM])==0) {
+                            mySelection = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            // Log(s:"Selected ", s:myNewInventory[mySelection][MI_ITEM], s:"?");
+
             // Log(s:"Rebuilding: new size = ", i:myNewInvCount);
             myInvCount = myNewInvCount;
             for(i = 0; i < myNewInvCount; i++) {
@@ -557,8 +588,8 @@ script "uixitem_giver" (void)
     }
 }
 
-script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
-script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
+// script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
+// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
 
 script "uix_timer" (void)
 {
