@@ -1,0 +1,17 @@
+sprite MTIC_ACS, 16, 16
+{
+   Offset 8, 16
+   XScale 1.0
+   YScale 1.0
+   Patch EBALG0, 0, 0
+   {translation "192:192=214:214", "198:198=229:229"}
+}
+
+sprite WTIC_ACS, 16, 16
+{
+   Offset 8, 16
+   XScale 1.0
+   YScale 1.0
+   Patch EBALH0, 0, 0
+   {translation "192:192=170:170", "198:198=41:41"}
+}

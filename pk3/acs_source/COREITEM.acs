@@ -23,7 +23,7 @@ Script "core_items" OPEN
     DefineAssistItem("TAG_REGGAECALL", "ReggaeCall", "WEA9Z0", 1, DTADD_GRP_ATTACK, mapTrue);
     DefineAssistItem("TAG_EXITUNIT", "ExitUnitItem", "EXITA0", 1, DTADD_GRP_ESCAPE, mapTrue);
     DefineAssistItem("TAG_ETANK", "ETank", "EBALF0", 1, DTADD_GRP_HEAL, mapTrue);
-    DefineAssistItem("TAG_WTANK", "WTank", "EBALH0", 1, DTADD_GRP_RELOAD, mapTrue);
-    DefineAssistItem("TAG_MTANK", "MTank", "EBALG0", 1, DTADD_GRP_FULLRESTORE, mapTrue);
+    DefineAssistItem("TAG_WTANK", "WTank", "WTIC_ACS", 1, DTADD_GRP_RELOAD, mapTrue);
+    DefineAssistItem("TAG_MTANK", "MTank", "MTIC_ACS", 1, DTADD_GRP_FULLRESTORE, mapTrue);
     DefineAssistItem("TAG_ENERGYBALANCER", "EnergyBalancer", "NRGBA0", 1, DTADD_GRP_PASSIVE, mapTrue);
 }
