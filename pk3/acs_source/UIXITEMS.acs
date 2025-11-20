@@ -156,9 +156,8 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 // myInventory
 #define MI_ITEM  0
 #define MI_IDX   1
-#define MI_GROUP 2
 str myInventory[UIX_INV_LMT][3];
-// int myInventoryGroup[]
+int myInventoryGroupMax[GROUP_COUNT_LIMIT];
 
 int myInvCount = 0;
 int mySelection = -1;
@@ -183,8 +182,9 @@ script "uix_items_inventory" ENTER CLIENTSIDE
 
         // rebuild inventory if something is missing
         str myNewInventory[UIX_INV_LMT][2];
-        int myHoldById[UIX_INV_LMT];
         int myNewInvCount = 0;
+
+        int myHoldById[UIX_INV_LMT];
 
         for(i = 0; i < myInvCount; i++) {
             if(checkInventory(myInventory[i][MI_ITEM]) > 0) {
@@ -192,6 +192,8 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                 myNewInventory[myNewInvCount][MI_IDX] = myInventory[i][MI_IDX];
                 myHoldById[myInventory[i][MI_IDX]] = true;
                 myNewInvCount++;
+            } else {
+                myInventoryGroupMax[getItemProperty(IT_GROUP, myInventory[i][MI_IDX])]--;
             }
         }
 
@@ -245,10 +247,11 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             if(c > 0) {
                 myInventory[myInvCount][MI_ITEM] = act;
                 myInventory[myInvCount][MI_IDX] = i;
-                myInventory[myInvCount][MI_GROUP] = grp;
+                Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
                 if(mySelection == -1)
                     mySelection = myInvCount;
                 myInvCount++;
+                myInventoryGroupMax[grp]++;
                 // Log(s:"Adding ", s:act, s:"... new size: ", i:myInvCount);
 
                 // Take the item and immediately give it back so we can ensure consistent ordering
@@ -258,6 +261,13 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                 GiveInventory(act, c);
             }
         }
+
+        // str testOut = "";
+        // for(i = 0; i < GROUP_COUNT; i++) {
+        //     if(i > 0) testOut = StrParam(s:testOut, s:"\n");
+        //     testOut = StrParam(s:testOut, s:"Group ", i:i, s:": ", i:myInventoryGroupMax[i]);
+        // }
+        // Print(s:testOut);
 
         delay(1);
     }
@@ -335,9 +345,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
     int INV_USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
 
-    int userAlpha = 1.0;
-    int iconAlpha = FixedMul(0.5, userAlpha);
-
     wheelActive = true;
     wheelTime = Timer();
 
@@ -357,7 +364,39 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     bool drawMouse = false;
 
     while(wheelActive) {
-        int baseScale = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
+
+        if(IsNetworkGame()) {
+            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
+        } else {
+            SetActorPitch(0, sPosY);
+            SetActorAngle(0, sPosX);
+        }
+
+        int curTime = Timer()-wheelTime-INV_USE_BUFFER;
+
+        if(curTime < 0) {
+            delay(1);
+            continue;
+        }
+
+        int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
+        int userAlpha = 1.0;
+
+        int maxTime = 3;
+        curTime++;
+
+        if(curTime < maxTime+1) {
+            userAlpha = curTime * userAlpha / maxTime;
+            scaleMult = curTime * scaleMult / maxTime;
+        }
+
+        int baseScale = 3*scaleMult;
+
+        int sCountX = FixedMul(21.0, baseScale) >> 16;
+        int sCountY = FixedMul(24.0, baseScale) >> 16;
+        int sCenterOffs = FixedMul(6.0, baseScale) >> 16;
+
+        int iconAlpha = userAlpha >> 1;
 
         int iconScale = 3*baseScale/4;
         int iconX = FixedMul(ICON_PX / 2, iconScale);
@@ -370,25 +409,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
         int posyFactor = FixedMul(FixedMul(3.0, FixedDiv(GetScreenWidth(), GetScreenHeight())), iconScale);
         int posxFactor = FixedMul((3.0), iconScale);
-
-        if(IsNetworkGame()) {
-            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
-        } else {
-            SetActorPitch(0, sPosY);
-            SetActorAngle(0, sPosX);
-        }
-
-        if(Timer()-wheelTime < INV_USE_BUFFER) {
-            delay(1);
-            continue;
-        }
-
-        // for(i = 0; i < bits; i++) {
-        //     int ang = (1.0/bits) * i;
-        //     int tposx = FixedMul(cos(ang), mouseScale);
-        //     int tposy = FixedMul(sin(ang), mouseScale);
-        //     displayIcon(LAYER_DEFAULT, "UXICB0", tposx+iconX, tposy+iconY, iconScale, iconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
-        // }
 
         // Mouse logic --------------------------
         oldPosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
@@ -424,7 +444,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         // Sector divisions ---------------------
         for(i = 0; i < GROUP_COUNT; i++) {
             ang = (GROUP_ANG * i) + baseAng;
-            int dotRange = 500;
+            int dotRange = (166*baseScale)>>16;
             int dotCount = 30;
             int dotBase = 80;
             for(ii = 1; ii<dotCount; ii++){
@@ -453,11 +473,13 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         int IP_TAG = i++;
         int iconPositions[UIX_INV_LMT+1][5];
 
-        int iconRange = 300;
+        int iconRange = (100*baseScale) >> 16;
         int iconArc = 4*GROUP_ANG/5;
 
         int closestInv = -1;
         int closestDist = MAX_INT;
+
+        int wheelGroupCounts[GROUP_COUNT_LIMIT];
 
         for(i = 0; i < myInvCount; i++) {
             int idx = myInventory[i][MI_IDX];
@@ -466,15 +488,18 @@ script "uixitem_activate" (void) NET CLIENTSIDE
             iconPositions[i][IP_TAG] = getItemProperty(IT_TAG, idx);
             iconPositions[i][IP_COUNT] = checkInventory(getItemProperty(IT_ACTOR, idx));
 
-            int group = myInventory[i][MI_GROUP];
+            int group = getItemProperty(IT_GROUP, idx);
 
             // Log(s:"centerrange: ", s:getItemProperty(IT_ACTOR, idx), s:" - ", i:iconArc, s:" ", i:getItemProperty(IT_INGROUPIDX, idx), s:" ", i:groupCounts[group]);
 
             ang = baseAng
                   + (GROUP_ANG * group)
                   + (GROUP_ANG >> 1)
-                  + centerRange(iconArc, getItemProperty(IT_INGROUPIDX, idx), groupCounts[group])
+                  + centerRange(iconArc, wheelGroupCounts[group]++, myInventoryGroupMax[group])
                   ;
+            if(wheelGroupCounts[group] >= myInventoryGroupMax[group])
+                wheelGroupCounts[group] = 0;
+
             iconPositions[i][IP_X] = (iconRange * cos(ang)) >> 16;
             iconPositions[i][IP_Y] = (iconRange * sin(ang)) >> 16;
 
@@ -505,13 +530,13 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         }
 
         if(selected != -1) {
-            displayIcon(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-18, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIcon(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             SetFont("SMALLFNT");
-            displayMessageColor(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, 18, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD);
+            displayMessageColor(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD);
 
             if(iconPositions[selected][IP_COUNT] > 1) {
                 SetFont("INDEXFONT");
-                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-64, sIconY-72, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE);
+                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE);
             }
         }
 
