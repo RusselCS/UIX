@@ -60,8 +60,7 @@ user int UIX_CL_KILLFEEDLAYER = 0;
 user noarchive bool UIX_DEBUG_SHOWSELF = false;
 
 // item wheel
-server noarchive bool UIX_SV_ITEMWHEEL = true;
-user bool UIX_CL_ITEMWHEEL = true;
+user bool UIX_CL_ITEMWHEELTAP = true;
 user int UIX_CL_ITEMWHEELBUFFER = 1;
 user float UIX_CL_ITEMWHEELSCALE = 1.0;
 

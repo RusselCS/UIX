@@ -5,6 +5,8 @@ UIX_MNU_SR50_2 = "\cqReplace your strafe keys:";
 
 UIX_MNU_CLASHES = "\cdThese items may clash with UI Extensions.";
 UIX_MNU_KILLFEEDPRE = "\cdTo see Kill Feed Mugshots, turn this on.";
+UIX_MNU_ITEMWHEELPRE1 = "\cdUsing these buttons causes the item wheel";
+UIX_MNU_ITEMWHEELPRE2 = "\cdto think the wrong item is selected.";
 
 UIX_UNKNOWN_LOC_1 = "Unknown Location.";
 UIX_UNKNOWN_LOC_2 = "Node Graph out of Date. Rebuilding...";

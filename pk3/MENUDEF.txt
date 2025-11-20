@@ -61,6 +61,7 @@ OptionMenu "UIXOptions"
 	Submenu "Team Info Options", "UIXOptions_TeamInfo"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
 	Submenu "Kill Feed Options", "UIXOptions_KillFeed"
+	Submenu "Item Wheel Options", "UIXOptions_ItemWheel"
 	StaticText " "
 	Submenu "Server Settings", "UIXOptions_ServerMenu"
 	StaticText " "
@@ -204,7 +205,6 @@ OptionMenu "UIXOptions_WeaponBar"
 	StaticText "---------------", 1
 	Option "Layer", "UIX_CL_WEAPBARLAYER", "UIXLayers"
 	StaticText " "
-	Slider "Item Wheel Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
 }
 
 OptionMenu "UIXOptions_KillFeed"
@@ -227,6 +227,31 @@ OptionMenu "UIXOptions_KillFeed"
 	StaticText "Advanced", 1
 	StaticText "---------------", 1
 	Option "Frag Mugshots Layer", "UIX_CL_KILLFEEDLAYER", "UIXLayers"
+	StaticText " "
+}
+
+OptionMenu "UIXOptions_ItemWheel"
+{
+	Title "Item Wheel Settings"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Clashing Items", 1
+	StaticText "---------------", 1
+	StaticText "$UIX_MNU_ITEMWHEELPRE1", 1
+	StaticText "$UIX_MNU_ITEMWHEELPRE2", 1
+	Control "Next Item", "invnext"
+	Control "Previous Item", "invprev"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Settings", 1
+	StaticText "---------------", 1
+	Control "Open Item Wheel", "+invwheel"
+	Control "Use Item", "invuse"
+	StaticText " "
+	Option "Tap Item Wheel to Use", "UIX_CL_ITEMWHEELTAP", "OnOff"
+	Slider "Tap use window (tics)", "UIX_CL_ITEMWHEELBUFFER", 1, 10, 1, 0
+	StaticText " "
+	Slider "Item Wheel Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
 	StaticText " "
 }
 

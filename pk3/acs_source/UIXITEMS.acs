@@ -442,29 +442,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         }
         // --------------------------------------
 
-        // Sector divisions ---------------------
-        for(i = 0; i < GROUP_COUNT; i++) {
-            ang = (GROUP_ANG * i) + baseAng;
-            int dotRange = (166*baseScale)>>16;
-            int dotCount = 30;
-            int dotBase = 80;
-            for(ii = 1; ii<dotCount; ii++){
-                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
-                int dotx = (dotDist * cos(ang)) >> 16;
-                int doty = (dotDist * sin(ang)) >> 16;
-                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
-
-                displayIcon(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
-            }
-
-            // dotx = (dotRange * cos(ang)) >> 16;
-            // doty = (dotRange * sin(ang)) >> 16;
-            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
-
-            // displayIcon(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
-        }
-        // --------------------------------------
-
         // TODO: move these to defines
         i = 0;
         int IP_X = i++;
@@ -543,9 +520,32 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         }
         // --------------------------------------
 
-        // Out of sequence drawing --------------
+        // Out of sequence mouse drawing --------
         if(drawMouse) {
             displayIcon(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+        }
+        // --------------------------------------
+
+        // Sector divisions ---------------------
+        for(i = 0; i < GROUP_COUNT; i++) {
+            ang = (GROUP_ANG * i) + baseAng;
+            int dotRange = (166*baseScale)>>16;
+            int dotCount = 30;
+            int dotBase = 80;
+            for(ii = 1; ii<dotCount; ii++){
+                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
+                int dotx = (dotDist * cos(ang)) >> 16;
+                int doty = (dotDist * sin(ang)) >> 16;
+                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
+
+                displayIcon(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            }
+
+            // dotx = (dotRange * cos(ang)) >> 16;
+            // doty = (dotRange * sin(ang)) >> 16;
+            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
+
+            // displayIcon(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
         }
         // --------------------------------------
 
@@ -567,12 +567,17 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
 script "uixitem_deactivate" (void) NET CLIENTSIDE
 {
-    print_time("uixitem_deactivate", Timer());
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
+        terminate;
+
     if(wheelActive) {
         wheelActive = false;
+
+        if(!GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP"))
+            terminate;
+
         if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
-            // Log(i:Timer());
-            // ConsoleCommand("invuse"); // [Russ] idk a better way to do this atm
             UseInventory(myInventory[mySelection][MI_ITEM]);
         }
     }
@@ -623,8 +628,8 @@ script "uixitem_giver" (void)
     }
 }
 
-// script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
-// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
+script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
+script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
 
 script "uix_timer" (void)
 {
