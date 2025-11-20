@@ -247,7 +247,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             if(c > 0) {
                 myInventory[myInvCount][MI_ITEM] = act;
                 myInventory[myInvCount][MI_IDX] = i;
-                Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
+                // Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
                 if(mySelection == -1)
                     mySelection = myInvCount;
                 myInvCount++;
@@ -364,7 +364,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     bool drawMouse = false;
 
     while(wheelActive) {
-
         if(IsNetworkGame()) {
             SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
         } else {
@@ -377,6 +376,10 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         if(curTime < 0) {
             delay(1);
             continue;
+        }
+
+        if(curTIme == 0) {
+            FadeTo(0, 0, 0, 0.5, 0.08);
         }
 
         int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
@@ -436,8 +439,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
             oldPosY = clamp(oldPosY, botY, topY);
             oldPosX = clamp(oldPosX, botX, topX);
-
-            displayIcon(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
         }
         // --------------------------------------
 
@@ -529,6 +530,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
             }
         }
 
+        // Selected icon ------------------------
         if(selected != -1) {
             displayIcon(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
             SetFont("SMALLFNT");
@@ -539,6 +541,13 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                 displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE);
             }
         }
+        // --------------------------------------
+
+        // Out of sequence drawing --------------
+        if(drawMouse) {
+            displayIcon(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+        }
+        // --------------------------------------
 
         if(selected != oldSelected) {
             LocalAmbientSound("ui/itemwheelshift", 64);
@@ -548,6 +557,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
         delay(1);
     }
+    FadeTo(0, 0, 0, 0.0, 0.08);
     ACS_NamedExecuteWithResult("uixitem_selectitem", selected);
 
     if(IsNetworkGame()) {
