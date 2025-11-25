@@ -618,13 +618,23 @@ function int centerRange(int range, int dividend, int divisor)
 
 script "uixitem_giver" (void)
 {
-    until(timer()>=3)
+    while(MAX_BUSTERUPGRADES == 0 || MAX_ITEMS_GLOBAL == 0)
         delay(1);
 
-    for(int i = 0; i < UIX_INV_LMT; i++) {
-        if(StrLen(getItemProperty(IT_ACTOR, i)) == 0)
+    int i;
+
+    for(i = 0; i < MAX_BUSTERUPGRADES; i++) {
+        if(StrLen(getBusterUpgrade(i)) == 0)
             continue;
-        GiveInventory(getItemProperty(IT_ACTOR, i), getItemProperty(IT_AMOUNT, i));
+        GiveInventory(getBusterUpgrade(i), 1);
+    }
+
+    for(i = 0; i < MAX_ITEMS_GLOBAL; i++) {
+        if(StrLen(getAssistItemActor(i)) == 0)
+            continue;
+        if(getAssistItemGroup(i) == 10)
+            continue;
+        GiveInventory(getAssistItemActor(i), getAssistItemAmount(i));
     }
 }
 
