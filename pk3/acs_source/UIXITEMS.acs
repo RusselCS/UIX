@@ -360,10 +360,14 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     int i, ii;
     int ang;
     int baseAng = 0.25;
+    int fadeTime = 0.0;
 
     bool drawMouse = false;
 
-    while(wheelActive) {
+    while(true) {
+        if(!wheelActive)
+            fadeTime = 0.1;
+
         if(IsNetworkGame()) {
             SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
         } else {
@@ -378,12 +382,9 @@ script "uixitem_activate" (void) NET CLIENTSIDE
             continue;
         }
 
-        if(curTIme == 0) {
-            FadeTo(0, 0, 0, 0.5, 0.08);
-        }
-
         int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
         int userAlpha = 1.0;
+        int menuAlpha = GetCvar("dimamount");
 
         int maxTime = 3;
         curTime++;
@@ -391,6 +392,7 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         if(curTime < maxTime+1) {
             userAlpha = curTime * userAlpha / maxTime;
             scaleMult = curTime * scaleMult / maxTime;
+            menuAlpha = curTime * menuAlpha / maxTime;
         }
 
         int baseScale = 3*scaleMult;
@@ -494,35 +496,35 @@ script "uixitem_activate" (void) NET CLIENTSIDE
         for(i = 0; i < myInvCount; i++) {
             if(i == closestInv) {
                 int amtColor = CR_GOLD;
-                displayIcon(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+sIconX, iconPositions[i][IP_Y]+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                displayIconFade(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+sIconX, iconPositions[i][IP_Y]+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
             } else {
                 amtColor = CR_DARKGREEN;
-                displayIcon(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha/2, ALIGN_CENTER, ALIGN_CENTER);
-                displayIcon(LAYER_DEFAULT, "UXICB0", iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                displayIconFade(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha/2, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+                displayIconFade(LAYER_DEFAULT, "UXICB0", iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
             }
 
             if(iconPositions[i][IP_COUNT] > 1) {
                 SetFont("INDEXFONT");
-                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[i][IP_COUNT]), 5*iconPositions[i][IP_X]/6, 5*iconPositions[i][IP_Y]/6, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, amtColor);
+                displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[i][IP_COUNT]), 5*iconPositions[i][IP_X]/6, 5*iconPositions[i][IP_Y]/6, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, amtColor, fadeTime);
             }
         }
 
         // Selected icon ------------------------
         if(selected != -1) {
-            displayIcon(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIconFade(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
             SetFont("SMALLFNT");
-            displayMessageColor(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD);
+            displayMessageColorFade(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD, fadeTime);
 
             if(iconPositions[selected][IP_COUNT] > 1) {
                 SetFont("INDEXFONT");
-                displayMessageColor(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE);
+                displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE, fadeTime);
             }
         }
         // --------------------------------------
 
         // Out of sequence mouse drawing --------
         if(drawMouse) {
-            displayIcon(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            displayIconFade(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
         }
         // --------------------------------------
 
@@ -538,16 +540,23 @@ script "uixitem_activate" (void) NET CLIENTSIDE
                 int doty = (dotDist * sin(ang)) >> 16;
                 int dotAlpha = min(ii * userAlpha / 10, userAlpha);
 
-                displayIcon(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
+                displayIconFade(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
             }
 
             // dotx = (dotRange * cos(ang)) >> 16;
             // doty = (dotRange * sin(ang)) >> 16;
             // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
 
-            // displayIcon(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER);
+            // displayIconFade(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
         }
         // --------------------------------------
+
+        // Background ---------------------------
+
+        displayIconFade(LAYER_DEFAULT, "BLACKP", 0, 0, 100.0, 100.0, menuAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+
+        // --------------------------------------
+
 
         if(selected != oldSelected) {
             LocalAmbientSound("ui/itemwheelshift", 64);
@@ -555,9 +564,11 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
         oldSelected = selected;
 
+        if(fadeTime != 0)
+            break;
+
         delay(1);
     }
-    FadeTo(0, 0, 0, 0.0, 0.08);
     ACS_NamedExecuteWithResult("uixitem_selectitem", selected);
 
     if(IsNetworkGame()) {

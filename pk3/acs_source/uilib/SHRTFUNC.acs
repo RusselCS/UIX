@@ -41,6 +41,16 @@ function int displayIcon(int layer, str icon, int offsX, int offsY, int scaleX, 
 	return res;
 }
 
+function int displayIconFade(int layer, str icon, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int fadeTime)
+{
+	int res = CheckFont(icon);
+    if(res) {
+		SetFont(icon);
+		displayMessageFade(layer, "A", offsX, offsY, scaleX, scaleY, alpha, halign, valign, fadeTime);
+	}
+	return res;
+}
+
 // [Russ] maybe
 // int virtScale = 1.0;
 // function void setVirtualScale(int scale)
@@ -85,6 +95,24 @@ function void displayMessageColor(int layer, str msg, int offsX, int offsY, int 
 {
 	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
 	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+}
+
+function void displayMessageFade(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int fadeTime)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	if(fadeTime > 0)
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, fadeTime, alpha);
+	else
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+}
+
+function void displayMessageColorFade(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color, int fadeTime)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	if(fadeTime > 0)
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
+	else
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
 }
 
 #define BAR_DISPLAY_NONE 0
