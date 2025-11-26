@@ -1,0 +1,2 @@
+
+actor InCombat_PU : Powerup { powerup.duration -3 }

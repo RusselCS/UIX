@@ -2,3 +2,6 @@
 texture	UIXSTCO1  	range	UIXSTCO2  	tics 9
 texture	UIXSTMN1  	range	UIXSTMN4  	tics 10
 texture	UIXSTVC1  	range	UIXSTVC3  	tics 5
+
+// ActionCam stuff
+texture UXCAM0      range   UXCAM2      tics 3
