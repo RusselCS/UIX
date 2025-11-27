@@ -8,7 +8,7 @@ Manual camera "leave" clause and auto camera "leave" clause are weirdly entangle
 
 */
 
-#include "shrtfunc.acs"
+#include "SHRTFUNC.acs"
 
 #define TICKRATE 35
 
