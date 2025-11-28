@@ -3,6 +3,8 @@
 #include "zcommon.acs"
 #include "SHRTFUNC.acs"
 
+#include "UXWHLDEF.acs"
+
 #import "8BDT.acs"
 
 // Preliminary data preparatation =====================================================================================
@@ -308,10 +310,84 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
 // please enjoy 🐊👍
 // (it also had the added benefit of putting all the necessary data in an easier-to-gather spot, so, double boon ig)
 
-// The Actual Widget ==================================================================================================
-// ironic that all the stuff before this was the easy part
+// Widget Settings ====================================================================================================
 //
-#define INV_MOUSE_MINRANGE 0.01
+
+// settingsScript: uixitem_settings
+// loopScript: uixtiem_loop
+// selectScript: uixitem_selectitem
+
+script "uixitem_activate" (void) NET CLIENTSIDE
+{
+    if(!wheelInitialized)
+        terminate;
+    CallACS3("uix_wheelActivate", "uixitem_settings", "uixtiem_loop", "uixitem_selectitem");
+}
+
+script "uixitem_deactivate" (void) NET CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
+        terminate;
+
+    CallACS0("uix_wheelDeactivate");
+
+    // if(wheelActive) {
+    //     wheelActive = false;
+
+    //     if(!GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP"))
+    //         terminate;
+
+    //     if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
+    //         UseInventory(myInventory[mySelection][MI_ITEM]);
+    //     }
+    // }
+}
+
+// These are called by "uix_wheelActivate" per the above scripts...
+script "uixitem_settings" (int mode, int idx, int a, int b) { SetResultValue(itemWheelSelection(mode, idx, a, b)); }
+function int itemWheelSelection(int mode, int idx, int a, int b)
+{
+    if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
+        return itemWheelElementProperty(myInventory[mode-UIW_ELEMENT_START][MI_IDX], idx, a, b);
+    }
+    switch(mode) {
+        case UIW_CURSELECT:     return mySelection;
+        case UIW_GROUPCOUNT:    return GROUP_COUNT;
+        case UIW_ITEMCOUNT:     return myInvCount;
+        case UIW_ITEMGROUP:     return getItemProperty(IT_GROUP, myInventory[idx][MI_IDX]);
+        case UIW_ITEMGROUPMAX:  return myInventoryGroupMax[idx]; // IDX is group in this case
+        case UIW_ELEMENT_COUNT: return 1;
+    }
+    // if the default clause ever gets invoked in this script, we have problems.
+    return -1;
+}
+
+int propIdx = -1;
+int propSlot = -1;
+str properties[UIX_IL_MAX];
+function int itemWheelElementProperty(int idx, int slot, int property, int selected)
+{
+    if(propIdx != idx || propSlot != slot) {
+        properties[UIX_IL_CONTENT] = "A";
+        properties[UIX_IL_FONT] = getItemProperty(IT_ICON, idx);
+        properties[UIX_IL_COLOR] = CR_UNTRANSLATED;
+        properties[UIX_IL_OFFSX] = 0;
+        properties[UIX_IL_OFFSY] = 0;
+        properties[UIX_IL_OFFSXOP] = 0;
+        properties[UIX_IL_OFFSYOP] = 0;
+        properties[UIX_IL_OFFSXTYPE] = 0;
+        properties[UIX_IL_OFFSYTYPE] = 0;
+        properties[UIX_IL_SCALE] = 3.0; // TODO: User Defined
+        properties[UIX_IL_ALPHA] = 1.0; // TODO: User Defined
+    }
+    return properties[property];
+}
+
+script "uixtiem_loop" (void)
+{
+    
+}
 
 #define ICON_PX 16
 
@@ -325,305 +401,6 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
 #define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
 #define bits 8
-
-script "uixitem_activate" (void) NET CLIENTSIDE
-{
-    if(!wheelInitialized)
-        terminate;
-
-    print_time("uixitem_activate", Timer());
-    int cln = ConsolePlayerNumber();
-    int pln = PlayerNumber();
-    int cam = ActivatorTID();
-
-    if(pln == -1)
-        terminate;
-    if(pln != cln)
-        terminate;
-    if(!playerInGame(pln))
-        terminate;
-
-    int INV_USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
-
-    wheelActive = true;
-    wheelTime = Timer();
-
-    int sPosY = GetActorPitch(0);
-    int sPosX = GetActorAngle(0);
-
-    int oldPosY, oldPosX;
-    int selectRange = 0.15;
-
-    int selected = mySelection;
-    int oldSelected = selected;
-    bool selectionActive = false;
-    int i, ii;
-    int ang;
-    int baseAng = 0.25;
-    int fadeTime = 0.0;
-
-    bool drawMouse = false;
-
-    while(true) {
-        if(!wheelActive)
-            fadeTime = 0.1;
-
-        if(IsNetworkGame()) {
-            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
-        } else {
-            SetActorPitch(0, sPosY);
-            SetActorAngle(0, sPosX);
-        }
-
-        int curTime = Timer()-wheelTime-INV_USE_BUFFER;
-
-        if(curTime < 0) {
-            delay(1);
-            continue;
-        }
-
-        int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
-        int userAlpha = 1.0;
-        int menuAlpha = GetCvar("dimamount");
-
-        int maxTime = 3;
-        curTime++;
-
-        if(curTime < maxTime+1) {
-            userAlpha = curTime * userAlpha / maxTime;
-            scaleMult = curTime * scaleMult / maxTime;
-            menuAlpha = curTime * menuAlpha / maxTime;
-        }
-
-        int baseScale = 3*scaleMult;
-
-        int sCountX = FixedMul(21.0, baseScale) >> 16;
-        int sCountY = FixedMul(24.0, baseScale) >> 16;
-        int sCenterOffs = FixedMul(6.0, baseScale) >> 16;
-
-        int iconAlpha = userAlpha >> 1;
-
-        int iconScale = 3*baseScale/4;
-        int iconX = FixedMul(ICON_PX / 2, iconScale);
-        int iconY = FixedMul(ICON_PX, iconScale);
-        int sIconScale = iconScale + iconScale/2;
-        int sIconX = FixedMul(ICON_PX / 2, sIconScale);
-        int sIconY = FixedMul(ICON_PX, sIconScale);
-        int messageScale = 2 * iconScale / 4;
-        int mouseScale = baseScale / 4;
-
-        int posyFactor = FixedMul(FixedMul(3.0, FixedDiv(GetScreenWidth(), GetScreenHeight())), iconScale);
-        int posxFactor = FixedMul((3.0), iconScale);
-
-        // Mouse logic --------------------------
-        oldPosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
-        oldPosX -= FixedMul(GetPlayerInput(cln, INPUT_YAW), posxFactor);
-
-        if(!drawMouse) {
-            if(abs(oldPosY) > 0.03 || abs(oldPosX) > 0.03)
-                drawMouse = true;
-        }
-
-        if(drawMouse) {
-            if(!selectionActive) {
-                if(abs(oldPosX) > selectRange || abs(oldPosX) > selectRange) {
-                    selectionActive = true;
-                }
-            }
-            int range = FixedMul(96, baseScale);
-
-            int clampAng = VectorAngle(oldPosX, oldPosY);
-
-            int botX = min(0, FixedMul(cos(clampAng), mouseScale));
-            int topX = max(0, FixedMul(cos(clampAng), mouseScale));
-            int botY = min(0, FixedMul(sin(clampAng), mouseScale));
-            int topY = max(0, FixedMul(sin(clampAng), mouseScale));
-
-            oldPosY = clamp(oldPosY, botY, topY);
-            oldPosX = clamp(oldPosX, botX, topX);
-        }
-        // --------------------------------------
-
-        // TODO: move these to defines
-        i = 0;
-        int IP_X = i++;
-        int IP_Y = i++;
-        int IP_ICON = i++;
-        int IP_COUNT = i++;
-        int IP_TAG = i++;
-        int iconPositions[UIX_INV_LMT+1][5];
-
-        int iconRange = (100*baseScale) >> 16;
-        int iconArc = 4*GROUP_ANG/5;
-
-        int closestInv = -1;
-        int closestDist = MAX_INT;
-
-        int wheelGroupCounts[GROUP_COUNT_LIMIT];
-
-        for(i = 0; i < myInvCount; i++) {
-            int idx = myInventory[i][MI_IDX];
-
-            iconPositions[i][IP_ICON] = getItemProperty(IT_ICON, idx);
-            iconPositions[i][IP_TAG] = getItemProperty(IT_TAG, idx);
-            iconPositions[i][IP_COUNT] = checkInventory(getItemProperty(IT_ACTOR, idx));
-
-            int group = getItemProperty(IT_GROUP, idx);
-
-            // Log(s:"centerrange: ", s:getItemProperty(IT_ACTOR, idx), s:" - ", i:iconArc, s:" ", i:getItemProperty(IT_INGROUPIDX, idx), s:" ", i:groupCounts[group]);
-
-            ang = baseAng
-                  + (GROUP_ANG * group)
-                  + (GROUP_ANG >> 1)
-                  + centerRange(iconArc, wheelGroupCounts[group]++, myInventoryGroupMax[group])
-                  ;
-            if(wheelGroupCounts[group] >= myInventoryGroupMax[group])
-                wheelGroupCounts[group] = 0;
-
-            iconPositions[i][IP_X] = (iconRange * cos(ang)) >> 16;
-            iconPositions[i][IP_Y] = (iconRange * sin(ang)) >> 16;
-
-            int mouseDist = VectorLength(oldPosX - iconPositions[i][IP_X], oldPosY - iconPositions[i][IP_Y]);
-            if(drawMouse) {
-                if(mouseDist < closestDist) {
-                    closestDist = mouseDist;
-                    closestInv = i;
-                    selected = closestInv;
-                }
-            }
-        }
-
-        for(i = 0; i < myInvCount; i++) {
-            if(i == closestInv) {
-                int amtColor = CR_GOLD;
-                displayIconFade(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+sIconX, iconPositions[i][IP_Y]+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-            } else {
-                amtColor = CR_DARKGREEN;
-                displayIconFade(LAYER_DEFAULT, iconPositions[i][IP_ICON], iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha/2, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-                displayIconFade(LAYER_DEFAULT, "UXICB0", iconPositions[i][IP_X]+IconX, iconPositions[i][IP_Y]+IconY, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-            }
-
-            if(iconPositions[i][IP_COUNT] > 1) {
-                SetFont("INDEXFONT");
-                displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[i][IP_COUNT]), 5*iconPositions[i][IP_X]/6, 5*iconPositions[i][IP_Y]/6, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, amtColor, fadeTime);
-            }
-        }
-
-        // Selected icon ------------------------
-        if(selected != -1) {
-            displayIconFade(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-            SetFont("SMALLFNT");
-            displayMessageColorFade(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD, fadeTime);
-
-            if(iconPositions[selected][IP_COUNT] > 1) {
-                SetFont("INDEXFONT");
-                displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE, fadeTime);
-            }
-        }
-        // --------------------------------------
-
-        // Out of sequence mouse drawing --------
-        if(drawMouse) {
-            displayIconFade(LAYER_DEFAULT, "UXIWCUR", FixedMul(oldPosX, range)+sIconX, FixedMul(oldPosY, range)+sIconY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-        }
-        // --------------------------------------
-
-        // Sector divisions ---------------------
-        for(i = 0; i < GROUP_COUNT; i++) {
-            ang = (GROUP_ANG * i) + baseAng;
-            int dotRange = (166*baseScale)>>16;
-            int dotCount = 30;
-            int dotBase = 80;
-            for(ii = 1; ii<dotCount; ii++){
-                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
-                int dotx = (dotDist * cos(ang)) >> 16;
-                int doty = (dotDist * sin(ang)) >> 16;
-                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
-
-                displayIconFade(LAYER_DEFAULT, "UXIWDOT", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-            }
-
-            // dotx = (dotRange * cos(ang)) >> 16;
-            // doty = (dotRange * sin(ang)) >> 16;
-            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
-
-            // displayIconFade(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-        }
-        // --------------------------------------
-
-        // Background ---------------------------
-
-        displayIconFade(LAYER_DEFAULT, "BLACKP", 0, 0, 100.0, 100.0, menuAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-
-        // --------------------------------------
-
-
-        if(selected != oldSelected) {
-            LocalAmbientSound("ui/itemwheelshift", 64);
-        }
-
-        oldSelected = selected;
-
-        if(fadeTime != 0)
-            break;
-
-        delay(1);
-    }
-    ACS_NamedExecuteWithResult("uixitem_selectitem", selected);
-
-    if(IsNetworkGame()) {
-        SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
-    }
-}
-
-script "uixitem_deactivate" (void) NET CLIENTSIDE
-{
-    int cln = ConsolePlayerNumber();
-    if(cln != PlayerNumber())
-        terminate;
-
-    if(wheelActive) {
-        wheelActive = false;
-
-        if(!GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP"))
-            terminate;
-
-        if(Timer()-wheelTime < GetUserCvar(ConsolePlayerNumber(), "UIX_CL_ITEMWHEELBUFFER")) {
-            UseInventory(myInventory[mySelection][MI_ITEM]);
-        }
-    }
-}
-
-script "uix_useitem1" (void) NET
-{
-    // str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
-    // if(CheckInventory(item) > 0) {
-        UseInventory("item1");
-    // }
-}
-
-script "uix_useitem2" (void) NET
-{
-    // str item = GetUserCvarString(PlayerNumber(), "UIX_CL_Temp_Item");
-    // if(CheckInventory(item) > 0) {
-        ConsoleCommand("invuse");
-    // }
-}
-
-
-function int clamp(int x, int n, int m)
-{
-    if(x > m)
-        return m;
-    if(x < n)
-        return n;
-    return x;
-}
-
-function int centerRange(int range, int dividend, int divisor)
-{
-    return ((range/divisor) >> 1) + dividend*range/divisor - (range >> 1);
-}
 
 // Test functions =====================================================================================================
 

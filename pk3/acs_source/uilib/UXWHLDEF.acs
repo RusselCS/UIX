@@ -1,0 +1,28 @@
+#define UIW_CURSELECT     0
+#define UIW_GROUPCOUNT    1
+#define UIW_ITEMCOUNT     2
+#define UIW_ITEMGROUP     3
+#define UIW_ITEMGROUPMAX  4
+#define UIW_ELEMENT_COUNT 5
+#define UIW_ELEMENT_START 6
+
+#define UIX_IL_CONTENT    0
+#define UIX_IL_FONT       1
+#define UIX_IL_COLOR      2
+#define UIX_IL_OFFSX      3
+#define UIX_IL_OFFSY      4
+#define UIX_IL_OFFSXOP    5
+#define UIX_IL_OFFSYOP    6
+#define UIX_IL_OFFSXTYPE  7 // 1 for Fixed
+#define UIX_IL_OFFSYTYPE  8
+#define UIX_IL_SCALE      9
+#define UIX_IL_ALPHA      10
+#define UIX_IL_MAX        11
+
+#define IL_TYPE_INT       0
+#define IL_TYPE_FIXED     1
+
+#define IL_OP_ADD         0
+#define IL_OP_SUBTRACT    1
+#define IL_OP_MULTIPLY    2
+#define IL_OP_DIVIDE      3

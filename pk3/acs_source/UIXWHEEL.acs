@@ -1,0 +1,351 @@
+#library "UIXWHEEL"
+
+#include "zcommon.acs"
+#include "SHRTFUNC.acs"
+
+#include "UXWHLDEF.acs"
+
+// Item Wheel Settings
+int wheelActive = false;
+
+// str selectScript = "uix_selectScript";
+// str settingsScript = "uix_settingsScript";
+
+// [Russ] Frankly just making something up rn
+// A limit of `some type` is needed for the scripted arrays to behave
+#define WHEEL_LIMIT       1000
+
+script "uix_settingsScript" (int mode, int idx, int a, int b) { SetResultValue(defaultWheelSelection(mode, idx, a, b)); }
+function int defaultWheelSelection(int mode, int idx, int a, int b)
+{
+    if(mode >= UIW_ELEMENT_START) {
+        return -1;
+    }
+    switch(mode) {
+        // case UIW_CURSELECT:     return -1;
+        // case UIW_GROUPCOUNT:    return -1;
+        // case UIW_ITEMCOUNT:     return -1;
+        // case UIW_ITEMGROUP:     return -1;
+        // case UIW_ITEMGROUPMAX:  return -1;
+        // case UIW_ELEMENT_COUNT: return -1;
+    }
+    // if the default clause ever gets invoked in this script, we have problems.
+    return -1;
+}
+
+#define SELECT_RANGE 0.15
+#define BASE_ANG 0.25
+
+#define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
+
+// [Russ] Keeping aggressive comments on this because I reckon it's gonna be a pain in the tail to maintain otherwise
+script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript) CLIENTSIDE
+{
+    if(wheelActive) terminate;
+    wheelActive = true;
+
+    int cln = ConsolePlayerNumber();
+
+    int sPosY = GetActorPitch(0);
+    int sPosX = GetActorAngle(0);
+    int isOnline = IsNetworkGame();
+
+    int USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
+
+    int selected = CallACS1(settingsScript, UIW_CURSELECT);
+    int oldSelected = selected;
+
+    int curCount = CallACS1(settingsScript, UIW_ITEMCOUNT);
+    int oldCount = curCount;
+    int groupCount = CallACS1(settingsScript, UIW_GROUPCOUNT);
+
+    int fadeTime = 0;
+    int wheelTime = Timer();
+
+    int i, ii;
+
+    int mousePosY = 0.0;
+    int mousePosX = 0.0;
+    bool drawMouse = false;
+    bool selectionActive = false;
+
+    while(true) {
+        if(!wheelActive)
+            fadeTime = 0.1;
+
+        // Aim lock - has different methods for online and offline.
+        // Offline, it's as simple as forcing the user to keep their pitch/yaw.
+        // Online, it needs to be "PROP_TOTALLYFROZEN" because force-setting the pitch/yaw causes jitter.
+        // This makes chasecam look a bit weird, but UIX's guiding mantra has always been "don't let perfect be the enemy of good" 🤷
+        if(!isOnline) {
+            SetActorPitch(0, sPosY);
+            SetActorAngle(0, sPosX);
+        } else {
+            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
+        }
+
+        // These need to always be up to date because they drive critical logic
+        // And since this will be tied to player's inventory, it NEEDS to be up to date at all times.
+        // Even if the current loop doesn't continue.
+        oldCount = curCount;
+        curCount = CallACS1(settingsScript, UIW_ITEMCOUNT);
+        groupCount = CallACS1(settingsScript, UIW_GROUPCOUNT);
+
+        // Escape conditions
+        if(curCount > WHEEL_LIMIT) {
+            Log(s:"\cg[uix_wheelActivate] ERROR: Element count above the limit!");
+            break;
+        }
+
+        int curTime = Timer()-wheelTime-USE_BUFFER;
+
+        if(loopScript != -1)
+            CallACS1(loopScript, curTime);
+
+        // If the timer is below the buffer, go ahead and skip this cycle.
+        if(curTime < 0) {
+            delay(1);
+            continue;
+        }
+
+        int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
+        int userAlpha = 1.0;
+        int menuAlpha = GetCvar("dimamount");
+
+        // Fade time is 1/10th of a second.
+        // There's no point in drawing something that has 0 alpha, so the timer
+        // is offset by 1 here to ensure the alpha is always 1 or more.
+        int maxTime = 3;
+        curTime++;
+
+        if(curTime < maxTime) {
+            userAlpha = curTime * userAlpha / maxTime;
+            scaleMult = curTime * scaleMult / maxTime;
+            menuAlpha = curTime * menuAlpha / maxTime;
+        }
+
+        int baseScale = 3*scaleMult;
+
+        int sCountX = FixedMul(21.0, baseScale) >> 16;
+        int sCountY = FixedMul(24.0, baseScale) >> 16;
+        int sCenterOffs = FixedMul(6.0, baseScale) >> 16;
+
+        int iconAlpha = userAlpha >> 1;
+
+        int mouseScale = baseScale / 4;
+
+        int posyFactor = FixedMul(FixedMul(3.0, FixedDiv(GetScreenWidth(), GetScreenHeight())), baseScale);
+        int posxFactor = FixedMul((3.0), baseScale);
+
+        // Mouse logic --------------------------
+        mousePosY -= FixedMul(GetPlayerInput(cln, INPUT_PITCH), posyFactor);
+        mousePosX -= FixedMul(GetPlayerInput(cln, INPUT_YAW), posxFactor);
+
+        if(!drawMouse) {
+            if(abs(mousePosY) > 0.03 || abs(mousePosX) > 0.03)
+                drawMouse = true;
+        }
+
+        if(drawMouse) {
+            if(!selectionActive) {
+                if(abs(mousePosX) > SELECT_RANGE || abs(mousePosX) > SELECT_RANGE) {
+                    selectionActive = true;
+                }
+            }
+            int range = FixedMul(96, baseScale);
+
+            int clampAng = VectorAngle(mousePosX, mousePosY);
+
+            int botX = min(0, FixedMul(cos(clampAng), mouseScale));
+            int topX = max(0, FixedMul(cos(clampAng), mouseScale));
+            int botY = min(0, FixedMul(sin(clampAng), mouseScale));
+            int topY = max(0, FixedMul(sin(clampAng), mouseScale));
+
+            mousePosY = clamp(mousePosY, botY, topY);
+            mousePosX = clamp(mousePosX, botX, topX);
+        }
+        // --------------------------------------
+
+        // These are kept updated before any escape conditions.
+        if(curCount < oldCount) {
+            selected = CallACS1(settingsScript, UIW_CURSELECT);
+        }
+
+        int groupAng = 1.0 / groupCount;
+
+        // TODO: move these to defines
+        i = 0;
+        int IP_X = i++;
+        int IP_Y = i++;
+        int basePositions[WHEEL_LIMIT][2];
+
+        int iconRange = (100*baseScale) >> 16;
+        int iconArc = 4*groupAng/5;
+
+        int closestInv = -1;
+        int closestDist = MAX_INT;
+
+        int wheelGroupCounts[WHEEL_LIMIT];
+
+        for(i = 0; i < curCount; i++) {
+            int group = CallACS2(settingsScript, UIW_ITEMGROUP, i);
+
+            // Log(s:"centerrange: ", s:getItemProperty(IT_ACTOR, idx), s:" - ", i:iconArc, s:" ", i:getItemProperty(IT_INGROUPIDX, idx), s:" ", i:groupCounts[group]);
+
+            int ang = BASE_ANG
+                  + (groupAng * group)
+                  + (groupAng >> 1)
+                  + centerRange(iconArc, wheelGroupCounts[group]++, CallACS2(settingsScript, UIW_ITEMGROUPMAX, group))
+                  ;
+            if(wheelGroupCounts[group] >= CallACS2(settingsScript, UIW_ITEMGROUPMAX, group))
+                wheelGroupCounts[group] = 0;
+
+            basePositions[i][IP_X] = (iconRange * cos(ang)) >> 16;
+            basePositions[i][IP_Y] = (iconRange * sin(ang)) >> 16;
+
+            int mouseDist = VectorLength(mousePosX - basePositions[i][IP_X], mousePosY - basePositions[i][IP_Y]);
+            if(drawMouse) {
+                if(mouseDist < closestDist) {
+                    closestDist = mouseDist;
+                    closestInv = i;
+                    selected = closestInv;
+                }
+            }
+        }
+
+        for(i = 0; i < curCount; i++) {
+
+            int elements = CallACS1(settingsScript, UIW_ELEMENT_COUNT);
+            int elSelected = i==selected;
+
+            for(ii = 0; ii < elements; ii++) {
+                int elContent = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_CONTENT, elSelected);
+                int elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_FONT,    elSelected);
+                int elScale   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_SCALE,   elSelected);
+                int elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_ALPHA,   elSelected);
+                int elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_COLOR,   elSelected);
+
+                int elX = applyExpression(
+                                        basePositions[i][IP_X],
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXOP, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSX, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXTYPE, elSelected)
+                                    );
+                int elY = applyExpression(
+                                        basePositions[i][IP_Y],
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYOP, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSY, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYTYPE, elSelected)
+                                    );
+
+                SetFont(elFont);
+                displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, ALIGN_CENTER, ALIGN_CENTER, elColor, fadeTime);
+            }
+        }
+
+        // Selected icon ------------------------
+        // if(selected != -1) {
+        //     displayIconFade(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+        //     SetFont("SMALLFNT");
+        //     displayMessageColorFade(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD, fadeTime);
+
+        //     if(iconPositions[selected][IP_COUNT] > 1) {
+        //         SetFont("INDEXFONT");
+        //         displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE, fadeTime);
+        //     }
+        // }
+        // --------------------------------------
+
+        // Out of sequence mouse drawing --------
+        if(drawMouse) {
+            displayIconFade(LAYER_DEFAULT, "UXIWCUR", FixedMul(mousePosX, range), FixedMul(mousePosY, range), baseScale, baseScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+        }
+        // --------------------------------------
+
+        // Sector divisions ---------------------
+        for(i = 0; i < groupCount; i++) {
+            ang = (groupAng * i) + BASE_ANG;
+            int dotRange = (166*baseScale)>>16;
+            int dotCount = 30;
+            int dotBase = 80;
+            for(ii = 1; ii<dotCount; ii++){
+                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
+                int dotx = (dotDist * cos(ang)) >> 16;
+                int doty = (dotDist * sin(ang)) >> 16;
+                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
+
+                displayIconFade(LAYER_DEFAULT, "UXIWDOT", dotx, doty, baseScale, baseScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+            }
+
+            // dotx = (dotRange * cos(ang)) >> 16;
+            // doty = (dotRange * sin(ang)) >> 16;
+            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
+
+            // displayIconFade(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+        }
+        // --------------------------------------
+
+        // Background ---------------------------
+
+        displayIconFade(LAYER_DEFAULT, "BLACKP", 0, 0, 100.0, 100.0, menuAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+
+        // --------------------------------------
+
+
+        if(selected != oldSelected) {
+            LocalAmbientSound("ui/itemwheelshift", 64);
+        }
+
+        oldSelected = selected;
+
+        if(fadeTime != 0)
+            break;
+
+        delay(1);
+    }
+    ACS_NamedExecuteWithResult(selectScript, selected);
+
+    if(IsNetworkGame()) {
+        SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
+    }
+}
+
+script "uix_wheelDeactivate" (void) CLIENTSIDE
+{
+    wheelActive = false;
+}
+
+function int applyExpression(int n, int op, int x, int type)
+{
+    if(!type) {
+        switch(op) {
+            case IL_OP_ADD:      n = n + x; break;
+            case IL_OP_SUBTRACT: n = n - x; break;
+            case IL_OP_MULTIPLY: n = n * x; break;
+            case IL_OP_DIVIDE:   n = n / x; break;
+        }
+    } else {
+        switch(op) {
+            case IL_OP_ADD:      n = n + x;          break;
+            case IL_OP_SUBTRACT: n = n - x;          break;
+            case IL_OP_MULTIPLY: n = FixedMul(n, x); break;
+            case IL_OP_DIVIDE:   n = FixedDiv(n, x); break;
+        }
+        n >>= 16;
+    }
+    return n;
+}
+
+function int clamp(int x, int n, int m)
+{
+    if(x > m)
+        return m;
+    if(x < n)
+        return n;
+    return x;
+}
+
+function int centerRange(int range, int dividend, int divisor)
+{
+    return ((range/divisor) >> 1) + dividend*range/divisor - (range >> 1);
+}
