@@ -158,7 +158,10 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 // myInventory
 #define MI_ITEM  0
 #define MI_IDX   1
-str myInventory[UIX_INV_LMT][3];
+#define MI_ICON  2
+#define MI_TAG   3
+#define MI_GROUP 4
+str myInventory[UIX_INV_LMT][5];
 int myInventoryGroupMax[GROUP_COUNT_LIMIT];
 
 int myInvCount = 0;
@@ -227,6 +230,8 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             for(i = 0; i < myNewInvCount; i++) {
                 myInventory[i][MI_ITEM] = myNewInventory[i][MI_ITEM];
                 myInventory[i][MI_IDX] = myNewInventory[i][MI_IDX];
+                myInventory[i][MI_ICON] = getItemProperty(IT_ICON, myInventory[i][MI_IDX]);
+                myInventory[i][MI_TAG] = getItemProperty(IT_TAG, myInventory[i][MI_IDX]);
             }
         }
 
@@ -249,6 +254,8 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             if(c > 0) {
                 myInventory[myInvCount][MI_ITEM] = act;
                 myInventory[myInvCount][MI_IDX] = i;
+                myInventory[myInvCount][MI_ICON] = getItemProperty(IT_ICON, i);
+                myInventory[myInvCount][MI_TAG] = getItemProperty(IT_TAG, i);
                 // Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
                 if(mySelection == -1)
                     mySelection = myInvCount;
@@ -314,14 +321,14 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
 //
 
 // settingsScript: uixitem_settings
-// loopScript: uixtiem_loop
+// loopScript: uixitem_loop
 // selectScript: uixitem_selectitem
 
 script "uixitem_activate" (void) NET CLIENTSIDE
 {
     if(!wheelInitialized)
         terminate;
-    CallACS3("uix_wheelActivate", "uixitem_settings", "uixtiem_loop", "uixitem_selectitem");
+    CallACS3("uix_wheelActivate", "uixitem_settings", -1, "uixitem_selectitem");
 }
 
 script "uixitem_deactivate" (void) NET CLIENTSIDE
@@ -349,7 +356,7 @@ script "uixitem_settings" (int mode, int idx, int a, int b) { SetResultValue(ite
 function int itemWheelSelection(int mode, int idx, int a, int b)
 {
     if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
-        return itemWheelElementProperty(myInventory[mode-UIW_ELEMENT_START][MI_IDX], idx, a, b);
+        return itemWheelElementProperty(mode-UIW_ELEMENT_START, idx, a, b);
     }
     switch(mode) {
         case UIW_CURSELECT:     return mySelection;
@@ -357,36 +364,217 @@ function int itemWheelSelection(int mode, int idx, int a, int b)
         case UIW_ITEMCOUNT:     return myInvCount;
         case UIW_ITEMGROUP:     return getItemProperty(IT_GROUP, myInventory[idx][MI_IDX]);
         case UIW_ITEMGROUPMAX:  return myInventoryGroupMax[idx]; // IDX is group in this case
-        case UIW_ELEMENT_COUNT: return 1;
+        case UIW_ELEMENT_COUNT:
+            if(b == 1) return 2;
+            return 3;
     }
     // if the default clause ever gets invoked in this script, we have problems.
     return -1;
 }
 
-int propIdx = -1;
-int propSlot = -1;
-str properties[UIX_IL_MAX];
-function int itemWheelElementProperty(int idx, int slot, int property, int selected)
+#define UIX_IW_LABELPOS -7
+#define UIX_IW_ICONX    8
+#define UIX_IW_ICONY    16
+
+#define UIX_IW_CNTMUL   0.8
+#define UIX_IW_CNTSCALE 1.2
+
+str properties_str[3][3][UIX_IL_MAX] = {
+    { // selected == 0
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixitem_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (count)
+            "uixitem_getcount", // UIX_IL_CONTENT
+            "INDEXFONT", // UIX_IL_FONT
+        },
+        { // slot == 2 (background)
+            "A", // UIX_IL_CONTENT
+            "UXICB0", // UIX_IL_FONT
+        },
+    },
+    { // selected == 1
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixitem_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (count)
+            "uixitem_getcount", // UIX_IL_CONTENT
+            "INDEXFONT", // UIX_IL_FONT
+        },
+    },
+    { // selected == 2
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixitem_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (count)
+            "uixitem_getcount", // UIX_IL_CONTENT
+            "INDEXFONT", // UIX_IL_FONT
+        },
+        { // slot == 2 (label)
+            "uixitem_getlabel", // UIX_IL_CONTENT
+            "SMALLFNT", // UIX_IL_FONT
+        },
+    },
+};
+
+int properties_int[3][3][UIX_IL_MAX] = {
+    { // selected == 0
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 1 (count)
+            CR_DARKGREY, // UIX_IL_COLOR
+            UIX_IW_CNTMUL, // UIX_IL_OFFSX
+            UIX_IW_CNTMUL, // UIX_IL_OFFSY
+            IL_OP_MULTIPLY, // UIX_IL_OFFSXOP
+            IL_OP_MULTIPLY, // UIX_IL_OFFSYOP
+            1, // UIX_IL_OFFSXTYPE
+            1, // UIX_IL_OFFSYTYPE
+            UIX_IW_CNTSCALE, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 2 (background)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+    { // selected == 1
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.5, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 1 (count)
+            CR_GOLD, // UIX_IL_COLOR
+            UIX_IW_CNTMUL, // UIX_IL_OFFSX
+            UIX_IW_CNTMUL, // UIX_IL_OFFSY
+            IL_OP_MULTIPLY, // UIX_IL_OFFSXOP
+            IL_OP_MULTIPLY, // UIX_IL_OFFSYOP
+            1, // UIX_IL_OFFSXTYPE
+            1, // UIX_IL_OFFSYTYPE
+            UIX_IW_CNTSCALE, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+    { // selected == 2
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.5, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 1 (count)
+            CR_WHITE, // UIX_IL_COLOR
+            -6, // UIX_IL_OFFSX
+            -5, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            2.0, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_RIGHT, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 2 (label)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            -UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+};
+
+// values here mean "do this thing"
+// 0: take the value as-is, as an int
+// 1: take the value as-is, as a str
+// 2: pass the given script the variables and pass that return back
+// perhaps an over-complicated way of handling this, but
+// it's simpler on computation side than a function with a bunch of exceptions to handle the edge cases
+int propertiesTypes[3][3][UIX_IL_MAX] = {
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0},
+    },
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0},
+    },
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0},
+    },
+};
+
+script "uixitem_geticon" (int idx) { SetResultValue(myInventory[idx][MI_ICON]); }
+script "uixitem_getcount" (int idx)
 {
-    if(propIdx != idx || propSlot != slot) {
-        properties[UIX_IL_CONTENT] = "A";
-        properties[UIX_IL_FONT] = getItemProperty(IT_ICON, idx);
-        properties[UIX_IL_COLOR] = CR_UNTRANSLATED;
-        properties[UIX_IL_OFFSX] = 0;
-        properties[UIX_IL_OFFSY] = 0;
-        properties[UIX_IL_OFFSXOP] = 0;
-        properties[UIX_IL_OFFSYOP] = 0;
-        properties[UIX_IL_OFFSXTYPE] = 0;
-        properties[UIX_IL_OFFSYTYPE] = 0;
-        properties[UIX_IL_SCALE] = 3.0; // TODO: User Defined
-        properties[UIX_IL_ALPHA] = 1.0; // TODO: User Defined
+    int count = CheckInventory(myInventory[idx][MI_ITEM]);
+    if(count > 1) {
+        SetResultValue(StrParam(i:count));
+        terminate;
     }
-    return properties[property];
+    SetResultValue(-1);
 }
 
-script "uixtiem_loop" (void)
+script "uixitem_getlabel" (int idx) { SetResultValue(StrParam(l:myInventory[idx][MI_TAG])); }
+
+
+function int itemWheelElementProperty(int idx, int slot, int property, int selected)
 {
-    
+    if(propertiesTypes[selected][slot][property] == 1) return properties_str[selected][slot][property];
+    if(propertiesTypes[selected][slot][property] == 2) return CallACS1(properties_str[selected][slot][property], idx);
+    return properties_int[selected][slot][property-2];
 }
 
 #define ICON_PX 16

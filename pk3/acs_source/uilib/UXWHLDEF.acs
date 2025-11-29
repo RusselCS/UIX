@@ -17,7 +17,9 @@
 #define UIX_IL_OFFSYTYPE  8
 #define UIX_IL_SCALE      9
 #define UIX_IL_ALPHA      10
-#define UIX_IL_MAX        11
+#define UIX_IL_HALIGN     11
+#define UIX_IL_VALIGN     12
+#define UIX_IL_MAX        13
 
 #define IL_TYPE_INT       0
 #define IL_TYPE_FIXED     1

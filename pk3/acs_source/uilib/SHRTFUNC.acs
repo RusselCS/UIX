@@ -373,3 +373,8 @@ function void readWeaponBars(str weap) {
     }
     // Log(s:"Output: ", i:cyan1, s:", ", i:blue1, s:", ", i:cyan2, s:", ", i:blue2);
 }
+
+function int zanRound(int x)
+{
+	return (x + 0.5) >> 16;
+}

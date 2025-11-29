@@ -34,7 +34,7 @@ function int defaultWheelSelection(int mode, int idx, int a, int b)
 }
 
 #define SELECT_RANGE 0.15
-#define BASE_ANG 0.25
+#define BASE_ANG 0.75
 
 #define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
@@ -52,7 +52,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
     int USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
 
-    int selected = CallACS1(settingsScript, UIW_CURSELECT);
+    int selected = -1;
     int oldSelected = selected;
 
     int curCount = CallACS1(settingsScript, UIW_ITEMCOUNT);
@@ -168,7 +168,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
         // These are kept updated before any escape conditions.
         if(curCount < oldCount) {
-            selected = CallACS1(settingsScript, UIW_CURSELECT);
+            selected = -1;
         }
 
         int groupAng = 1.0 / groupCount;
@@ -213,47 +213,82 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             }
         }
 
-        for(i = 0; i < curCount; i++) {
+        int elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign;
 
-            int elements = CallACS1(settingsScript, UIW_ELEMENT_COUNT);
-            int elSelected = i==selected;
+        for(i = 0; i < curCount; i++) {
+            elSelected = i==selected;
+            elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, 0, 0, elSelected);
 
             for(ii = 0; ii < elements; ii++) {
-                int elContent = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_CONTENT, elSelected);
-                int elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_FONT,    elSelected);
-                int elScale   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_SCALE,   elSelected);
-                int elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_ALPHA,   elSelected);
-                int elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_COLOR,   elSelected);
+                elContent = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_CONTENT, elSelected);
 
-                int elX = applyExpression(
+                if(elContent == -1)
+                    continue;
+
+                elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_FONT,    elSelected);
+                elScale   = FixedMul(baseScale, CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_SCALE, elSelected));
+                elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_ALPHA,   elSelected);
+                elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_COLOR,   elSelected);
+                elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_HALIGN,   elSelected);
+                elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_VALIGN,   elSelected);
+
+                elX = applyExpression(
                                         basePositions[i][IP_X],
                                         CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXOP, elSelected),
                                         CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSX, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXTYPE, elSelected)
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXTYPE, elSelected),
+                                        elScale
                                     );
-                int elY = applyExpression(
+                elY = applyExpression(
                                         basePositions[i][IP_Y],
                                         CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYOP, elSelected),
                                         CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSY, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYTYPE, elSelected)
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYTYPE, elSelected),
+                                        elScale
                                     );
 
                 SetFont(elFont);
-                displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, ALIGN_CENTER, ALIGN_CENTER, elColor, fadeTime);
+                displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
             }
         }
 
         // Selected icon ------------------------
-        // if(selected != -1) {
-        //     displayIconFade(LAYER_DEFAULT, iconPositions[selected][IP_ICON], sIconX, sIconY-sCenterOffs, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-        //     SetFont("SMALLFNT");
-        //     displayMessageColorFade(LAYER_DEFAULT, StrParam(l:iconPositions[selected][IP_TAG]), 0, sCenterOffs, IconScale, IconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_GOLD, fadeTime);
+        int preview = selected;
+        if(preview < 0)
+            preview = CallACS1(settingsScript, UIW_CURSELECT);
+        elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, 0, 0, 2);
 
-        //     if(iconPositions[selected][IP_COUNT] > 1) {
-        //         SetFont("INDEXFONT");
-        //         displayMessageColorFade(LAYER_DEFAULT, StrParam(i:iconPositions[selected][IP_COUNT]), sIconX-sCountX, sIconY-sCountY, sIconScale, sIconScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, CR_WHITE, fadeTime);
-        //     }
-        // }
+        for(ii = 0; ii < elements; ii++) {
+            elContent = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_CONTENT, 2);
+
+            if(elContent == -1)
+                continue;
+
+            elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_FONT,    2);
+            elScale   = FixedMul(baseScale, CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_SCALE, 2));
+            elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_ALPHA,   2);
+            elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_COLOR,   2);
+            elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_HALIGN,   2);
+            elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_VALIGN,   2);
+
+            elX = applyExpression(
+                                    0,
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSXOP, 2),
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSX, 2),
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSXTYPE, 2),
+                                    elScale
+                                );
+            elY = applyExpression(
+                                    0,
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSYOP, 2),
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSY, 2),
+                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSYTYPE, 2),
+                                    elScale
+                                );
+
+            SetFont(elFont);
+            displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
+        }
         // --------------------------------------
 
         // Out of sequence mouse drawing --------
@@ -303,6 +338,9 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
         delay(1);
     }
+    if(selected == -1)
+        selected = CallACS1(settingsScript, UIW_CURSELECT);
+
     ACS_NamedExecuteWithResult(selectScript, selected);
 
     if(IsNetworkGame()) {
@@ -315,23 +353,22 @@ script "uix_wheelDeactivate" (void) CLIENTSIDE
     wheelActive = false;
 }
 
-function int applyExpression(int n, int op, int x, int type)
+function int applyExpression(int n, int op, int x, int type, int scale)
 {
     if(!type) {
         switch(op) {
-            case IL_OP_ADD:      n = n + x; break;
-            case IL_OP_SUBTRACT: n = n - x; break;
+            case IL_OP_ADD:      n = n + zanRound(scale * x); break;
+            case IL_OP_SUBTRACT: n = n - zanRound(scale * x); break;
             case IL_OP_MULTIPLY: n = n * x; break;
             case IL_OP_DIVIDE:   n = n / x; break;
         }
     } else {
         switch(op) {
-            case IL_OP_ADD:      n = n + x;          break;
-            case IL_OP_SUBTRACT: n = n - x;          break;
-            case IL_OP_MULTIPLY: n = FixedMul(n, x); break;
-            case IL_OP_DIVIDE:   n = FixedDiv(n, x); break;
+            case IL_OP_ADD:      n = zanRound(n << 16 + zanRound(scale * x)); break;
+            case IL_OP_SUBTRACT: n = zanRound(n << 16 - zanRound(scale * x)); break;
+            case IL_OP_MULTIPLY: n = zanRound(n * x); break;
+            case IL_OP_DIVIDE:   n = zanRound(n / x); break;
         }
-        n >>= 16;
     }
     return n;
 }
