@@ -34,7 +34,7 @@ function int defaultWheelSelection(int mode, int idx, int a, int b)
 }
 
 #define SELECT_RANGE 0.15
-#define BASE_ANG 0.75
+#define BASE_ANG -0.25
 
 #define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
@@ -194,7 +194,6 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
             int ang = BASE_ANG
                   + (groupAng * group)
-                  + (groupAng >> 1)
                   + centerRange(iconArc, wheelGroupCounts[group]++, CallACS2(settingsScript, UIW_ITEMGROUPMAX, group))
                   ;
             if(wheelGroupCounts[group] >= CallACS2(settingsScript, UIW_ITEMGROUPMAX, group))
@@ -299,7 +298,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
         // Sector divisions ---------------------
         for(i = 0; i < groupCount; i++) {
-            ang = (groupAng * i) + BASE_ANG;
+            ang = (groupAng >> 1) + (groupAng * i) + BASE_ANG;
             int dotRange = (166*baseScale)>>16;
             int dotCount = 30;
             int dotBase = 80;

@@ -10,11 +10,12 @@
 // Preliminary data preparatation =====================================================================================
 
 #define IWGRP_NULL      -1
-#define IWGRP_BUSTER     0
-#define IWGRP_RECOV      1
-#define IWGRP_MOBILITY   2
-#define IWGRP_MISC       3
-#define IWGRP_ATTACK     4
+#define IWGRP_MOBILITY   0
+#define IWGRP_MISC       1
+#define IWGRP_ATTACK     2
+#define IWGRP_BUSTER     3
+#define IWGRP_RECOV      4
+
 #define IWGRP_MAX        5
 
 #define MAX_GROUPS 11
