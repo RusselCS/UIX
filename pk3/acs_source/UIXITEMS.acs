@@ -615,8 +615,8 @@ script "uixitem_giver" (void)
     }
 }
 
-script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
-script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
+// script "uixitem_enter" ENTER { CallACS0("uixitem_giver"); }
+// script "uixitem_respawn" RESPAWN { CallACS0("uixitem_giver"); }
 
 script "uix_timer" (void)
 {

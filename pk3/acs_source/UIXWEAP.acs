@@ -9,6 +9,8 @@
 #include "UXTBWBAR.acs"
 #include "UXTBWOVR.acs"
 
+#include "UXWHLDEF.acs"
+
 /*
 DATA NEEDED:
 - Wep Actor
@@ -538,4 +540,278 @@ function int busterMap(int idx)
     busterInit[idx][1] = wep;
 
     return wep;
+}
+
+// Weapon Wheel =====================================================================================================================================
+
+
+
+// Big Brother script ===========================
+// This one is far less complicated than the inventory manager because
+// weapons always have the same scroll order regardless of collection order
+// We don't need to be as heavy-handed
+
+#define UIX_WEAPS_LIMIT MAX_WEAPONS_GLOBAL_LIMIT + MAX_BUSTER_LIMIT
+int UIX_WEAPS = 0;
+
+#define AP_GROUP 0
+#define AP_WEP 1
+#define AP_ICON 2
+#define AP_TAG 3
+int wepProps[4];
+int WepGroupCounts[10];
+int GROUP_MAX = 0;
+int wepPropCacheIdx = -1;
+
+function int getWeaponProperty(int idx, int prop)
+{
+    if(wepPropCacheIdx != idx) {
+        int dtIdx;
+        if(idx < MAX_WEAPONS_GLOBAL) { // weapons
+            dtIdx = idx;
+            int group = getWeaponSlot(dtIdx)-1;
+            if(group < 0) group = 10;
+            wepProps[AP_GROUP] = group;
+            wepProps[AP_WEP] = getWeaponActor(dtIdx);
+            wepProps[AP_ICON] = getWeaponIcon(dtIdx);
+            wepProps[AP_TAG] = getWeaponTag(dtIdx);
+        } else { // busters
+            dtIdx = idx-MAX_WEAPONS_GLOBAL;
+            wepProps[AP_GROUP] = 0;
+            wepProps[AP_WEP] = getBusterActor(dtIdx);
+            wepProps[AP_ICON] = getBusterIcon(dtIdx);
+            wepProps[AP_TAG] = getBusterTag(dtIdx);
+        }
+    }
+    return wepProps[prop];
+}
+
+script "uixweap_bigbrother_open" OPEN CLIENTSIDE
+{
+    while(Timer() < 3) delay(1);
+    while(MAX_WEAPONS_GLOBAL == 0 || MAX_BUSTERUPGRADES == 0) delay(1);
+
+    UIX_WEAPS = MAX_WEAPONS_GLOBAL + MAX_BUSTERUPGRADES;
+
+    int i;
+    for(i = 0; i < UIX_WEAPS; i++) {
+        int group = getWeaponProperty(i, AP_GROUP);
+        WepGroupCounts[group]++;
+        if(WepGroupCounts[group] == 1) {
+            GROUP_MAX++;
+        }
+    }
+}
+
+int wheelActive = false;
+script "uixweap_wheel_start" (void) NET CLIENTSIDE
+{
+    if(GROUP_MAX == 0)
+        terminate;
+    if(wheelActive)
+        terminate;
+    wheelActive = true;
+    CallACS3("uix_wheelActivate", "uixweap_wheel_settings", -1, "uixweap_wheel_select");
+}
+
+script "uixweap_wheel_end" (void) NET CLIENTSIDE
+{
+    wheelActive = false;
+    CallACS0("uix_wheelDeactivate");
+}
+
+// Settings scripts
+int wheel_selectedWep = -1;
+int wheel_heldIdxMapping[UIX_WEAPS_LIMIT];
+int wheel_groups[10];
+int wheel_max;
+int wheel_lastUpdate;
+function void wheel_populate(void)
+{
+    if(wheel_lastUpdate == Timer())
+        return;
+    wheel_lastUpdate = Timer();
+
+    int i;
+    wheel_max = 0;
+
+    for(i = 0; i < 10; i++)
+        wheel_groups[i] = 0;
+
+    for(i = 0; i < UIX_WEAPS; i++) {
+        int act = getWeaponProperty(i, AP_WEP);
+        if(CheckInventory(act)) {
+            wheel_groups[getWeaponProperty(i, AP_GROUP)]++;
+            if(CheckWeapon(act))
+                wheel_selectedWep = wheel_max;
+
+            wheel_heldIdxMapping[wheel_max++] = i;
+        }
+    }
+}
+
+script "uixweap_wheel_settings" (int mode, int idx, int a, int b) { SetResultValue(wheel_settings(mode, idx, a, b)); }
+function int wheel_settings(int mode, int idx, int a, int b)
+{
+    wheel_populate();
+    if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
+        return wheel_getElementProperty(wheel_heldIdxMapping[mode-UIW_ELEMENT_START], idx, a, b);
+    }
+    switch(mode) {
+        case UIW_CURSELECT:     return wheel_selectedWep;
+        case UIW_GROUPCOUNT:    return GROUP_MAX;
+        case UIW_ITEMCOUNT:     return wheel_max;
+        case UIW_ITEMGROUP:     return getWeaponProperty(wheel_heldIdxMapping[idx], AP_GROUP);
+        case UIW_ITEMGROUPMAX:  return wheel_groups[idx]; // IDX is group in this case
+        case UIW_ELEMENT_COUNT:
+            if(b == 1) return 1;
+            return 2;
+    }
+    // if the default clause ever gets invoked in this script, we have problems.
+    return -1;
+}
+
+script "uixweap_wheel_select" (int idx)
+{
+    SetWeapon(getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP));
+}
+
+#define UIX_IW_LABELPOS -7
+#define UIX_IW_ICONX    8
+#define UIX_IW_ICONY    16
+
+#define UIX_IW_CNTMUL   0.8
+#define UIX_IW_CNTSCALE 1.2
+
+str properties_str[3][3][UIX_IL_MAX] = {
+    { // selected == 0
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (background)
+            "A", // UIX_IL_CONTENT
+            "UXICB0", // UIX_IL_FONT
+        },
+    },
+    { // selected == 1
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_geticon", // UIX_IL_FONT
+        },
+    },
+    { // selected == 2
+        { // slot == 0 (icon)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (label)
+            "uixweap_wheel_getlabel", // UIX_IL_CONTENT
+            "SMALLFNT", // UIX_IL_FONT
+        },
+    },
+};
+
+int properties_int[3][3][UIX_IL_MAX] = {
+    { // selected == 0
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 2 (background)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+    { // selected == 1
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.5, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+    { // selected == 2
+        { // slot == 0 (icon)
+            0, // UIX_IL_COLOR
+            UIX_IW_ICONX, // UIX_IL_OFFSX
+            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.5, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+        { // slot == 2 (label)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            -UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            1.0, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+        },
+    },
+};
+
+// values here mean "do this thing"
+// 0: take the value as-is, as an int
+// 1: take the value as-is, as a str
+// 2: pass the given script the variables and pass that return back
+// perhaps an over-complicated way of handling this, but
+// it's simpler on computation side than a function with a bunch of exceptions to handle the edge cases
+int propertiesTypes[3][2][UIX_IL_MAX] = {
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0},
+    },
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+    },
+    {
+        {1,2,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0},
+    },
+};
+
+script "uixweap_wheel_geticon" (int idx) { SetResultValue(getWeaponProperty(idx, AP_ICON)); }
+script "uixweap_wheel_getlabel" (int idx) { SetResultValue(StrParam(l:getWeaponProperty(idx, AP_TAG))); }
+
+function int wheel_getElementProperty(int idx, int slot, int property, int selected)
+{
+    if(propertiesTypes[selected][slot][property] == 1) return properties_str[selected][slot][property];
+    if(propertiesTypes[selected][slot][property] == 2) return CallACS1(properties_str[selected][slot][property], idx);
+    return properties_int[selected][slot][property-2];
 }

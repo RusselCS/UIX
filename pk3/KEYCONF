@@ -22,3 +22,6 @@ alias "freezebots" "pukename UIT_FREEZEBOTS"
 
 alias +invwheel "pukename \"uixitem_activate\""
 alias -invwheel "pukename \"uixitem_deactivate\""
+
+alias +weapwheel "pukename \"uixweap_wheel_start\""
+alias -weapwheel "pukename \"uixweap_wheel_end\""
