@@ -673,6 +673,7 @@ function int wheel_settings(int mode, int idx, int a, int b)
 
 script "uixweap_wheel_select" (int idx)
 {
+    GiveInventory("UIX_WeaponSelected_PU", 1);
     SetWeapon(getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP));
 }
 

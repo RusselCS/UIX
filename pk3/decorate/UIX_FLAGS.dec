@@ -8,3 +8,6 @@ actor UIX_Flag : Once {
 
 actor UIX_NoTeamBar : UIX_Flag {}
 actor UIX_NoWeaponBar : UIX_Flag {}
+
+actor UIX_ItemSelected_PU : Powerup { powerup.duration 2 }
+actor UIX_WeaponSelected_PU : Powerup { powerup.duration 2 }

@@ -299,6 +299,8 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
         terminate;
 
     int i;
+
+    GiveInventory("UIX_ItemSelected_PU", 1);
     // because the only real way to select an item is to take away everything and give it back...
     // that is done here.
     // to preserve order, this cycles around, taking all the player's items in order

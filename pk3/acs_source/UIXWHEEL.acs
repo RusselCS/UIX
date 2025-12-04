@@ -212,37 +212,49 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             }
         }
 
-        int elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign;
+        int el, elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign;
+        int oX, oY;
 
-        for(i = 0; i < curCount; i++) {
-            elSelected = i==selected;
+        for(i = 0; i <= curCount; i++) {
+            if(i < curCount) {
+                el = i;
+                elSelected = i==selected;
+                oX = basePositions[i][IP_X];
+                oY = basePositions[i][IP_Y];
+            } else {
+                el = selected < 0 ? CallACS1(settingsScript, UIW_CURSELECT) : selected;
+                elSelected = 2;
+                oX = 0;
+                oY = 0;
+            }
+
             elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, 0, 0, elSelected);
 
             for(ii = 0; ii < elements; ii++) {
-                elContent = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_CONTENT, elSelected);
+                elContent = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_CONTENT, elSelected);
 
                 if(elContent == -1)
                     continue;
 
-                elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_FONT,    elSelected);
-                elScale   = FixedMul(baseScale, CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_SCALE, elSelected));
-                elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_ALPHA,   elSelected);
-                elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_COLOR,   elSelected);
-                elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_HALIGN,   elSelected);
-                elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_VALIGN,   elSelected);
+                elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_FONT,    elSelected);
+                elScale   = FixedMul(baseScale, CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_SCALE, elSelected));
+                elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_ALPHA,   elSelected);
+                elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_COLOR,   elSelected);
+                elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_HALIGN,   elSelected);
+                elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_VALIGN,   elSelected);
 
                 elX = applyExpression(
-                                        basePositions[i][IP_X],
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXOP, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSX, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSXTYPE, elSelected),
+                                        oX,
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSXOP, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSX, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSXTYPE, elSelected),
                                         elScale
                                     );
                 elY = applyExpression(
-                                        basePositions[i][IP_Y],
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYOP, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSY, elSelected),
-                                        CallACS4(settingsScript, UIW_ELEMENT_START+i, ii, UIX_IL_OFFSYTYPE, elSelected),
+                                        oY,
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSYOP, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSY, elSelected),
+                                        CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_OFFSYTYPE, elSelected),
                                         elScale
                                     );
 
@@ -250,45 +262,6 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
                 displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
             }
         }
-
-        // Selected icon ------------------------
-        int preview = selected;
-        if(preview < 0)
-            preview = CallACS1(settingsScript, UIW_CURSELECT);
-        elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, 0, 0, 2);
-
-        for(ii = 0; ii < elements; ii++) {
-            elContent = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_CONTENT, 2);
-
-            if(elContent == -1)
-                continue;
-
-            elFont    = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_FONT,    2);
-            elScale   = FixedMul(baseScale, CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_SCALE, 2));
-            elAlpha   = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_ALPHA,   2);
-            elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_COLOR,   2);
-            elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_HALIGN,   2);
-            elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_VALIGN,   2);
-
-            elX = applyExpression(
-                                    0,
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSXOP, 2),
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSX, 2),
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSXTYPE, 2),
-                                    elScale
-                                );
-            elY = applyExpression(
-                                    0,
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSYOP, 2),
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSY, 2),
-                                    CallACS4(settingsScript, UIW_ELEMENT_START+preview, ii, UIX_IL_OFFSYTYPE, 2),
-                                    elScale
-                                );
-
-            SetFont(elFont);
-            displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
-        }
-        // --------------------------------------
 
         // Out of sequence mouse drawing --------
         if(drawMouse) {
