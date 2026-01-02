@@ -558,7 +558,13 @@ int UIX_WEAPS = 0;
 #define AP_WEP 1
 #define AP_ICON 2
 #define AP_TAG 3
-int wepProps[4];
+#define AP_AMMO1 4
+#define AP_BARCYAN1 5
+#define AP_BARBLUE1 6
+#define AP_AMMO2 7
+#define AP_BARCYAN2 8
+#define AP_BARBLUE2 9
+int wepProps[10];
 int WepGroupCounts[10];
 int GROUP_MAX = 0;
 int wepPropCacheIdx = -1;
@@ -575,12 +581,24 @@ function int getWeaponProperty(int idx, int prop)
             wepProps[AP_WEP] = getWeaponActor(dtIdx);
             wepProps[AP_ICON] = getWeaponIcon(dtIdx);
             wepProps[AP_TAG] = getWeaponTag(dtIdx);
+            wepProps[AP_AMMO1] = getWeaponAmmoType(dtIdx);
+            wepProps[AP_BARCYAN1] = WeaponBarColor(dtIdx, 1);
+            wepProps[AP_BARBLUE1] = WeaponBarColor(dtIdx, 2);
+            wepProps[AP_AMMO2] = getWeaponAmmo2Type(dtIdx);
+            wepProps[AP_BARCYAN2] = WeaponBarColor(dtIdx, 3);
+            wepProps[AP_BARBLUE2] = WeaponBarColor(dtIdx, 4);
         } else { // busters
             dtIdx = idx-MAX_WEAPONS_GLOBAL;
             wepProps[AP_GROUP] = 0;
             wepProps[AP_WEP] = getBusterActor(dtIdx);
             wepProps[AP_ICON] = getBusterIcon(dtIdx);
             wepProps[AP_TAG] = getBusterTag(dtIdx);
+            wepProps[AP_AMMO1] = -1;
+            wepProps[AP_BARCYAN1] = -1;
+            wepProps[AP_BARBLUE1] = -1;
+            wepProps[AP_AMMO2] = -1;
+            wepProps[AP_BARCYAN2] = -1;
+            wepProps[AP_BARBLUE2] = -1;
         }
     }
     return wepProps[prop];
@@ -664,7 +682,22 @@ function int wheel_settings(int mode, int idx, int a, int b)
         case UIW_ITEMGROUP:     return getWeaponProperty(wheel_heldIdxMapping[idx], AP_GROUP);
         case UIW_ITEMGROUPMAX:  return wheel_groups[idx]; // IDX is group in this case
         case UIW_ELEMENT_COUNT:
-            if(b == 1) return 1;
+            if(b == 1) {
+                if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN2) != -1) {
+                    return 7;
+                }
+                if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN1) != -1) {
+                    return 4;
+                }
+                return 1;
+            }
+
+            if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN2) != -1) {
+                return 8;
+            }
+            if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN1) != -1) {
+                return 5;
+            }
             return 2;
     }
     // if the default clause ever gets invoked in this script, we have problems.
@@ -677,14 +710,17 @@ script "uixweap_wheel_select" (int idx)
     SetWeapon(getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP));
 }
 
-#define UIX_IW_LABELPOS -7
+#define UIX_IW_LABELPOS -9
 #define UIX_IW_ICONX    8
 #define UIX_IW_ICONY    16
 
 #define UIX_IW_CNTMUL   0.8
 #define UIX_IW_CNTSCALE 1.2
 
-str properties_str[3][3][UIX_IL_MAX] = {
+#define UIX_IW_SELECTMODE 3
+#define UIX_IW_ELEMENTCOUNT 8
+
+str properties_str[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
     { // selected == 0
         { // slot == 0 (icon)
             "A", // UIX_IL_CONTENT
@@ -694,11 +730,59 @@ str properties_str[3][3][UIX_IL_MAX] = {
             "A", // UIX_IL_CONTENT
             "UXICB0", // UIX_IL_FONT
         },
+        { // slot == 2 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan1", // UIX_IL_FONT
+        },
+        { // slot == 3 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue1", // UIX_IL_FONT
+        },
+        { // slot == 4 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
+        },
+        { // slot == 5 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan2", // UIX_IL_FONT
+        },
+        { // slot == 6 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue2", // UIX_IL_FONT
+        },
+        { // slot == 7 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
+        },
     },
     { // selected == 1
         { // slot == 0 (icon)
             "A", // UIX_IL_CONTENT
             "uixweap_wheel_geticon", // UIX_IL_FONT
+        },
+        { // slot == 1 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan1_selected", // UIX_IL_FONT
+        },
+        { // slot == 2 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue1_selected", // UIX_IL_FONT
+        },
+        { // slot == 3 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
+        },
+        { // slot == 4 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan2_selected", // UIX_IL_FONT
+        },
+        { // slot == 5 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue2_selected", // UIX_IL_FONT
+        },
+        { // slot == 6 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
         },
     },
     { // selected == 2
@@ -710,11 +794,35 @@ str properties_str[3][3][UIX_IL_MAX] = {
             "uixweap_wheel_getlabel", // UIX_IL_CONTENT
             "SMALLFNT", // UIX_IL_FONT
         },
+        { // slot == 1 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan1_middle", // UIX_IL_FONT
+        },
+        { // slot == 2 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue1_middle", // UIX_IL_FONT
+        },
+        { // slot == 3 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
+        },
+        { // slot == 4 (cyan)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_cyan2_middle", // UIX_IL_FONT
+        },
+        { // slot == 5 (blue)
+            "A", // UIX_IL_CONTENT
+            "uixweap_wheel_getbar_blue2_middle", // UIX_IL_FONT
+        },
+        { // slot == 6 (background)
+            "A", // UIX_IL_CONTENT
+            "UIXWHEMP", // UIX_IL_FONT
+        },
     },
 };
 
-int properties_int[3][3][UIX_IL_MAX] = {
-    { // selected == 0
+int properties_int[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
+    { // selected == 0 - deselected radial
         { // slot == 0 (icon)
             0, // UIX_IL_COLOR
             UIX_IW_ICONX, // UIX_IL_OFFSX
@@ -727,8 +835,10 @@ int properties_int[3][3][UIX_IL_MAX] = {
             0.5, // UIX_IL_ALPHA
             ALIGN_CENTER, // UIX_IL_HALIGN
             ALIGN_CENTER, // UIX_IL_VALIGN
+            0,
+            0,
         },
-        { // slot == 2 (background)
+        { // slot == 1 (background)
             0, // UIX_IL_COLOR
             UIX_IW_ICONX, // UIX_IL_OFFSX
             UIX_IW_ICONY, // UIX_IL_OFFSY
@@ -740,9 +850,101 @@ int properties_int[3][3][UIX_IL_MAX] = {
             1.0, // UIX_IL_ALPHA
             ALIGN_CENTER, // UIX_IL_HALIGN
             ALIGN_CENTER, // UIX_IL_VALIGN
+            0,
+            0,
+        },
+        { // slot == 2 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 3 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 4 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 5 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 6 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            0.5, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 7 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.1, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
         },
     },
-    { // selected == 1
+    { // selected == 1 - selected radial
         { // slot == 0 (icon)
             0, // UIX_IL_COLOR
             UIX_IW_ICONX, // UIX_IL_OFFSX
@@ -755,9 +957,101 @@ int properties_int[3][3][UIX_IL_MAX] = {
             1.0, // UIX_IL_ALPHA
             ALIGN_CENTER, // UIX_IL_HALIGN
             ALIGN_CENTER, // UIX_IL_VALIGN
+            0,
+            0,
+        },
+        { // slot == 1 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 2 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 3 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            6*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 4 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 5 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 6 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            9*UIX_IW_ICONY, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
         },
     },
-    { // selected == 2
+    { // selected == 2 - menu middle
         { // slot == 0 (icon)
             0, // UIX_IL_COLOR
             UIX_IW_ICONX, // UIX_IL_OFFSX
@@ -770,11 +1064,13 @@ int properties_int[3][3][UIX_IL_MAX] = {
             1.0, // UIX_IL_ALPHA
             ALIGN_CENTER, // UIX_IL_HALIGN
             ALIGN_CENTER, // UIX_IL_VALIGN
+            0,
+            0,
         },
-        { // slot == 2 (label)
+        { // slot == 1 (label)
             0, // UIX_IL_COLOR
             0, // UIX_IL_OFFSX
-            -UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            -2*UIX_IW_LABELPOS, // UIX_IL_OFFSY
             IL_OP_ADD, // UIX_IL_OFFSXOP
             IL_OP_ADD, // UIX_IL_OFFSYOP
             0, // UIX_IL_OFFSXTYPE
@@ -783,6 +1079,98 @@ int properties_int[3][3][UIX_IL_MAX] = {
             1.0, // UIX_IL_ALPHA
             ALIGN_CENTER, // UIX_IL_HALIGN
             ALIGN_CENTER, // UIX_IL_VALIGN
+            0,
+            0,
+        },
+        { // slot == 2 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 3 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 4 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 5 (cyan)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 6 (blue)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
+        },
+        { // slot == 7 (background)
+            0, // UIX_IL_COLOR
+            0, // UIX_IL_OFFSX
+            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
+            IL_OP_ADD, // UIX_IL_OFFSXOP
+            IL_OP_ADD, // UIX_IL_OFFSYOP
+            0, // UIX_IL_OFFSXTYPE
+            0, // UIX_IL_OFFSYTYPE
+            0.15, // UIX_IL_SCALE
+            1.0, // UIX_IL_ALPHA
+            ALIGN_CENTER, // UIX_IL_HALIGN
+            ALIGN_CENTER, // UIX_IL_VALIGN
+            1.0,
+            160,
         },
     },
 };
@@ -793,22 +1181,102 @@ int properties_int[3][3][UIX_IL_MAX] = {
 // 2: pass the given script the variables and pass that return back
 // perhaps an over-complicated way of handling this, but
 // it's simpler on computation side than a function with a bunch of exceptions to handle the edge cases
-int propertiesTypes[3][2][UIX_IL_MAX] = {
+int propertiesTypes[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
     {
-        {1,2,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
     },
     {
-        {1,2,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
     },
     {
-        {1,2,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {2,1,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,2,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,0,0,0,0,0,0,0,0,0,0,0},
     },
 };
 
 script "uixweap_wheel_geticon" (int idx) { SetResultValue(getWeaponProperty(idx, AP_ICON)); }
 script "uixweap_wheel_getlabel" (int idx) { SetResultValue(StrParam(l:getWeaponProperty(idx, AP_TAG))); }
+
+script "uixweap_wheel_getbar_cyan1" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO1);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[0][2][11] = ammoFactor;
+    properties_int[0][3][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
+}
+script "uixweap_wheel_getbar_blue1" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
+
+script "uixweap_wheel_getbar_cyan2" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO2);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[0][5][11] = ammoFactor;
+    properties_int[0][6][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
+}
+script "uixweap_wheel_getbar_blue2" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
+
+
+script "uixweap_wheel_getbar_cyan1_selected" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO1);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[1][1][11] = ammoFactor;
+    properties_int[1][2][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
+}
+script "uixweap_wheel_getbar_blue1_selected" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
+
+script "uixweap_wheel_getbar_cyan2_selected" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO2);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[1][4][11] = ammoFactor;
+    properties_int[1][5][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
+}
+script "uixweap_wheel_getbar_blue2_selected" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
+
+
+script "uixweap_wheel_getbar_cyan1_middle" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO1);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[2][2][11] = ammoFactor;
+    properties_int[2][3][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
+}
+script "uixweap_wheel_getbar_blue1_middle" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
+
+script "uixweap_wheel_getbar_cyan2_middle" (int idx)
+{
+    int ammoType = getWeaponProperty(idx, AP_AMMO2);
+    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
+    properties_int[2][5][11] = ammoFactor;
+    properties_int[2][6][11] = ammoFactor;
+    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
+}
+script "uixweap_wheel_getbar_blue2_middle" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
 
 function int wheel_getElementProperty(int idx, int slot, int property, int selected)
 {

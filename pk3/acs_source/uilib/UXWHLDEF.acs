@@ -19,7 +19,9 @@
 #define UIX_IL_ALPHA      10
 #define UIX_IL_HALIGN     11
 #define UIX_IL_VALIGN     12
-#define UIX_IL_MAX        13
+#define UIX_IL_BARFACTOR  13
+#define UIX_IL_BARWIDTH   14
+#define UIX_IL_MAX        15
 
 #define IL_TYPE_INT       0
 #define IL_TYPE_FIXED     1

@@ -119,6 +119,30 @@ function void displayMessageColorFade(int layer, str msg, int offsX, int offsY, 
 #define BAR_DISPLAY_VERT 1
 #define BAR_DISPLAY_HORI 2
 
+function void displayMessageColorFadeBar(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color, int fadeTime, int width, int barFactor)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+
+	// [Russ] this is a lazy copy-paste from the drawbar functions i made
+	// so i'm just gonna populate the parameters that aren't included in this VERY long function signature
+	// k? k.
+
+	int height = MAX_INT >> 2;
+
+	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (calchalign == ALIGN_RIGHT || calchalign == ALIGN_NEGRIGHT ? -width : 0));
+	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (calcvalign == ALIGN_BOTTOM ? -height : 0));
+
+    int clip = (barFactor * width) >> 16;
+	SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
+
+	if(fadeTime > 0)
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
+	else
+		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+
+    SetHudClipRect(0, 0, 0, 0, 0);
+}
+
 // Bar drawing stuff
 // Original concept by BinaryCode
 //

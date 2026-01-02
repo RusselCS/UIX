@@ -212,7 +212,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             }
         }
 
-        int el, elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign;
+        int el, elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign, elBarWidth, elBarFactor;
         int oX, oY;
 
         for(i = 0; i <= curCount; i++) {
@@ -228,7 +228,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
                 oY = 0;
             }
 
-            elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, 0, 0, elSelected);
+            elements = CallACS4(settingsScript, UIW_ELEMENT_COUNT, el, 0, elSelected);
 
             for(ii = 0; ii < elements; ii++) {
                 elContent = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_CONTENT, elSelected);
@@ -242,6 +242,8 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
                 elColor   = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_COLOR,   elSelected);
                 elHAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_HALIGN,   elSelected);
                 elVAlign  = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_VALIGN,   elSelected);
+                elBarFactor = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_BARFACTOR,   elSelected);
+                elBarWidth = CallACS4(settingsScript, UIW_ELEMENT_START+el, ii, UIX_IL_BARWIDTH,   elSelected);
 
                 elX = applyExpression(
                                         oX,
@@ -258,8 +260,18 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
                                         elScale
                                     );
 
+                // [Russ] there's too much math involved for my rotten brain to get this done correctly
+                // so, in the misguided hopes no one actually wants to make anything more complicated,
+                // i'll just make the bars work at a basic level
+                // if i don't do it this way, i'll never get it done
+                // if you need text wrapping for a radial menu, fuck you, do it yourself
+                // i'm very tired
                 SetFont(elFont);
-                displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
+                if(elBarWidth != 0) {
+                    displayMessageColorFadeBar(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime, elBarWidth, elBarFactor);
+                } else {
+                    displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
+                }
             }
         }
 
