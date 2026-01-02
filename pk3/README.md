@@ -39,7 +39,7 @@ with the necessary integrations, so they do not need to be implemented directly 
 
 If your mod is not on this list and you want it to be, raise an issue on github.com/russelcs/uix or ping me on discord.
 I typically hang out in the MM8BDM unofficial discord (linked from the forums), TSPG discord, or in the Gondola discord.
-My name is Russel, or RusselCS. Please describe me with he/him or they/them pronouns.
+I go by Russel, or RusselCS. Please describe me with he/him or they/them pronouns.
 
 Alternatively you can choose to support this mod yourself in your project.
 To do that, just define a clientside script that checks if there's a network game and call your table definition functions from there.
@@ -164,3 +164,11 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
   - Cleaned up unused graphics, functions, scripts, and lumps.
   - Compressed graphics.
   - Stopped maintaining v6a support.
+
+# Build Instructions
+
+This project ships with my Doom Archive Manager, which can compile everything in the pk3 folder into a functional pwad in the form of a pk3.
+On Windows, simply run `dam build` through powershell or cmd.
+For Linux, I did not include a bash script to easily run this in linux, but the command to do so is `java -jar dam.jar -p archive.linux.properties`.
+Java supporting OpenJVM in some form is required to build a pk3. I recommend Eclipse Adoptium.
+
