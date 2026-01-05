@@ -52,6 +52,18 @@ user bool UIX_CV_TEAMINFOSHOWMENUSTATUS = true;
 user bool UIX_CV_TEAMINFOSHOWOBJECTIVES = true;
 user int UIX_CL_TEAMINFOLAYER = 0;
 
+server noarchive bool UIX_SV_COMPASS = true;
+user bool UIX_CL_COMPASS = true;
+user int UIX_CL_COMPASSX = 0;
+user int UIX_CL_COMPASSY = 350;
+user float UIX_CL_COMPASSSCALE = 3.0;
+user float UIX_CL_COMPASSWIDTHSCALE = 1.0;
+user float UIX_CL_COMPASSALPHA = 1.0;
+user bool UIX_CL_COMPASSUSEPLAYERFOV = false;
+user int UIX_CL_COMPASSFOV = 90;
+user int UIX_CL_COMPASSUNIT = 0;
+user bool UIX_CL_COMPASSFLIP = true;
+
 server noarchive bool UIX_SV_DRAWKILLFEED = true;
 user bool UIX_CL_DRAWKILLFEED = true;
 user int UIX_CL_KILLFEEDLAYER = 0;

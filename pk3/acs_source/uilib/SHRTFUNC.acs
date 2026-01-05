@@ -402,3 +402,11 @@ function int zanRound(int x)
 {
 	return (x + 0.5) >> 16;
 }
+
+function int normalize(int angle)
+{
+	while(angle < 0)
+		angle += 1.0;
+	return angle % 1.0;
+}
+

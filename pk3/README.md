@@ -165,6 +165,9 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
   - Compressed graphics.
   - Stopped maintaining v6a support.
 
+## v3a changelog: "the marathon continues"
+
+
 # Build Instructions
 
 This project ships with my Doom Archive Manager, which can compile everything in the pk3 folder into a functional pwad in the form of a pk3.

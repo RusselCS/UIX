@@ -62,6 +62,7 @@ OptionMenu "UIXOptions"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
 	Submenu "Kill Feed Options", "UIXOptions_KillFeed"
 	Submenu "Item Wheel Options", "UIXOptions_ItemWheel"
+	Submenu "Compass Options", "UIXOptions_Compass"
 	StaticText " "
 	Submenu "Server Settings", "UIXOptions_ServerMenu"
 	StaticText " "
@@ -255,6 +256,37 @@ OptionMenu "UIXOptions_ItemWheel"
 	StaticText " "
 }
 
+OptionMenu "UIXOptions_Compass"
+{
+	Title "COMPASS SETTINGS"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Clashing Items", 1
+	StaticText "---------------", 1
+	StaticText "$UIX_MNU_CLASHES", 1
+	Option "Objective Radar",	"mm8bdm_noctfradar", "OffOn"
+	Option "Show tag on swap",	"displaynametags", 	"DisplayTagsTypes"
+	StaticText " "
+	StaticText "---------------", 1
+	StaticText "Settings", 1
+	StaticText "---------------", 1
+	Option "Compass Enabled", "UIX_CL_COMPASS", "OnOff"
+
+	Slider "Compass X", "UIX_CL_COMPASSX", -640, 640, 10
+	Slider "Compass Y", "UIX_CL_COMPASSY", -640, 640, 10
+	Slider "Compass Scale", "UIX_CL_COMPASSSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Compass Width Scale", "UIX_CL_COMPASSWIDTHSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Compass Alpha", "UIX_CL_COMPASSALPHA", 0.0, 1.0, 0.05, 2
+	Option "Flip Compass", "UIX_CL_COMPASSFLIP", "OnOff"
+
+	Option "Angle Unit", "UIX_CL_COMPASSUNIT", "CompassUnit"
+
+	Option "Use Player's FOV", "UIX_CL_COMPASSUSEPLAYERFOV", "OnOff"
+	Slider "Compass's FOV", "UIX_CL_COMPASSFOV", 10, 90, 5
+
+	StaticText " "
+}
+
 OptionMenu "UIXOptions_ServerMenu"
 {
 	RequiresRconAccess
@@ -268,6 +300,7 @@ OptionMenu "UIXOptions_ServerMenu"
 	Option "Team Info Enabled", "UIX_SV_TEAMINFO", "YesNo"
 	Option "Weapon Bar Enabled", "UIX_SV_WEAPBAR", "YesNo"
 	Option "Frag Mugshots Enabled", "UIX_SV_DRAWKILLFEED", "YesNo"
+	Option "Compass Enabled", "UIX_SV_COMPASS", "YesNo"
 	StaticText " "
 }
 
@@ -293,4 +326,11 @@ OptionValue "UIXLayers"
 {
 	0, "Over Status Bar"
 	1, "Under Status Bar"
+}
+
+OptionValue "CompassUnit"
+{
+	0, "Degrees"
+	1, "Fixed Point Angle"
+	2, "Byte Angle"
 }

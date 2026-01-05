@@ -3,6 +3,7 @@
 #include "decorate/UIX_FLAGS.dec"
 #include "decorate/UIX_CAMS.dec"
 #include "decorate/UIX_ITEMS.dec"
+#include "decorate/UIX_COMPASS.dec"
 
 // pb-skinsupport
 #include "decorate/pbskins.dec"

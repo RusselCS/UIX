@@ -1,0 +1,166 @@
+#library "UICMPASS"
+
+#include "zcommon.acs"
+
+#include "SHRTFUNC.acs"
+
+int layer = 0;
+
+// main compass script, pretty simple
+script "uix_compassdispatcher" OPEN CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    do
+    {
+        delay(1);
+        SetActivatorToPlayer(cln);
+        SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+
+        drawCompass(cln);
+    }
+    while(true);
+}
+
+#define MAX_ANGLE_DEG 360 << 16
+
+#define MAX_POINTS 24
+#define POINT_DIV 1.0/MAX_POINTS
+#define POINT_PROPS 2
+
+#define POINT_SCALE 1.0
+#define TICK_SCALE 0.4
+
+int compassPoints[MAX_POINTS] = {
+    POINT_SCALE, TICK_SCALE, TICK_SCALE, POINT_SCALE, TICK_SCALE, TICK_SCALE,
+    POINT_SCALE, TICK_SCALE, TICK_SCALE, POINT_SCALE, TICK_SCALE, TICK_SCALE,
+    POINT_SCALE, TICK_SCALE, TICK_SCALE, POINT_SCALE, TICK_SCALE, TICK_SCALE,
+    POINT_SCALE, TICK_SCALE, TICK_SCALE, POINT_SCALE, TICK_SCALE, TICK_SCALE,
+};
+
+int compassInFov[MAX_POINTS];
+
+#define TICK "\cu|\n\n"
+
+str compassStrings[MAX_POINTS] = {
+    "\cjE", TICK, TICK, "\cjNE", TICK, TICK,
+    "\cjN", TICK, TICK, "\cjNW", TICK, TICK,
+    "\cjW", TICK, TICK, "\cjSW", TICK, TICK,
+    "\cjS", TICK, TICK, "\cjSE", TICK, TICK,
+};
+
+#define ANG_UNIT 3
+#define ANG_BLANK ""
+
+str compassAngles[ANG_UNIT][MAX_POINTS] = {
+    {
+        ANG_BLANK, "\n\cj345", "\n\cj330", ANG_BLANK, "\n\cj300", "\n\cj285",
+        ANG_BLANK, "\n\cj255", "\n\cj240", ANG_BLANK, "\n\cj210", "\n\cj195",
+        ANG_BLANK, "\n\cj165", "\n\cj150", ANG_BLANK, "\n\cj120", "\n\cj105",
+        ANG_BLANK, "\n\cj75",  "\n\cj60",  ANG_BLANK, "\n\cj30",  "\n\cj15",
+    },
+    {
+        ANG_BLANK, "\n\cj.958", "\n\cj.917", ANG_BLANK, "\n\cj.833", "\n\cj.792",
+        ANG_BLANK, "\n\cj.708", "\n\cj.667", ANG_BLANK, "\n\cj.583", "\n\cj.542",
+        ANG_BLANK, "\n\cj.458", "\n\cj.417", ANG_BLANK, "\n\cj.333", "\n\cj.292",
+        ANG_BLANK, "\n\cj.208", "\n\cj.167", ANG_BLANK, "\n\cj.083", "\n\cj.042",
+    },
+    {
+        ANG_BLANK, "\n\cj244", "\n\cj234", ANG_BLANK, "\n\cj213", "\n\cj202",
+        ANG_BLANK, "\n\cj181", "\n\cj170", ANG_BLANK, "\n\cj149", "\n\cj138",
+        ANG_BLANK, "\n\cj117", "\n\cj106", ANG_BLANK, "\n\cj85",  "\n\cj74",
+        ANG_BLANK, "\n\cj53",  "\n\cj43",  ANG_BLANK, "\n\cj21",  "\n\cj11",
+    },
+};
+
+// mirrored, piece
+#define PIECE_ARROW 0
+str compassBorders[2][1] = {
+    { "UXCMARRW" },
+    { "UXCMARRF" },
+};
+
+// activator: client's current camera
+function void drawCompass(int cln)
+{
+    if(!getCvar("UIX_SV_COMPASS"))
+        return;
+    if(!getUserCvar(cln, "UIX_CL_COMPASS"))
+        return;
+
+    int basex = getUserCvar(cln, "UIX_CL_COMPASSX");
+    int basey = getUserCvar(cln, "UIX_CL_COMPASSY");
+    int baseScale = getUserCvar(cln, "UIX_CL_COMPASSSCALE");
+    int baseAlpha = getUserCvar(cln, "UIX_CL_COMPASSALPHA");
+    int angUnit = getUserCvar(cln, "UIX_CL_COMPASSUNIT");
+    int flipped = getUserCvar(cln, "UIX_CL_COMPASSFLIP");
+    int flipFactor = 1 - (2 * flipped);
+
+    int centerY = baseY + roundFactor(-1.0, baseScale);
+    int widthScale = FixedMul(0.4, FixedMul(baseScale, getUserCvar(cln, "UIX_CL_COMPASSWIDTHSCALE")));
+
+    int fov, i;
+    int minPoint;
+
+    if(getUserCvar(cln, "UIX_CL_COMPASSUSEPLAYERFOV"))
+        fov = normalize(FixedDiv(90.0, MAX_ANGLE_DEG)); // will need to populate this with some other specific logic later...
+    else
+        fov = normalize(FixedDiv(GetCVar("UIX_CL_COMPASSFOV") << 16, MAX_ANGLE_DEG));
+
+    int actyaw = GetActorAngle(0);
+    int minYaw = normalize(actYaw-(fov/2));
+    int maxYaw = normalize(actYaw+(fov/2));
+
+    str loc = GetActorSectorLocation(0, 0);
+
+    SetActivator(0, AAPTR_NULL);
+
+    displayIcon(layer, compassBorders[flipped][PIECE_ARROW], basex, centerY + roundFactor(flipFactor*6.0, baseScale), baseScale, baseScale, baseAlpha, ALIGN_CENTER, ALIGN_CENTER);
+    SetFont("SMALLFNT");
+
+    for(i = 0; i < MAX_POINTS; i++) {
+        int calcYaw = normalize(i * POINT_DIV - actYaw);
+
+        if(cos(calcYaw) < 0)
+            continue;
+
+        int alpha = FixedMul(clamp(FixedMul(cos(calcYaw), 1.5), 0.0, 1.0), baseAlpha);
+        int scale = FixedMul(baseScale, compassPoints[i]);
+
+        if(compassAngles[angUnit][i] != ANG_BLANK)
+            displayMessage(layer, compassAngles[angUnit][i], basex - roundFactor(widthScale, sinFactor(calcYaw, 200)), basey, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+
+        displayMessage(layer, compassStrings[i], basex - roundFactor(widthScale, sinFactor(calcYaw, 200)), basey, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+    }
+
+    if(StrLen(loc) != 0)
+        displayMessage(layer, StrParam(s:"\cf", s:loc), basex, centerY + roundFactor(flipFactor*13.5, baseScale), baseScale, baseScale, baseAlpha, ALIGN_CENTER, ALIGN_CENTER);
+}
+
+function int roundFactor(int x, int y)
+{
+    return (fixedMul(x, y) + 0.5) >> 16;
+}
+
+function int cosFactor(int theta, int factor)
+{
+    return (FixedMul(cos(theta), factor << 16) + 0.5) >> 16;
+}
+
+function int sinFactor(int theta, int factor)
+{
+    return (FixedMul(sin(theta), factor << 16) + 0.5);
+}
+
+function int clamp(int n, int mn, int mx)
+{
+    if(mx < mn) {
+        int t = mx;
+        mx = mn;
+        mn = t;
+    }
+    if(n > mx)
+        n = mx;
+    if(n < mn)
+        n = mn;
+    return n;
+}
