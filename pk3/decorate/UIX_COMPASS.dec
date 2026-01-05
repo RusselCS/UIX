@@ -3,7 +3,7 @@ actor UixCompassMultitarget_CI : CustomInventory
     States
     {
     Pickup:
-        TNT1 A 0 ACS_NamedExecuteWithResult("uix_loadcompassicon_actor")
+        TNT1 A 0 A_ClientsideACSExecute("uix_loadcompassicon_actor")
         stop
     }
 }

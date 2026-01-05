@@ -50,7 +50,7 @@ function void clearCompassProperties(void)
         UIX_COMPASS_TEMP[i] = 0;
 }
 
-script "uix_drawcompassicon" (int propScript, int tid, int clearTid)
+script "uix_drawcompassicon" (int propScript, int tid, int clearTid) CLIENTSIDE
 {
     if(ThingCount(T_NONE, tid) < 1)
         terminate;
@@ -90,12 +90,12 @@ script "uix_drawcompassicon_xyz" (int propScript, int x, int y, int z)
     callBackScript = -1;
 }
 
-script "uix_loadcompassicon_actor" (void)
+script "uix_loadcompassicon_actor" (void) CLIENTSIDE
 {
     CallACS3("uix_loadcompassicon", GetActorX(0), GetActorY(0), GetActorZ(0));
 }
 
-script "uix_loadcompassicon" (int x, int y, int z)
+script "uix_loadcompassicon" (int x, int y, int z) CLIENTSIDE
 {
     if(UIX_COMPASS_MAX >= UIX_COMPASS_MAX_LIMIT)
         terminate;
@@ -384,7 +384,7 @@ script "UIX_ACID_PROPERTIES" (void)
     CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
 }
 
-// Exit Unit
+// Exit Unit -------------------------------------------------------------
 script "UIX_EXIT_ICONNER" OPEN CLIENTSIDE
 {
     int cln = ConsolePlayerNumber();
