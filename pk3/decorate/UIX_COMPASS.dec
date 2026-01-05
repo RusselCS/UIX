@@ -3,7 +3,17 @@ actor UixCompassMultitarget_CI : CustomInventory
     States
     {
     Pickup:
-        TNT1 A 0 ACS_NamedExecuteWithResult("uix_loadcompassicon")
+        TNT1 A 0 ACS_NamedExecuteWithResult("uix_loadcompassicon_actor")
         stop
+    }
+}
+
+actor AcidDripperUIX : AcidDripper replaces AcidDripper
+{
+    states
+    {
+    Spawn:
+        TNT1 A 0 nodelay ACS_NamedExecuteWithResult("UIX_ACID_ICONNER_TID")
+        goto Super::Spawn
     }
 }

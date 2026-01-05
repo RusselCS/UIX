@@ -3,9 +3,124 @@
 #include "zcommon.acs"
 
 #include "SHRTFUNC.acs"
+#include "8BDMDEFS.acs"
+
+#include "UXTBICNS.acs"
 
 int layer = 0;
 
+// Icon API stuff =====================================================================================================
+#define UIX_COMPASS_MAX_LIMIT 1000
+int UIX_COMPASS_MAX = 0;
+
+#define UIC_INIT 0
+#define UIC_ICON 1
+#define UIC_POSX 2
+#define UIC_POSY 3
+#define UIC_POSZ 4
+#define UIC_SCALE 5
+#define UIC_ALPHA 6
+#define UIC_OFFSX 7
+#define UIC_OFFSY 8
+
+#define UIC_PROPS 9
+
+int UIX_COMPASS_ICON[UIX_COMPASS_MAX_LIMIT][UIC_PROPS];
+int UIX_COMPASS_TEMP[UIC_PROPS];
+
+int compassTransaction = false;
+str callBackScript = -1;
+
+script "uix_setcompassproperty" (int prop, int val) { setCompassProperty(prop, val); }
+
+function int getCompassProperty(int prop)
+{
+    return UIX_COMPASS_TEMP[prop];
+}
+
+function void setCompassProperty(int prop, int val)
+{
+    UIX_COMPASS_TEMP[prop] = val;
+    if(!UIX_COMPASS_TEMP[UIC_INIT]) UIX_COMPASS_TEMP[UIC_INIT] = true;
+}
+
+function void clearCompassProperties(void)
+{
+    for(int i = 0; i < UIC_PROPS; i++)
+        UIX_COMPASS_TEMP[i] = 0;
+}
+
+script "uix_drawcompassicon" (int propScript, int tid, int clearTid)
+{
+    if(ThingCount(T_NONE, tid) < 1)
+        terminate;
+    if(compassTransaction)
+        terminate;
+    compassTransaction = true;
+
+    // [Russ] i cannot imagine a world where a string created by a mod would end up being the 0th index.
+    // I know it is TECHNICALLY possible, but usually map scripts fill those up first, and almost certainly even empty map scripts will
+    // fill that with stuff from vanilla. The chance of a mod invoking 0 as this script is miniscule.
+    if(propScript != 0)
+        callBackScript = propScript;
+
+    GiveActorInventory(tid, "UixCompassMultitarget_CI", 1);
+    clearCompassProperties();
+
+    if(clearTid)
+        Thing_ChangeTID(tid, 0);
+
+    compassTransaction = false;
+    callBackScript = -1;
+}
+
+script "uix_drawcompassicon_xyz" (int propScript, int x, int y, int z)
+{
+    if(compassTransaction)
+        terminate;
+    compassTransaction = true;
+
+    if(propScript != 0)
+        callBackScript = propScript;
+
+    CallACS3("uix_loadcompassicon", x, y, z);
+    clearCompassProperties();
+
+    compassTransaction = false;
+    callBackScript = -1;
+}
+
+script "uix_loadcompassicon_actor" (void)
+{
+    CallACS3("uix_loadcompassicon", GetActorX(0), GetActorY(0), GetActorZ(0));
+}
+
+script "uix_loadcompassicon" (int x, int y, int z)
+{
+    if(UIX_COMPASS_MAX >= UIX_COMPASS_MAX_LIMIT)
+        terminate;
+
+    // Log(n:0, s:" acted script with parameter ", s:callBackScript);
+
+    setCompassProperty(UIC_POSX, x);
+    setCompassProperty(UIC_POSY, y);
+    setCompassProperty(UIC_POSZ, z);
+    setCompassProperty(UIC_SCALE, 1.0);
+    setCompassProperty(UIC_ALPHA, 1.0);
+
+    // [Russ] Invoke the callback script *after* the default properties are set
+    // this way the modder can modify the properties as they want without needing
+    // to worry about stuff they don't care about
+    if(callBackScript != -1)
+        CallACS0(callBackScript);
+
+    int idx = UIX_COMPASS_MAX++;
+    for(int i = 0; i < UIC_PROPS; i++) {
+        UIX_COMPASS_ICON[idx][i] = UIX_COMPASS_TEMP[i];
+    }
+}
+
+// Dispatcher Script ==================================================================================================
 // main compass script, pretty simple
 script "uix_compassdispatcher" OPEN CLIENTSIDE
 {
@@ -17,8 +132,52 @@ script "uix_compassdispatcher" OPEN CLIENTSIDE
         SetActivator(0, AAPTR_PLAYER_GETCAMERA);
 
         drawCompass(cln);
+        UIX_COMPASS_MAX = 0;
     }
     while(true);
+}
+
+script "uix_compass_scaler" (void)
+{
+    SetResultValue(CallACS4("uix_compass_scaler_ex", 1.0, 0.33, 2048, 5));
+}
+
+script "uix_compass_scaler_ex" (int maxScale, int minScale, int maxDist, int segs)
+{
+    int objX = UIX_COMPASS_TEMP[UIC_POSX];
+    int objY = UIX_COMPASS_TEMP[UIC_POSY];
+    int objZ = UIX_COMPASS_TEMP[UIC_POSZ];
+
+    SetActivatorToPlayer(ConsolePlayerNumber());
+    SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+
+    int povX = GetActorX(0);
+    int povY = GetActorY(0);
+    int povZ = GetActorZ(0);
+
+    int dist = VectorLength(VectorLength(objX-povX, objY-povY), objZ-povZ) >> 16;
+
+    SetResultValue(distScale(dist, maxScale, minScale, maxDist, segs));
+}
+
+function int distScale(int dist, int maxScale, int minScale, int maxDist, int segs)
+{
+    if(dist > maxDist)
+        return minScale;
+    segs--;
+
+    int distPart = maxDist / segs;
+    int zeroScale = maxScale - minScale;
+    int scalePart = zeroScale / segs;
+
+    zeroScale += scalePart; // offset this cuz the while loop will undo it immediately
+
+    while(dist > 0) {
+        dist -= distPart;
+        zeroScale -= scalePart;
+    }
+
+    return zeroScale + minScale;
 }
 
 #define MAX_ANGLE_DEG 360 << 16
@@ -79,6 +238,8 @@ str compassBorders[2][1] = {
     { "UXCMARRF" },
 };
 
+// the actual drawing script
+// mostly simple trigonometric math
 // activator: client's current camera
 function void drawCompass(int cln)
 {
@@ -106,6 +267,9 @@ function void drawCompass(int cln)
     else
         fov = normalize(FixedDiv(GetCVar("UIX_CL_COMPASSFOV") << 16, MAX_ANGLE_DEG));
 
+    int actX = GetActorX(0);
+    int actY = GetActorY(0);
+
     int actyaw = GetActorAngle(0);
     int minYaw = normalize(actYaw-(fov/2));
     int maxYaw = normalize(actYaw+(fov/2));
@@ -115,16 +279,36 @@ function void drawCompass(int cln)
     SetActivator(0, AAPTR_NULL);
 
     displayIcon(layer, compassBorders[flipped][PIECE_ARROW], basex, centerY + roundFactor(flipFactor*6.0, baseScale), baseScale, baseScale, baseAlpha, ALIGN_CENTER, ALIGN_CENTER);
-    SetFont("SMALLFNT");
 
-    for(i = 0; i < MAX_POINTS; i++) {
-        int calcYaw = normalize(i * POINT_DIV - actYaw);
+    int alpha, scale, calcYaw;
+
+    for(i = 0; i < UIX_COMPASS_MAX; i++) {
+        calcYaw = normalize(VectorAngle(UIX_COMPASS_ICON[i][UIC_POSX]-actX, UIX_COMPASS_ICON[i][UIC_POSY]-actY) - actYaw);
 
         if(cos(calcYaw) < 0)
             continue;
 
-        int alpha = FixedMul(clamp(FixedMul(cos(calcYaw), 1.5), 0.0, 1.0), baseAlpha);
-        int scale = FixedMul(baseScale, compassPoints[i]);
+        alpha = FixedMul(FixedMul(clamp(FixedMul(cos(calcYaw), 1.5), 0.0, 1.0), baseAlpha), UIX_COMPASS_ICON[i][UIC_ALPHA]);
+        if(alpha <= 0.0)
+            continue;
+
+        scale = FixedMul(baseScale, UIX_COMPASS_ICON[i][UIC_SCALE]);
+        if(scale <= 0.0)
+            continue;
+
+        displayIcon(layer, UIX_COMPASS_ICON[i][UIC_ICON], basex - roundFactor(widthScale, sinFactor(calcYaw, 200)) + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSX] << 16), centerY + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSY] << 16), scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+    }
+
+    SetFont("SMALLFNT");
+
+    for(i = 0; i < MAX_POINTS; i++) {
+        calcYaw = normalize(i * POINT_DIV - actYaw);
+
+        if(cos(calcYaw) < 0)
+            continue;
+
+        alpha = FixedMul(clamp(FixedMul(cos(calcYaw), 1.5), 0.0, 1.0), baseAlpha);
+        scale = FixedMul(baseScale, compassPoints[i]);
 
         if(compassAngles[angUnit][i] != ANG_BLANK)
             displayMessage(layer, compassAngles[angUnit][i], basex - roundFactor(widthScale, sinFactor(calcYaw, 200)), basey, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
@@ -163,4 +347,79 @@ function int clamp(int n, int mn, int mx)
     if(n < mn)
         n = mn;
     return n;
+}
+
+// Core icon setters! =================================================================================================
+// Acid Drippers - As a joke/demo.
+// This widget probably doesn't help much on MM2DW3 anyway, so it's proooobably fine.
+// Might piss off Bik tho
+int acidicon_tid = 0;
+script "UIX_ACID_ICONNER" OPEN CLIENTSIDE
+{
+    if(StrICmp(StrParam(n:PRINTNAME_LEVEL), "MM2DW3") != 0)
+        terminate;
+
+    acidicon_tid = UniqueTID(10000);
+
+    while(true) {
+        delay(1);
+        CallACS3("uix_drawcompassicon", "UIX_ACID_PROPERTIES", acidicon_tid, false);
+    }
+}
+
+script "UIX_ACID_ICONNER_TID" (void) CLIENTSIDE
+{
+    until(acidicon_tid != 0) {
+        if(Timer() > 35) terminate;
+        delay(1);
+    }
+    Thing_ChangeTID(0, acidicon_tid);
+}
+
+script "UIX_ACID_PROPERTIES" (void)
+{
+    CallACS2("uix_setcompassproperty", UIC_ICON, "ACIDD0");
+    CallACS2("uix_setcompassproperty", UIC_OFFSX, 0);
+    CallACS2("uix_setcompassproperty", UIC_OFFSY, 8);
+    CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
+}
+
+// Exit Unit
+script "UIX_EXIT_ICONNER" OPEN CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    int pln;
+    do
+    {
+        delay(1);
+        SetActivatorToPlayer(cln);
+        SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+
+        pln = PlayerNumber();
+
+        if(pln < 0)
+            continue;
+
+        if(PlayerHealth() <= 0)
+            continue;
+
+        if(CheckInventory("ExitUnitItem") == 0)
+            continue;
+
+        CallACS2("uix_drawcompassicon", "uix_exiticon_properties", pln+PLN_EXITUNITIMAGE);
+    }
+    while(true);
+}
+
+script "uix_exiticon_properties" (void)
+{
+    if((Timer() / 6) % 2 == 0) {
+        CallACS2("uix_setcompassproperty", UIC_ICON, "EXITB0");
+    } else {
+        CallACS2("uix_setcompassproperty", UIC_ICON, "EXITC0");
+    }
+
+    CallACS2("uix_setcompassproperty", UIC_OFFSX, 11);
+    CallACS2("uix_setcompassproperty", UIC_OFFSY, 19);
+    CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
 }
