@@ -45,8 +45,11 @@ function int getCompassProperty(int prop)
 
 function void setCompassProperty(int prop, int val)
 {
+    if(!UIX_COMPASS_TEMP[UIC_INIT]) {
+        UIX_COMPASS_TEMP[UIC_MESSAGE] = "A";
+        UIX_COMPASS_TEMP[UIC_INIT] = true;
+    }
     UIX_COMPASS_TEMP[prop] = val;
-    if(!UIX_COMPASS_TEMP[UIC_INIT]) UIX_COMPASS_TEMP[UIC_INIT] = true;
 }
 
 function void clearCompassProperties(void)
@@ -724,7 +727,7 @@ script "uix_objective_iconner" OPEN CLIENTSIDE
     while(true);
 }
 
-int neutralColors[2] = { 86, 95 };
+int neutralColors[2] = { 81, 3 };
 
 function int getTeamColor(int team, int idx)
 {
