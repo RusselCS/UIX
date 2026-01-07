@@ -26,8 +26,9 @@ int UIX_COMPASS_MAX = 0;
 #define UIC_OFFSY 8
 #define UIC_COLOR 9
 #define UIC_MESSAGE 10
+#define UIC_DIST 11
 
-#define UIC_PROPS 11
+#define UIC_PROPS 12
 
 int UIX_COMPASS_ICON[UIX_COMPASS_MAX_LIMIT][UIC_PROPS];
 int UIX_COMPASS_TEMP[UIC_PROPS];
@@ -112,16 +113,49 @@ script "uix_loadcompassicon" (int x, int y, int z) CLIENTSIDE
     setCompassProperty(UIC_SCALE, 1.0);
     setCompassProperty(UIC_ALPHA, 1.0);
 
+    SetActivatorToPlayer(ConsolePlayerNumber());
+    SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+
+    int povX = GetActorX(0);
+    int povY = GetActorY(0);
+    int povZ = GetActorZ(0);
+
+    int dist = VectorLength(VectorLength(x-povX, y-povY), z-povZ) >> 16;
+    setCompassProperty(UIC_DIST, dist);
+
     // [Russ] Invoke the callback script *after* the default properties are set
     // this way the modder can modify the properties as they want without needing
     // to worry about stuff they don't care about
     if(callBackScript != -1)
         CallACS0(callBackScript);
 
-    int idx = UIX_COMPASS_MAX++;
+    int idx = prepareSort(dist);
     for(int i = 0; i < UIC_PROPS; i++) {
         UIX_COMPASS_ICON[idx][i] = UIX_COMPASS_TEMP[i];
     }
+}
+
+function int prepareSort(int dist)
+{
+    int idx = findSortIndex(dist);
+
+    for(int i = UIX_COMPASS_MAX; i > idx; i--) {
+        for(int prop = 0; prop < UIC_PROPS; prop++) {
+            UIX_COMPASS_ICON[i][prop] = UIX_COMPASS_ICON[i-1][prop];
+        }
+    }
+    UIX_COMPASS_MAX++;
+
+    return idx;
+}
+
+function int findSortIndex(int dist)
+{
+    for(int i = 0; i < UIX_COMPASS_MAX; i++) {
+        if(dist < UIX_COMPASS_ICON[i][UIC_DIST])
+            return i;
+    }
+    return UIX_COMPASS_MAX;
 }
 
 // Dispatcher Script ==================================================================================================
@@ -148,20 +182,7 @@ script "uix_compass_scaler" (void)
 
 script "uix_compass_scaler_ex" (int maxScale, int minScale, int maxDist, int segs)
 {
-    int objX = UIX_COMPASS_TEMP[UIC_POSX];
-    int objY = UIX_COMPASS_TEMP[UIC_POSY];
-    int objZ = UIX_COMPASS_TEMP[UIC_POSZ];
-
-    SetActivatorToPlayer(ConsolePlayerNumber());
-    SetActivator(0, AAPTR_PLAYER_GETCAMERA);
-
-    int povX = GetActorX(0);
-    int povY = GetActorY(0);
-    int povZ = GetActorZ(0);
-
-    int dist = VectorLength(VectorLength(objX-povX, objY-povY), objZ-povZ) >> 16;
-
-    SetResultValue(distScale(dist, maxScale, minScale, maxDist, segs));
+    SetResultValue(distScale(UIX_COMPASS_TEMP[UIC_DIST], maxScale, minScale, maxDist, segs));
 }
 
 function int distScale(int dist, int maxScale, int minScale, int maxDist, int segs)
@@ -489,8 +510,8 @@ function str getTeamItem(int team) {
 script "uix_objective_iconner_regevent" OPEN
 {
     CallACS0("uix_objective_iconner_pickmode");
-    AddSpawnFunc(DTADD_SFT_FLAG, "uix_object_flagger");
-    AddSpawnFunc(DTADD_SFT_PILLAR, "uix_pillar_flagger");
+    AddSpawnFunc(DTADD_SFT_FLAG, "uix_object_marker");
+    AddSpawnFunc(DTADD_SFT_PILLAR, "uix_pillar_marker");
 }
 
 script "uix_objective_iconner_pickmode" (void)
@@ -511,7 +532,7 @@ script "uix_objective_iconner_pickmode" (void)
     }
 }
 
-script "uix_object_flagger" (void)
+script "uix_object_marker" (void)
 {
     str name = StrParam(n:0);
     int team = findTeamItem(name);
@@ -552,7 +573,7 @@ function void removeIfExisting(int tid) {
     }
 }
 
-script "uix_pillar_flagger" (void)
+script "uix_pillar_marker" (void)
 {
     if(!useSkull)
         terminate;
