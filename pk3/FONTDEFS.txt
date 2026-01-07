@@ -2,3 +2,25 @@ SIDEFNTL
 {
 	TEMPLATE OTCFN%03d
 }
+
+// [Russ] i realized at some point it's probably better to
+// just do this with text colors instead of ten quintillion graphics
+// was probably a little too late to save some other components though
+CMPSOBJS
+{
+	A UXCMOBJA
+	B UXCMOBJB
+	C UXCMOBJC
+	D UXCMOBJD
+	E UXCMOBJE
+	F UXCMOBJF
+	G UXCMOBJG
+	H UXCMOBJH
+	I UXCMOBJI
+	J UXCMOBJJ
+	K UXCMOBJK
+	L UXCMOBJL
+	M UXCMOBJM
+
+	NOTRANSLATION 4// 247
+}

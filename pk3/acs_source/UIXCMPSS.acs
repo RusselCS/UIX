@@ -5,6 +5,7 @@
 #include "SHRTFUNC.acs"
 #include "8BDMDEFS.acs"
 
+#include "DTADD.acs"
 #include "UXTBICNS.acs"
 
 int layer = 0;
@@ -15,6 +16,7 @@ int UIX_COMPASS_MAX = 0;
 
 #define UIC_INIT 0
 #define UIC_ICON 1
+#define UIC_FONT 1
 #define UIC_POSX 2
 #define UIC_POSY 3
 #define UIC_POSZ 4
@@ -22,8 +24,10 @@ int UIX_COMPASS_MAX = 0;
 #define UIC_ALPHA 6
 #define UIC_OFFSX 7
 #define UIC_OFFSY 8
+#define UIC_COLOR 9
+#define UIC_MESSAGE 10
 
-#define UIC_PROPS 9
+#define UIC_PROPS 11
 
 int UIX_COMPASS_ICON[UIX_COMPASS_MAX_LIMIT][UIC_PROPS];
 int UIX_COMPASS_TEMP[UIC_PROPS];
@@ -296,7 +300,23 @@ function void drawCompass(int cln)
         if(scale <= 0.0)
             continue;
 
-        displayIcon(layer, UIX_COMPASS_ICON[i][UIC_ICON], basex - roundFactor(widthScale, sinFactor(calcYaw, 200)) + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSX] << 16), centerY + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSY] << 16), scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+        SetFont(UIX_COMPASS_ICON[i][UIC_ICON]);
+
+        int color = UIX_COMPASS_ICON[i][UIC_COLOR];
+
+        if(color == -1) {
+            displayMessage(layer, UIX_COMPASS_ICON[i][UIC_MESSAGE],
+                basex - roundFactor(widthScale, sinFactor(calcYaw, 200)) + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSX] << 16),
+                centerY + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSY] << 16),
+                scale, scale, alpha,
+                ALIGN_CENTER, ALIGN_CENTER);
+        } else {
+            displayMessageColorString(layer, UIX_COMPASS_ICON[i][UIC_MESSAGE],
+                basex - roundFactor(widthScale, sinFactor(calcYaw, 200)) + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSX] << 16),
+                centerY + roundFactor(scale, UIX_COMPASS_ICON[i][UIC_OFFSY] << 16),
+                scale, scale, alpha,
+                ALIGN_CENTER, ALIGN_CENTER, color);
+        }
     }
 
     SetFont("SMALLFNT");
@@ -423,3 +443,310 @@ script "uix_exiticon_properties" (void)
     CallACS2("uix_setcompassproperty", UIC_OFFSY, 19);
     CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
 }
+
+// CTF/Skulltag ----------------------------------------------------------
+
+// First, spawn all some synchronized markers so the clients know where everything is...
+#define UIX_TRACKER_START 12300
+#define UIX_TEAM_MAX 5
+#define UIX_WHITEFLAG 4
+#define UIX_TRACKER_DEPOSITS_START UIX_TRACKER_START+UIX_TEAM_MAX
+int UIX_TRACKER_DEPOSITS = 0;
+
+#define UIX_PROP_TEAM AProp_Mass
+#define UIX_PROP_SCORE AProp_Accuracy
+
+int useSkull = false;
+int ctfMode = -1;
+int maxTeams = 0;
+
+str teamItem_str[UIX_TEAM_MAX][6] = {
+    {"MegaBlueFlag", "MegaBlueHat", "UIX_Deposit_Blue_1", "UIX_Deposit_Blue_2", "UIX_Deposit_Blue_3", "UIX_Deposit_Blue_4"},
+    {"MegaRedFlag", "MegaRedHat", "UIX_Deposit_Red_1", "UIX_Deposit_Red_2", "UIX_Deposit_Red_3", "UIX_Deposit_Red_4"},
+    {"MegaGreenFlag", "MegaGreenHat", "UIX_Deposit_Green_1", "UIX_Deposit_Green_2", "UIX_Deposit_Green_3", "UIX_Deposit_Green_4"},
+    {"MegaYellowFlag", "MegaYellowHat", "UIX_Deposit_Yellow_1", "UIX_Deposit_Yellow_2", "UIX_Deposit_Yellow_3", "UIX_Deposit_Yellow_4"},
+    {"MegaWhiteFlag", "MegaWhiteHat", "UIX_Deposit_Neutral_1", "UIX_Deposit_Neutral_2", "UIX_Deposit_Neutral_3", "UIX_Deposit_Neutral_4"}, // team -1 is neutral
+};
+
+#define TI_DEPOSIT 0
+
+int teamItem_int[UIX_TEAM_MAX][1];
+
+str teamItemTracker[2] = { "UIX_TeamHome", "UIX_TeamDropped" };
+
+function int findTeamItem(str act) {
+    for(int i = 0; i < UIX_TEAM_MAX; i++) {
+        if(StrICmp(getTeamItem(i), act) == 0)
+            return i;
+    }
+    return -1;
+}
+
+function str getTeamItem(int team) {
+    return teamItem_str[team][useSkull];
+}
+
+script "uix_objective_iconner_regevent" OPEN
+{
+    CallACS0("uix_objective_iconner_pickmode");
+    AddSpawnFunc(DTADD_SFT_FLAG, "uix_object_flagger");
+    AddSpawnFunc(DTADD_SFT_PILLAR, "uix_pillar_flagger");
+}
+
+script "uix_objective_iconner_pickmode" (void)
+{
+    if(GetCVar("oneflagctf")) {
+        ctfMode = 0;
+    }
+    if(GetCVar("skulltag")) {
+        useSkull = true;
+        ctfMode = 1;
+    }
+    if(GetCVar("ctf")) {
+        ctfMode = 2;
+    }
+
+    if(ctfMode > -1) {
+        maxTeams = GetCVar("sv_maxteams");
+    }
+}
+
+script "uix_object_flagger" (void)
+{
+    str name = StrParam(n:0);
+    int team = findTeamItem(name);
+
+    if(team == -1)
+        terminate;
+
+    if(!teamItem_int[team][TI_DEPOSIT] && team < UIX_TEAM_MAX-1) {
+        teamItem_int[team][TI_DEPOSIT] = true;
+        if(!useSkull) {
+            // just tell the clients this depository is worth 4 or more points
+            // ya know, like a liar.
+            // (it's so the icon doesn't show a number because ctf only awards 1 point per score)
+            SpawnSpotForced(teamItem_str[team][5], 0, 0, 0);
+        }
+    }
+
+    int tid = team+UIX_TRACKER_START;
+
+    removeIfExisting(tid);
+    SpawnSpotForced(teamItemTracker[GetActorProperty(0, AProp_Dropped)], 0, tid, 0);
+    // Log(s:"Object ", i:tid, s:" created on ", i:Timer(), s:" by ", n:0);
+
+    int act = ClassifyActor(0);
+    while(true) {
+        if(act != ClassifyActor(0)) break;
+        if(!CheckFlag(0, "SPECIAL")) break;
+        delay(1);
+    }
+
+    removeIfExisting(tid);
+}
+
+function void removeIfExisting(int tid) {
+    if(ThingCount(T_NONE, tid) > 0) {
+        Thing_Remove(tid);
+        // Log(s:"Object ", i:tid, s:" removed on ", i:Timer(), s:" by ", n:0);
+    }
+}
+
+script "uix_pillar_flagger" (void)
+{
+    if(!useSkull)
+        terminate;
+
+    GiveInventory("UIX_Deposit_SpawnPillar_CI", 1);
+}
+
+script "UIX_Deposit_SpawnPillar" (int a, int b)
+{
+    int u = UniqueTID();
+    int me = UniqueTID(u+1);
+    int oldme = ActivatorTID();
+
+    Thing_ChangeTID(0, me);
+
+    b = clamp(b-1, 0, 3);
+    SpawnSpotForced(teamItem_str[a][2+b], 0, u, 0);
+
+    SetActivator(u);
+    SetPointer(AAPTR_TARGET, me);
+    SetActivator(me);
+
+    Thing_ChangeTID(0, oldme);
+}
+
+script "UIX_Objective_AssignTID" (void)
+{
+    int tid = UIX_TRACKER_DEPOSITS_START+UIX_TRACKER_DEPOSITS;
+    UIX_TRACKER_DEPOSITS++;
+    Thing_ChangeTID(0, tid);
+    // Log(n:0, s:" tid: ", i:ActivatorTID(), s:" // team: ", i:GetActorProperty(0, UIX_PROP_TEAM));
+}
+
+// Now that the clients know where everything is, let's show the players!
+script "uix_objective_iconner" OPEN CLIENTSIDE
+{
+    CallACS0("uix_objective_iconner_pickmode");
+    if(ctfMode == -1)
+        terminate;
+
+    int minTeam = 0;
+    int maxTeam = maxTeams;
+
+    if(ctfMode == 0) { // one flag CTF has different carry rules...
+        minTeam = 4;
+        maxTeam = 5;
+    }
+
+    int cln = ConsolePlayerNumber();
+    int pln;
+
+    int i;
+    do
+    {
+        SetActivator(0, AAPTR_NULL);
+        delay(1);
+
+        SetActivatorToPlayer(cln);
+        SetActivator(0, AAPTR_PLAYER_GETCAMERA);
+        pln = PlayerNumber();
+        bool imCarrying = false;
+
+        for(i = minTeam; i < maxTeam; i++) {
+            int carrying = false;
+            int tid = i+UIX_TRACKER_START;
+
+            if(ThingCount(T_NONE, tid) == 0) {
+                for(int ii = 0; ii < MAX_PLAYERS_SHRT; ii++) {
+                    if(!PlayerInGame(ii))
+                        continue;
+                    if(CheckActorInventory(ii+PLN_TID_SHRT, getTeamItem(i)) > 0) {
+                        if(!imCarrying && ii == pln) {
+                            imCarrying = true;
+                        } else {
+                            tid = ii+PLN_TID_SHRT;
+                            carrying = true;
+                        }
+                        break;
+                    }
+                }
+
+                // 410 gone.
+                if(tid == i+UIX_TRACKER_START) continue;
+            }
+
+            if(GetActorProperty(tid, AProp_Dropped)) {
+                if((Timer() / 17) % 2) {
+                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                } else {
+                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[CallACS2("core_getteampalette", i, 1)]);
+                }
+                CallACS2("uix_setcompassproperty", UIC_MESSAGE, "M");
+                CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
+            }
+
+            if(carrying && (Timer() / 17) % 2) {
+                CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][0]);
+                CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
+            }
+
+            CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][1]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(i, 0)]);
+            CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
+            CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][2]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(i, 1)]);
+            CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
+
+            // CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
+        }
+
+        if(pln < 0)
+            continue;
+        if(!imCarrying)
+            continue;
+
+        int camTeam = GetPlayerInfo(pln, PLAYERINFO_TEAM);
+
+        for(i = UIX_TRACKER_DEPOSITS_START; ThingCount(T_NONE, i) > 0; i++) {
+            int dteam = GetActorProperty(i, UIX_PROP_TEAM);
+            // Log(i:i);
+
+            if(ctfMode == 0) { // deposit at enemy base in one-flag
+                if(dteam == camTeam)
+                    continue;
+            } else { // in skulltag and ctf, deposit at ally base
+                if(dteam != camTeam && dteam != 4)
+                    continue;
+            }
+
+            int dscore = useSkull ? GetActorProperty(i, UIX_PROP_SCORE) : 4;
+
+            if((Timer() / 17) % 2) {
+                CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][0]);
+                CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
+            }
+
+            CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][dscore]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(dteam, 0)]);
+            CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
+
+            CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][5]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(dteam, 1)]);
+            CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
+        }
+    }
+    while(true);
+}
+
+int neutralColors[2] = { 86, 95 };
+
+function int getTeamColor(int team, int idx)
+{
+    if(team > 3 || team < 0) {
+        return neutralColors[idx];
+    }
+    return CallACS2("core_getteampalette", team, idx);
+}
+
+script "uix_compass_objectiveicon" (void)
+{
+    CallACS2("uix_setcompassproperty", UIC_FONT, "CMPSOBJS");
+    CallACS2("uix_setcompassproperty", UIC_OFFSX, 0);
+    CallACS2("uix_setcompassproperty", UIC_OFFSY, 0);
+    CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
+}
+
+/*
+// bottom (default)
+UIX_CL_COMPASS=true
+UIX_CL_COMPASSX=0
+UIX_CL_COMPASSY=350
+UIX_CL_COMPASSSCALE=3
+UIX_CL_COMPASSWIDTHSCALE=1
+UIX_CL_COMPASSALPHA=1
+UIX_CL_COMPASSUSEPLAYERFOV=false
+UIX_CL_COMPASSFOV=90
+UIX_CL_COMPASSUNIT=0
+UIX_CL_COMPASSFLIP=true
+
+// top
+UIX_CL_COMPASSFLIP=false
+UIX_CL_COMPASSUNIT=0
+UIX_CL_COMPASSFOV=90
+UIX_CL_COMPASSUSEPLAYERFOV=false
+UIX_CL_COMPASSALPHA=1
+UIX_CL_COMPASSWIDTHSCALE=1
+UIX_CL_COMPASSSCALE=3
+UIX_CL_COMPASSY=350
+UIX_CL_COMPASSX=0
+UIX_CL_COMPASS=true
+
+WepWheel: ammo bars divide by 0 if the ammotype is not registered
+ItemWheel: trigger cvar for tapping doesn't work
+
+*/

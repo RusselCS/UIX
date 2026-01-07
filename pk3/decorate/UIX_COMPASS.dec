@@ -13,7 +13,85 @@ actor AcidDripperUIX : AcidDripper replaces AcidDripper
     states
     {
     Spawn:
-        TNT1 A 0 nodelay ACS_NamedExecuteWithResult("UIX_ACID_ICONNER_TID")
+        TNT1 A 0 nodelay A_ClientsideACSExecute("UIX_ACID_ICONNER_TID")
         goto Super::Spawn
+    }
+}
+
+// [Russ] these are all more or less direct copies of the stuff in ctf.txt for the radar
+actor UIX_TeamHome
+{
+-SOLID
++NOBLOCKMAP
++DONTSPLASH
+RenderStyle "Translucent"
+Alpha 0.35
++INVISIBLE
+scale 1.25
+-DROPPED
+states
+{
+Spawn:
+AUT2 A 1
+loop
+Spawn2:
+"----" A 1
+loop
+Spawn3:
+"----" A 0 A_JumpIf(!CallACS("core_targetexists"), "Removd")
+"----" A 1 A_Warp(AAPTR_TARGET, 0, 0, 0, 0, WARPF_NOCHECKPOSITION)
+loop
+Removd:
+TNT1 A 0 Thing_ChangeTID(0, 0)
+stop
+}
+}
+
+actor UIX_TeamDropped : UIX_TeamHome { +DROPPED }
+
+actor UIX_TeamCounter : CutterFlag {}
+
+actor UIX_Deposit : UIX_TeamHome
+{
+    States
+    {
+    Spawn:
+        MAIL A 0
+        MAIL A 0 ACS_NamedExecuteWithResult("UIX_Objective_AssignTID")
+        goto Spawn3
+    }
+}
+
+actor UIX_Deposit_Blue_1 : UIX_Deposit { mass 0 accuracy 1 }
+actor UIX_Deposit_Red_1 : UIX_Deposit { mass 1 accuracy 1 }
+actor UIX_Deposit_Green_1 : UIX_Deposit { mass 2 accuracy 1 }
+actor UIX_Deposit_Yellow_1 : UIX_Deposit { mass 3 accuracy 1 }
+actor UIX_Deposit_Neutral_1 : UIX_Deposit { mass 4 accuracy 1 }
+
+actor UIX_Deposit_Blue_2 : UIX_Deposit { mass 0 accuracy 2 }
+actor UIX_Deposit_Red_2 : UIX_Deposit { mass 1 accuracy 2 }
+actor UIX_Deposit_Green_2 : UIX_Deposit { mass 2 accuracy 2 }
+actor UIX_Deposit_Yellow_2 : UIX_Deposit { mass 3 accuracy 2 }
+actor UIX_Deposit_Neutral_2 : UIX_Deposit { mass 4 accuracy 2 }
+
+actor UIX_Deposit_Blue_3 : UIX_Deposit { mass 0 accuracy 3 }
+actor UIX_Deposit_Red_3 : UIX_Deposit { mass 1 accuracy 3 }
+actor UIX_Deposit_Green_3 : UIX_Deposit { mass 2 accuracy 3 }
+actor UIX_Deposit_Yellow_3 : UIX_Deposit { mass 3 accuracy 3 }
+actor UIX_Deposit_Neutral_3 : UIX_Deposit { mass 4 accuracy 3 }
+
+actor UIX_Deposit_Blue_4 : UIX_Deposit { mass 0 accuracy 4 }
+actor UIX_Deposit_Red_4 : UIX_Deposit { mass 1 accuracy 4 }
+actor UIX_Deposit_Green_4 : UIX_Deposit { mass 2 accuracy 4 }
+actor UIX_Deposit_Yellow_4 : UIX_Deposit { mass 3 accuracy 4 }
+actor UIX_Deposit_Neutral_4 : UIX_Deposit { mass 4 accuracy 4 }
+
+actor UIX_Deposit_SpawnPillar_CI : CustomInventory
+{
+    States
+    {
+        Pickup:
+            TNT1 A 0 ACS_NamedExecuteWithResult("UIX_Deposit_SpawnPillar", args[0], args[1])
+            stop
     }
 }

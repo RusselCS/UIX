@@ -94,7 +94,14 @@ function void displayMessage(int layer, str msg, int offsX, int offsY, int scale
 function void displayMessageColor(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color)
 {
 	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	Log(i:color);
 	HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+}
+
+function void displayMessageColorString(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+	HudMessage(s:msg; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
 }
 
 function void displayMessageFade(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int fadeTime)

@@ -213,3 +213,46 @@ function str getObjectiveIcon(int obj, int layer, int col)
 
     return objIcons[obj][layer][col];
 }
+
+str fontColors[256] = {
+    "Crayon0","Crayon1","Crayon2","Crayon3","Crayon4","Crayon5","Crayon6","Crayon7",
+    "Crayon8","Crayon9","Crayon10","Crayon11","Crayon12","Crayon13","Crayon14","Crayon15",
+    "Crayon16","Crayon17","Crayon18","Crayon19","Crayon20","Crayon21","Crayon22","Crayon23",
+    "Crayon24","Crayon25","Crayon26","Crayon27","Crayon28","Crayon29","Crayon30","Crayon31",
+    "Crayon32","Crayon33","Crayon34","Crayon35","Crayon36","Crayon37","Crayon38","Crayon39",
+    "Crayon40","Crayon41","Crayon42","Crayon43","Crayon44","Crayon45","Crayon46","Crayon47",
+    "Crayon48","Crayon49","Crayon50","Crayon51","Crayon52","Crayon53","Crayon54","Crayon55",
+    "Crayon56","Crayon57","Crayon58","Crayon59","Crayon60","Crayon61","Crayon62","Crayon63",
+    "Crayon64","Crayon65","Crayon66","Crayon67","Crayon68","Crayon69","Crayon70","Crayon71",
+    "Crayon72","Crayon73","Crayon74","Crayon75","Crayon76","Crayon77","Crayon78","Crayon79",
+    "Crayon80","Crayon81","Crayon82","Crayon83","Crayon84","Crayon85","Crayon86","Crayon87",
+    "Crayon88","Crayon89","Crayon90","Crayon91","Crayon92","Crayon93","Crayon94","Crayon95",
+    "Crayon96","Crayon97","Crayon98","Crayon99","Crayon100","Crayon101","Crayon102","Crayon103",
+    "Crayon104","Crayon105","Crayon106","Crayon107","Crayon108","Crayon109","Crayon110","Crayon111",
+    "Crayon112","Crayon113","Crayon114","Crayon115","Crayon116","Crayon117","Crayon118","Crayon119",
+    "Crayon120","Crayon121","Crayon122","Crayon123","Crayon124","Crayon125","Crayon126","Crayon127",
+    "Crayon128","Crayon129","Crayon130","Crayon131","Crayon132","Crayon133","Crayon134","Crayon135",
+    "Crayon136","Crayon137","Crayon138","Crayon139","Crayon140","Crayon141","Crayon142","Crayon143",
+    "Crayon144","Crayon145","Crayon146","Crayon147","Crayon148","Crayon149","Crayon150","Crayon151",
+    "Crayon152","Crayon153","Crayon154","Crayon155","Crayon156","Crayon157","Crayon158","Crayon159",
+    "Crayon160","Crayon161","Crayon162","Crayon163","Crayon164","Crayon165","Crayon166","Crayon167",
+    "Crayon168","Crayon169","Crayon170","Crayon171","Crayon172","Crayon173","Crayon174","Crayon175",
+    "Crayon176","Crayon177","Crayon178","Crayon179","Crayon180","Crayon181","Crayon182","Crayon183",
+    "Crayon184","Crayon185","Crayon186","Crayon187","Crayon188","Crayon189","Crayon190","Crayon191",
+    "Crayon192","Crayon193","Crayon194","Crayon195","Crayon196","Crayon197","Crayon198","Crayon199",
+    "Crayon200","Crayon201","Crayon202","Crayon203","Crayon204","Crayon205","Crayon206","Crayon207",
+    "Crayon208","Crayon209","Crayon210","Crayon211","Crayon212","Crayon213","Crayon214","Crayon215",
+    "Crayon216","Crayon217","Crayon218","Crayon219","Crayon220","Crayon221","Crayon222","Crayon223",
+    "Crayon224","Crayon225","Crayon226","Crayon227","Crayon228","Crayon229","Crayon230","Crayon231",
+    "Crayon232","Crayon233","Crayon234","Crayon235","Crayon236","Crayon237","Crayon238","Crayon239",
+    "Crayon240","Crayon241","Crayon242","Crayon243","Crayon244","Crayon245","Crayon246","Crayon247",
+    "Crayon248","Crayon249","Crayon250","Crayon251","Crayon252","Crayon253","Crayon254","Crayon255"
+};
+
+str objMessage[5][6] = {
+    {"A", "B", "C"}, // OFCTF
+    {"D", "E", "F"}, // Skulltag
+    {"A", "B", "C"}, // CTF
+    {"A", "B", "C"}, // Possession
+    {"G", "H", "I", "J", "K", "L"}, // Deposits
+};
