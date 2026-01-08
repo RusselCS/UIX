@@ -564,7 +564,9 @@ int UIX_WEAPS = 0;
 #define AP_AMMO2 7
 #define AP_BARCYAN2 8
 #define AP_BARBLUE2 9
-int wepProps[10];
+#define AP_AMMOFACTOR1 10
+#define AP_AMMOFACTOR2 11
+int wepProps[12];
 int WepGroupCounts[10];
 int GROUP_MAX = 0;
 int wepPropCacheIdx = -1;
@@ -572,6 +574,7 @@ int wepPropCacheIdx = -1;
 function int getWeaponProperty(int idx, int prop)
 {
     if(wepPropCacheIdx != idx) {
+        wepPropCacheIdx = idx;
         int dtIdx;
         if(idx < MAX_WEAPONS_GLOBAL) { // weapons
             dtIdx = idx;
@@ -601,7 +604,34 @@ function int getWeaponProperty(int idx, int prop)
             wepProps[AP_BARBLUE2] = -1;
         }
     }
+
+    if(prop == AP_AMMOFACTOR1 || prop == AP_AMMOFACTOR2) {
+        setAmmoCounts();
+    }
+
     return wepProps[prop];
+}
+
+int lastAmmoIdx = -1;
+int ammoTypeCodes[2][2] = {
+    { AP_AMMO1, AP_AMMO2 },
+    { AP_AMMOFACTOR1, AP_AMMOFACTOR2 }
+};
+function void setAmmoCounts(void)
+{
+    if(lastAmmoIdx == wepPropCacheIdx)
+        return;
+    lastAmmoIdx = wepPropCacheIdx;
+    if(!(ClassifyActor(0) & ACTOR_PLAYER))
+        return;
+    for(int i = 0; i < 2; i++) {
+        str am = wepProps[ammoTypeCodes[0][i]];
+        if(am == -1)
+            continue;
+        if(StrLen(am) == 0)
+            continue;
+        wepProps[ammoTypeCodes[1][i]] = CheckInventory(am) * 1.0 / GetAmmoCapacity(am);
+    }
 }
 
 script "uixweap_bigbrother_open" OPEN CLIENTSIDE
@@ -673,7 +703,7 @@ function int wheel_settings(int mode, int idx, int a, int b)
 {
     wheel_populate();
     if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
-        return wheel_getElementProperty(wheel_heldIdxMapping[mode-UIW_ELEMENT_START], idx, a, b);
+        return get(wheel_heldIdxMapping[mode-UIW_ELEMENT_START], idx, a, b);
     }
     switch(mode) {
         case UIW_CURSELECT:     return wheel_selectedWep;
@@ -720,567 +750,467 @@ script "uixweap_wheel_select" (int idx)
 #define UIX_IW_SELECTMODE 3
 #define UIX_IW_ELEMENTCOUNT 8
 
-str properties_str[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
-    { // selected == 0
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (background)
-            "A", // UIX_IL_CONTENT
-            "UXICB0", // UIX_IL_FONT
-        },
-        { // slot == 2 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan1", // UIX_IL_FONT
-        },
-        { // slot == 3 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue1", // UIX_IL_FONT
-        },
-        { // slot == 4 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-        { // slot == 5 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan2", // UIX_IL_FONT
-        },
-        { // slot == 6 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue2", // UIX_IL_FONT
-        },
-        { // slot == 7 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-    },
-    { // selected == 1
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan1_selected", // UIX_IL_FONT
-        },
-        { // slot == 2 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue1_selected", // UIX_IL_FONT
-        },
-        { // slot == 3 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-        { // slot == 4 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan2_selected", // UIX_IL_FONT
-        },
-        { // slot == 5 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue2_selected", // UIX_IL_FONT
-        },
-        { // slot == 6 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-    },
-    { // selected == 2
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (label)
-            "uixweap_wheel_getlabel", // UIX_IL_CONTENT
-            "SMALLFNT", // UIX_IL_FONT
-        },
-        { // slot == 1 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan1_middle", // UIX_IL_FONT
-        },
-        { // slot == 2 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue1_middle", // UIX_IL_FONT
-        },
-        { // slot == 3 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-        { // slot == 4 (cyan)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_cyan2_middle", // UIX_IL_FONT
-        },
-        { // slot == 5 (blue)
-            "A", // UIX_IL_CONTENT
-            "uixweap_wheel_getbar_blue2_middle", // UIX_IL_FONT
-        },
-        { // slot == 6 (background)
-            "A", // UIX_IL_CONTENT
-            "UIXWHEMP", // UIX_IL_FONT
-        },
-    },
-};
+#define RAW 0
+#define SCR 1
 
-int properties_int[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
-    { // selected == 0 - deselected radial
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            0,
-            0,
-        },
-        { // slot == 1 (background)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            0,
-            0,
-        },
-        { // slot == 2 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 3 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 4 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 5 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 6 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 7 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.1, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-    },
-    { // selected == 1 - selected radial
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.5, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            0,
-            0,
-        },
-        { // slot == 1 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 2 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 3 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            6*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 4 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 5 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 6 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            9*UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-    },
-    { // selected == 2 - menu middle
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.5, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            0,
-            0,
-        },
-        { // slot == 1 (label)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            -2*UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            0,
-            0,
-        },
-        { // slot == 2 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 3 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 4 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 5 (cyan)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 6 (blue)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-        { // slot == 7 (background)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            4*UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            0.15, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-            1.0,
-            160,
-        },
-    },
-};
+int el_p[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX];
+int el_t[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX];
 
-// values here mean "do this thing"
-// 0: take the value as-is, as an int
-// 1: take the value as-is, as a str
-// 2: pass the given script the variables and pass that return back
-// perhaps an over-complicated way of handling this, but
-// it's simpler on computation side than a function with a bunch of exceptions to handle the edge cases
-int propertiesTypes[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX] = {
-    {
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-    },
-    {
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-    },
-    {
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,2,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0,0,0},
-    },
-};
+function int get(int idx, int el, int p, int sel)
+{
+    if(el_t[sel][el][p] == SCR) return CallACS4(el_p[sel][el][p], idx, sel, el, p);
+    return el_p[sel][el][p];
+}
+
+script "uix_weapwheel_pop" OPEN CLIENTSIDE
+{
+    int s = 0;
+    int e = 0;
+
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
+    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UXICB0";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    s++;
+    e = 0;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 1.5;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    s++;
+    e = 0;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 1.5;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "uixweap_wheel_getlabel";
+    el_p[s][e][UIX_IL_FONT     ] = "SMALLFNT";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = -2*UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+
+    el_t[s][e][UIX_IL_CONTENT  ] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo1blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2cyan";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_getammo2blue";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+
+    el_t[s][e][UIX_IL_FONT     ] = SCR;
+    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+
+    e++;
+    el_p[s][e][UIX_IL_CONTENT  ] = "A";
+    el_p[s][e][UIX_IL_FONT     ] = "UIXWHEMP";
+    el_p[s][e][UIX_IL_COLOR    ] = 0;
+    el_p[s][e][UIX_IL_OFFSX    ] = 0;
+    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
+    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
+    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
+    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
+    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
+    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
+    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
+    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
+    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+}
 
 script "uixweap_wheel_geticon" (int idx) { SetResultValue(getWeaponProperty(idx, AP_ICON)); }
 script "uixweap_wheel_getlabel" (int idx) { SetResultValue(StrParam(l:getWeaponProperty(idx, AP_TAG))); }
 
-script "uixweap_wheel_getbar_cyan1" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO1);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[0][2][11] = ammoFactor;
-    properties_int[0][3][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
-}
-script "uixweap_wheel_getbar_blue1" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
+script "uixweap_wheel_getammo1factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR1)); }
+script "uixweap_wheel_getammo1cyan" (int idx) { SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1))); }
+script "uixweap_wheel_getammo1blue" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
 
-script "uixweap_wheel_getbar_cyan2" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO2);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[0][5][11] = ammoFactor;
-    properties_int[0][6][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
-}
-script "uixweap_wheel_getbar_blue2" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
-
-
-script "uixweap_wheel_getbar_cyan1_selected" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO1);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[1][1][11] = ammoFactor;
-    properties_int[1][2][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
-}
-script "uixweap_wheel_getbar_blue1_selected" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
-
-script "uixweap_wheel_getbar_cyan2_selected" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO2);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[1][4][11] = ammoFactor;
-    properties_int[1][5][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
-}
-script "uixweap_wheel_getbar_blue2_selected" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
-
-
-script "uixweap_wheel_getbar_cyan1_middle" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO1);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[2][2][11] = ammoFactor;
-    properties_int[2][3][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN1)));
-}
-script "uixweap_wheel_getbar_blue1_middle" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE1))); }
-
-script "uixweap_wheel_getbar_cyan2_middle" (int idx)
-{
-    int ammoType = getWeaponProperty(idx, AP_AMMO2);
-    int ammoFactor = CheckInventory(ammoType) * 1.0 / GetAmmoCapacity(ammoType);
-    properties_int[2][5][11] = ammoFactor;
-    properties_int[2][6][11] = ammoFactor;
-    SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2)));
-}
-script "uixweap_wheel_getbar_blue2_middle" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
-
-function int wheel_getElementProperty(int idx, int slot, int property, int selected)
-{
-    if(propertiesTypes[selected][slot][property] == 1) return properties_str[selected][slot][property];
-    if(propertiesTypes[selected][slot][property] == 2) return CallACS1(properties_str[selected][slot][property], idx);
-    return properties_int[selected][slot][property-2];
-}
+script "uixweap_wheel_getammo2factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR2)); }
+script "uixweap_wheel_getammo2cyan" (int idx) { SetResultValue(getAmmoBar(0, 0, getWeaponProperty(idx, AP_BARCYAN2))); }
+script "uixweap_wheel_getammo2blue" (int idx) { SetResultValue(getAmmoBar(0, 1, getWeaponProperty(idx, AP_BARBLUE2))); }
