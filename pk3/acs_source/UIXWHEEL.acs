@@ -38,6 +38,9 @@ function int defaultWheelSelection(int mode, int idx, int a, int b)
 
 #define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
+#define IP_X 0
+#define IP_Y 1
+
 // [Russ] Keeping aggressive comments on this because I reckon it's gonna be a pain in the tail to maintain otherwise
 script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript) CLIENTSIDE
 {
@@ -179,10 +182,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
         int groupAng = 1.0 / groupCount;
 
-        // TODO: move these to defines
         i = 0;
-        int IP_X = i++;
-        int IP_Y = i++;
         int basePositions[WHEEL_LIMIT][2];
 
         int iconRange = (100*baseScale) >> 16;

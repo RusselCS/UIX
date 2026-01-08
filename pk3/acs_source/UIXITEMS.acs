@@ -336,7 +336,6 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     if(!wheelInitialized)
         terminate;
     wheelTime = Timer();
-    Log(s:"Press ", i:timer());
     CallACS3("uix_wheelActivate", "uixitem_settings", -1, "uixitem_selectitem");
 }
 
@@ -350,7 +349,6 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
 
     if(!GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP"))
         terminate;
-    Log(s:"Release ", i:timer());
 
     if(Timer()-wheelTime < GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER")) {
         UseInventory(myInventory[mySelection][MI_ITEM]);
