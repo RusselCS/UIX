@@ -167,24 +167,40 @@ function int combatCamera(int cam)
     return true;
 }
 
+int pln_real;
+int pln_x;
+int pln_y;
+int pln_z;
+int pln_yaw;
+int pln_pitch;
+function void getPlayerPosition(int pln)
+{
+    CallACS1("uix_playerposition_pln", pln);
+}
+
+script "uix_playerposition_pln" (int pln)
+{
+    pln_real = SetActivatorToPlayer(pln);
+    pln_x = GetActorX(0);
+    pln_y = GetActorY(0);
+    pln_z = GetActorZ(0);
+    pln_yaw = GetActorAngle(0);
+    pln_pitch = GetActorPitch(0);
+}
+
 function void checkTelespy(int pln)
 {
     if(!GetCvar("cl_telespy"))
         return;
-    
-    int tid = pln+PLN_TID_SHRT;
-    if(ThingCount(T_NONE, tid) == 0)
-        return;
-    
-    int x = GetActorX(tid);
-    int y = GetActorY(tid);
-    int z = GetActorZ(tid);
-    int yaw = GetActorAngle(tid);
-    int pitch = GetActorPitch(tid);
 
-    SetActorPosition(0, x, y, z, 0);
-    SetActorAngle(0, yaw);
-    SetActorPitch(0, pitch);
+    getPlayerPosition(pln);
+
+    if(!pln_real)
+        return;
+
+    SetActorPosition(0, pln_x, pln_y, pln_z, 0);
+    SetActorAngle(0, pln_yaw);
+    SetActorPitch(0, pln_pitch);
 }
 
 function void updateCamera(int cam, int auto)
