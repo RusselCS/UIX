@@ -585,11 +585,29 @@ function int getWeaponProperty(int idx, int prop)
             wepProps[AP_ICON] = getWeaponIcon(dtIdx);
             wepProps[AP_TAG] = getWeaponTag(dtIdx);
             wepProps[AP_AMMO1] = getWeaponAmmoType(dtIdx);
-            wepProps[AP_BARCYAN1] = WeaponBarColor(dtIdx, 1);
-            wepProps[AP_BARBLUE1] = WeaponBarColor(dtIdx, 2);
+            if(wepProps[AP_AMMO1] != -1)
+                if(StrLen(wepProps[AP_AMMO1]) == 0)
+                    wepProps[AP_AMMO1] = -1;
+            if(wepProps[AP_AMMO1] != -1) {
+                wepProps[AP_BARCYAN1] = WeaponBarColor(dtIdx, 1);
+                wepProps[AP_BARBLUE1] = WeaponBarColor(dtIdx, 2);
+            } else {
+                wepProps[AP_BARCYAN1] = -1;
+                wepProps[AP_BARBLUE1] = -1;
+            }
+
             wepProps[AP_AMMO2] = getWeaponAmmo2Type(dtIdx);
-            wepProps[AP_BARCYAN2] = WeaponBarColor(dtIdx, 3);
-            wepProps[AP_BARBLUE2] = WeaponBarColor(dtIdx, 4);
+            if(wepProps[AP_AMMO2] != -1)
+                if(StrLen(wepProps[AP_AMMO2]) == 0)
+                    wepProps[AP_AMMO2] = -1;
+            if(wepProps[AP_AMMO2] != -1) {
+                wepProps[AP_BARCYAN2] = WeaponBarColor(dtIdx, 3);
+                wepProps[AP_BARBLUE2] = WeaponBarColor(dtIdx, 4);
+            } else {
+                wepProps[AP_BARCYAN2] = -1;
+                wepProps[AP_BARBLUE2] = -1;
+            }
+
         } else { // busters
             dtIdx = idx-MAX_WEAPONS_GLOBAL;
             wepProps[AP_GROUP] = 0;
@@ -628,8 +646,6 @@ function void setAmmoCounts(void)
         str am = wepProps[ammoTypeCodes[0][i]];
         if(am == -1)
             continue;
-        if(StrLen(am) == 0)
-            continue;
         wepProps[ammoTypeCodes[1][i]] = CheckInventory(am) * 1.0 / GetAmmoCapacity(am);
     }
 }
@@ -644,12 +660,23 @@ script "uixweap_bigbrother_open" OPEN CLIENTSIDE
     int i;
     for(i = 0; i < UIX_WEAPS; i++) {
         int group = getWeaponProperty(i, AP_GROUP);
+
+        if(i < MAX_WEAPONS_GLOBAL) { // has ammo
+            int b = findBusterUpgradeByActor(getWeaponActor(i));
+            if(b > -1)
+                setAmmoBuster(b);
+        }
+
         WepGroupCounts[group]++;
         if(WepGroupCounts[group] == 1) {
             GROUP_MAX++;
         }
     }
 }
+
+int ammoBusters[MAX_BUSTER_LIMIT];
+function void setAmmoBuster(int idx) { ammoBusters[idx] = true; }
+function int isAmmoBuster(int idx) { return ammoBusters[idx]; }
 
 int wheelActive = false;
 script "uixweap_wheel_start" (void) NET CLIENTSIDE
@@ -678,6 +705,8 @@ function void wheel_populate(void)
 {
     if(wheel_lastUpdate == Timer())
         return;
+    wepPropCacheIdx = -1;
+    lastAmmoIdx = -1;
     wheel_lastUpdate = Timer();
 
     int i;
@@ -688,6 +717,12 @@ function void wheel_populate(void)
 
     for(i = 0; i < UIX_WEAPS; i++) {
         int act = getWeaponProperty(i, AP_WEP);
+        int bus = i-MAX_WEAPONS_GLOBAL;
+
+        if(bus > -1)
+            if(isAmmoBuster(bus))
+                continue;
+
         if(CheckInventory(act)) {
             wheel_groups[getWeaponProperty(i, AP_GROUP)]++;
             if(CheckWeapon(act))

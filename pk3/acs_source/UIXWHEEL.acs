@@ -68,10 +68,16 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
     int mousePosX = 0.0;
     bool drawMouse = false;
     bool selectionActive = false;
+    int curTime = -1;
 
     while(true) {
-        if(!wheelActive)
-            fadeTime = 0.1;
+        if(!wheelActive) {
+            if(curTime <= 0) {
+                break;
+            } else {
+                fadeTime = 0.1;
+            }
+        }
 
         // Aim lock - has different methods for online and offline.
         // Offline, it's as simple as forcing the user to keep their pitch/yaw.
@@ -97,7 +103,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             break;
         }
 
-        int curTime = Timer()-wheelTime-USE_BUFFER;
+        curTime = Timer()-wheelTime-USE_BUFFER;
 
         if(loopScript != -1)
             CallACS1(loopScript, curTime);
