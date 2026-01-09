@@ -8,6 +8,9 @@ UIX_MNU_KILLFEEDPRE = "\cdTo see Kill Feed Mugshots, turn this on.";
 UIX_MNU_ITEMWHEELPRE1 = "\cdUsing these buttons causes the item wheel";
 UIX_MNU_ITEMWHEELPRE2 = "\cdto think the wrong item is selected.";
 
+UIX_MNU_NEWWHEELS = "\cf[NEW!] \c-Wheel Menu Options";
+UIX_MNU_NEWCOMPASS = "\cf[NEW!] \c-Compass Options";
+
 UIX_UNKNOWN_LOC_1 = "Unknown Location.";
 UIX_UNKNOWN_LOC_2 = "Node Graph out of Date. Rebuilding...";
 UIX_UNKNOWN_LOC_3 = "A bomb's a bad choice for close-range combat.";

@@ -271,6 +271,8 @@ str compassBorders[2][1] = {
 // activator: client's current camera
 function void drawCompass(int cln)
 {
+    if(!GetUserCvar(cln, "UIX_CL_Enable"))
+        return;
     if(!getCvar("UIX_SV_COMPASS"))
         return;
     if(!getUserCvar(cln, "UIX_CL_COMPASS"))

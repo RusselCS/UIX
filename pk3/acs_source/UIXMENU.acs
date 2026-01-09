@@ -168,6 +168,8 @@ function void updateSettings(int cpn, int oldVersion)
                 SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
             if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE") == 1.5)
                 SetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE", 1.25);
+            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY") == -416)
+                SetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY", -360);
 
             // Compass actually got a bit smaller while in-dev, though a couple folks downloaded it early.
             if(GetUserCvar(cpn, "UIX_CL_COMPASSSCALE") == 3.0)

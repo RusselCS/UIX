@@ -3,7 +3,7 @@
 user bool UIX_CL_notification = true;
 
 user bool UIX_CL_Enable = true;
-user float UIX_CL_LATESTVERSION = 2.01;
+user float UIX_CL_LATESTVERSION = 3.00;
 
 user noarchive bool UIX_CL_Temp_ItemWheelActive = false;
 
@@ -28,7 +28,7 @@ user int UIX_CL_WEAPBARLAYER = 0;
 server noarchive bool UIX_SV_TEAMINFO = true;
 user bool UIX_CL_TEAMINFO = true;
 user int UIX_CL_TEAMINFOOFFSX = -416;
-user int UIX_CL_TEAMINFOOFFSY = -416;
+user int UIX_CL_TEAMINFOOFFSY = -360;
 user float UIX_CL_TEAMINFOSCALE = 1.25;
 user float UIX_CL_TEAMINFOALPHA = 1.0;
 user int UIX_CL_TEAMINFONAMESIZE = 118;
