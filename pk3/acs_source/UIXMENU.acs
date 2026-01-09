@@ -17,7 +17,7 @@ script "UITweaks_DefaultPresets" (void) NET CLIENTSIDE
 }
 
 // Built-in presets
-#define TEAMINFO_CVARS_MAX 23
+#define TEAMINFO_CVARS_MAX 24
 str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
     "UIX_CV_TEAMINFOSHOWOBJECTIVES",
     "UIX_CV_TEAMINFOSHOWMENUSTATUS",
@@ -25,6 +25,7 @@ str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
     "UIX_CV_TEAMINFOSHOWDEAD",
     "UIX_CL_TEAMINFOWRAPSEPARATION",
     "UIX_CL_TEAMINFOWRAPDIR",
+    "UIX_CL_TEAMINFOWRAPHIDE",
     "UIX_CL_TEAMINFOWRAPAMOUNT",
     "UIX_CL_TEAMINFOSEPARATION",
     "UIX_CL_TEAMINFOSHOWMUGSHOT",
@@ -48,9 +49,9 @@ str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
 // 1 - bottom left
 // 2 - bottom right
 int TeamInfo_Presets[3][TEAMINFO_CVARS_MAX] = {
-    {true,true,true,true,3,false,18,1,true,true,true,true,true,true,false,false,true,false,118,1.0,1.5,-416,-416},
-    {true,true,true,true,4,false,11,1,true,true,true,true,true,true,true,false,false,false,118,1.0,1.25,378,-610},
-    {true,true,true,true,4,true,11,1,true,true,true,true,true,true,true,false,false,true,118,1.0,1.25,378,620},
+    {true,true,true,true,3,false,true,18,1,true,true,true,true,true,true,false,false,true,false,118,1.0,1.25,-416,-416},
+    {true,true,true,true,4,false,true,11,1,true,true,true,true,true,true,true,false,false,false,118,1.0,1.25,378,-610},
+    {true,true,true,true,4,true,true,11,1,true,true,true,true,true,true,true,false,false,true,118,1.0,1.25,378,620},
 };
 
 script "UITweaks_TeaminfoPreset" (int which) NET CLIENTSIDE {
@@ -110,6 +111,7 @@ script "UITweaks_WeaponBarPreset" (int which) NET CLIENTSIDE {
 #define v1e 1.05
 #define v2a 2.0
 #define v2b 2.01
+#define v3a 3.00
 
 // #define VERSIONNUM v1a
 // #define VERSIONNUM v1b
@@ -117,7 +119,8 @@ script "UITweaks_WeaponBarPreset" (int which) NET CLIENTSIDE {
 // #define VERSIONNUM v1ch
 // #define VERSIONNUM v1d
 // #define VERSIONNUM v1e
-#define VERSIONNUM v2b
+// #define VERSIONNUM v2b
+#define VERSIONNUM v3a
 
 script "UIX_CurrentVersion" OPEN CLIENTSIDE
 {
@@ -125,7 +128,7 @@ script "UIX_CurrentVersion" OPEN CLIENTSIDE
     int cpn = ConsolePlayerNumber();
     int oldVersion = GetUserCvar(cpn, "UIX_CL_LATESTVERSION");
     if(oldVersion < VERSIONNUM) {
-        updateSettings(cpn, oldVersion);        
+        updateSettings(cpn, oldVersion);
 
         SetUserCvar(cpn, "UIX_CL_LATESTVERSION", VERSIONNUM);
         Log(s:"\c[gold]UI Extensions settings updated!");
@@ -139,7 +142,7 @@ function void updateSettings(int cpn, int oldVersion)
             SetUserCvar(cpn, "UIX_CL_SR50Visual", true);
             SetUserCvar(cpn, "UIX_CL_WEAPBAR", true);
             SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
-            
+
             for(int i = 0; i < WEAPONBAR_CVARS_MAX; i++)
             {
                 SetUserCvar(cpn, WeaponBar_Cvars[i], WeaponBar_Presets[0][i]);
@@ -156,6 +159,19 @@ function void updateSettings(int cpn, int oldVersion)
             if(GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE") == 96) {
                 SetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE", 118);
             }
+            return;
+        }
+
+        if(oldVersion < v3a) {
+            // Trying to make the teaminfo widget less intrusive, so people are less inclined to turn it off.
+            if(!GetUserCvar(cpn, "UIX_CL_TEAMINFO"))
+                SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
+            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE") == 1.5)
+                SetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE", 1.25);
+
+            // Compass actually got a bit smaller while in-dev, though a couple folks downloaded it early.
+            if(GetUserCvar(cpn, "UIX_CL_COMPASSSCALE") == 3.0)
+                SetUserCvar(cpn, "UIX_CL_COMPASSSCALE", 2.0);
             return;
         }
 }

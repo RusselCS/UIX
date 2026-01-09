@@ -61,7 +61,7 @@ OptionMenu "UIXOptions"
 	Submenu "Team Info Options", "UIXOptions_TeamInfo"
 	Submenu "Weapon Bar Options", "UIXOptions_WeaponBar"
 	Submenu "Kill Feed Options", "UIXOptions_KillFeed"
-	Submenu "Item Wheel Options", "UIXOptions_ItemWheel"
+	Submenu "Wheel Menu Options", "UIXOptions_ItemWheel"
 	Submenu "Compass Options", "UIXOptions_Compass"
 	StaticText " "
 	Submenu "Server Settings", "UIXOptions_ServerMenu"
@@ -233,7 +233,7 @@ OptionMenu "UIXOptions_KillFeed"
 
 OptionMenu "UIXOptions_ItemWheel"
 {
-	Title "Item Wheel Settings"
+	Title "Wheel Menu Settings"
 	StaticText " "
 	StaticText "---------------", 1
 	StaticText "Clashing Items", 1
@@ -252,7 +252,9 @@ OptionMenu "UIXOptions_ItemWheel"
 	Option "Tap Item Wheel to Use", "UIX_CL_ITEMWHEELTAP", "OnOff"
 	Slider "Tap use window (tics)", "UIX_CL_ITEMWHEELBUFFER", 1, 10, 1, 0
 	StaticText " "
-	Slider "Item Wheel Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
+	Control "Open Weapon Wheel", "+weapwheel"
+	StaticText " "
+	Slider "Wheel Menu Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
 	StaticText " "
 }
 
