@@ -82,7 +82,7 @@ script "UITweaks_TeamInfo_ModeTest" OPEN CLIENTSIDE
 #define horizontal 0
 #define vertical 1
 
-int cvars[26];
+int cvars[27];
 #define CV_OFFSX        0
 #define CV_OFFSY        1
 #define CV_SCALE        2
@@ -109,6 +109,7 @@ int cvars[26];
 #define CV_SHOWMENUSTATUS   23
 #define CV_SHOWOBJECTIVES   24
 #define CV_LAYER            25
+#define CV_WRAPHIDE         26
 
 int dbShowSelf;
 
@@ -187,6 +188,7 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvars[CV_SHOWWEAPON] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSHOWWEAPON");
         cvars[CV_SEPARATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOSEPARATION");
         cvars[CV_WRAPAMOUNT] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPAMOUNT");
+        cvars[CV_WRAPHIDE] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPHIDE");
         cvars[CV_WRAPDIR] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPDIR");
         cvars[CV_WRAPSEPARATION] = GetUserCvar(cpn, "UIX_CL_TEAMINFOWRAPSEPARATION");
         cvars[CV_SHOWDEAD] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWDEAD");
@@ -194,6 +196,30 @@ script "UITweaks_TeamInfo" (int cam, int cpn, int cv)
         cvars[CV_SHOWMENUSTATUS] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWMENUSTATUS");
         cvars[CV_SHOWOBJECTIVES] = GetUserCvar(cpn, "UIX_CV_TEAMINFOSHOWOBJECTIVES");
         cvars[CV_LAYER] = hudLayers[GetUserCvar(cpn, "UIX_CL_TEAMINFOLAYER")];
+
+        if(cvars[CV_WRAPHIDE] && cvars[CV_WRAPAMOUNT] > 0) {
+            if(team < 4) { // Team games
+                if(cvars[CV_SHOWDEAD]) {
+                    if(GetTeamProperty(team, TPROP_NumPlayers)-1 > cvars[CV_WRAPAMOUNT]) {
+                        terminate;
+                    }
+                } else {
+                    if(GetTeamProperty(team, TPROP_NumLivePlayers)-1 > cvars[CV_WRAPAMOUNT]) {
+                        terminate;
+                    }
+                }
+            } else { // Coop
+                if(cvars[CV_SHOWDEAD]) {
+                    if(countAllPlayers()-1 > cvars[CV_WRAPAMOUNT]) {
+                        terminate;
+                    }
+                } else {
+                    if(PlayerCount()-1 > cvars[CV_WRAPAMOUNT]) {
+                        terminate;
+                    }
+                }
+            }
+        }
 
         cvars[CV_FONTIDX] = cvars[CV_FONTDIR] ^ cvars[CV_DIR];
         cvars[CV_REVERSETEXT] = cvars[CV_DIR] && !cvars[CV_FONTDIR];
@@ -1493,4 +1519,14 @@ function void getPlayerWeaponInfo(int pln)
     playerWeaponInfo[PI_SUCCESS] = true;
     resetActivator();
     return;
+}
+
+function int countAllPlayers(void)
+{
+    int count = 0;
+    for(int i = 0; i < MAX_PLAYERS_SHRT; i++) {
+        if(getPlayerAlive(i) > STATUS_GONE)
+            count++;
+    }
+    return count;
 }

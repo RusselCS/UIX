@@ -44,6 +44,7 @@ user bool UIX_CL_TEAMINFOSHOWWEAPON = true;
 user bool UIX_CL_TEAMINFOSHOWMUGSHOT = true;
 user int UIX_CL_TEAMINFOSEPARATION = 1;
 user int UIX_CL_TEAMINFOWRAPAMOUNT = 18;
+user bool UIX_CL_TEAMINFOWRAPHIDE = true;
 user bool UIX_CL_TEAMINFOWRAPDIR = false; // false = down/right; true = up/left
 user int UIX_CL_TEAMINFOWRAPSEPARATION = 3;
 user bool UIX_CV_TEAMINFOSHOWDEAD = true;

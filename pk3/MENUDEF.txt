@@ -120,18 +120,18 @@ OptionMenu "UIXOptions_TeamInfo"
 	Slider "Team Info Alpha", "UIX_CL_TEAMINFOALPHA", 0.0, 1.0, 0.05, 2
 	StaticText " "
 	Option "Mirror Orientation", "UIX_CL_TEAMINFOMIRROR", "OnOff"
+	Slider "Overflow Amount (0=INF)", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
+	Option "Overflow Behavior", "UIX_CL_TEAMINFOWRAPHIDE", "WrapHide"
 	StaticText " "
 	StaticText "Horizontal Bar Stack & Wrap", 2
 	Slider "Stack Distance", "UIX_CL_TEAMINFOSEPARATION", 0, 255, 1, 0
 	Option "Stack Direction", "UIX_CL_TEAMINFOSTACK", "TeamStackHorz"
-	Slider "Wrap Allies (0=INF)", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
 	Slider "Wrap Distance", "UIX_CL_TEAMINFOWRAPSEPARATION", 0, 255, 1, 0
 	Option "Wrap Direction", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackVert"
 	StaticText " "
 	StaticText "Vertical Bar Stack & Wrap", 2
 	Slider "Stack Distance", "UIX_CL_TEAMINFOSEPARATION", 0, 255, 1, 0
 	Option "Stack Direction", "UIX_CL_TEAMINFOSTACK", "TeamStackVert"
-	Slider "Wrap Allies (0=INF)", "UIX_CL_TEAMINFOWRAPAMOUNT", 0, 64, 1, 0
 	Slider "Wrap Distance", "UIX_CL_TEAMINFOWRAPSEPARATION", 0, 255, 1, 0
 	Option "Wrap Direction", "UIX_CL_TEAMINFOWRAPDIR", "TeamStackHorz"
 	StaticText " "
@@ -314,6 +314,12 @@ OptionValue "TeamStackHorz"
 {
 	0, "Downwards"
 	1, "Upwards"
+}
+
+OptionValue "WrapHide"
+{
+	0, "Wrap"
+	1, "Hide"
 }
 
 OptionValue "TeamStackVert"
