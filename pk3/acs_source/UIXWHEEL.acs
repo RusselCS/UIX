@@ -90,6 +90,12 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             SetActorPitch(0, sPosY);
             SetActorAngle(0, sPosX);
         } else {
+            int buttons = GetPlayerInput(cln, INPUT_BUTTONS);
+            if(buttons & BT_ATTACK || buttons & BT_ALTATTACK || buttons & BT_RELOAD || buttons & BT_ZOOM || buttons & BT_USER1 || buttons & BT_USER2 || buttons & BT_USER3 || buttons & BT_USER4) {
+                Log(s:"Wheel menus cannot be used while attacking.");
+                selected = -1;
+                break;
+            }
             SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
         }
 

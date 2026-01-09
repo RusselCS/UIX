@@ -282,10 +282,12 @@ OptionMenu "UIXOptions_Compass"
 	Slider "Compass Alpha", "UIX_CL_COMPASSALPHA", 0.0, 1.0, 0.05, 2
 	Option "Flip Compass", "UIX_CL_COMPASSFLIP", "OnOff"
 
+	StaticText " "
 	Option "Angle Unit", "UIX_CL_COMPASSUNIT", "CompassUnit"
 
-	Option "Use Player's FOV", "UIX_CL_COMPASSUSEPLAYERFOV", "OnOff"
-	Slider "Compass's FOV", "UIX_CL_COMPASSFOV", 10, 90, 5
+	// StaticText " "
+	// Option "Use Player's FOV", "UIX_CL_COMPASSUSEPLAYERFOV", "OnOff"
+	// Slider "Compass's FOV", "UIX_CL_COMPASSFOV", 10, 90, 5
 
 	StaticText " "
 }

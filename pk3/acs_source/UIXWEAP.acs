@@ -773,6 +773,7 @@ script "uixweap_wheel_select" (int idx)
 {
     GiveInventory("UIX_WeaponSelected_PU", 1);
     SetWeapon(getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP));
+    ConsoleCommand(StrParam(s:"use ", s:getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP)));
 }
 
 #define UIX_IW_LABELPOS -9
