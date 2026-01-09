@@ -49,7 +49,7 @@ str TeamInfo_Cvars[TEAMINFO_CVARS_MAX] = {
 // 1 - bottom left
 // 2 - bottom right
 int TeamInfo_Presets[3][TEAMINFO_CVARS_MAX] = {
-    {true,true,true,true,3,false,true,18,1,true,true,true,true,true,true,false,false,true,false,118,1.0,1.25,-416,-416},
+    {true,true,true,true,3,false,true,18,1,true,true,true,true,true,true,false,false,true,false,118,1.0,1.25,-360,-416},
     {true,true,true,true,4,false,true,11,1,true,true,true,true,true,true,true,false,false,false,118,1.0,1.25,378,-610},
     {true,true,true,true,4,true,true,11,1,true,true,true,true,true,true,true,false,false,true,118,1.0,1.25,378,620},
 };
@@ -151,7 +151,6 @@ function void updateSettings(int cpn, int oldVersion)
             {
                 SetUserCvar(cpn, TeamInfo_Cvars[i], TeamInfo_Presets[0][i]);
             }
-            return;
         }
 
         if(oldVersion < v2b) {
@@ -159,21 +158,24 @@ function void updateSettings(int cpn, int oldVersion)
             if(GetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE") == 96) {
                 SetUserCvar(cpn, "UIX_CL_TEAMINFONAMESIZE", 118);
             }
-            return;
         }
 
         if(oldVersion < v3a) {
             // Trying to make the teaminfo widget less intrusive, so people are less inclined to turn it off.
-            if(!GetUserCvar(cpn, "UIX_CL_TEAMINFO"))
+            if(!GetUserCvar(cpn, "UIX_CL_TEAMINFO")) // Force re-enable it.
                 SetUserCvar(cpn, "UIX_CL_TEAMINFO", true);
-            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE") == 1.5)
+            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE") == 1.5) // Make it smaller so it takes up less space
                 SetUserCvar(cpn, "UIX_CL_TEAMINFOSCALE", 1.25);
-            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY") == -416)
+            if(GetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY") == -416) // Move it down so chat doesn't obstruct it
                 SetUserCvar(cpn, "UIX_CL_TEAMINFOOFFSY", -360);
 
             // Compass actually got a bit smaller while in-dev, though a couple folks downloaded it early.
             if(GetUserCvar(cpn, "UIX_CL_COMPASSSCALE") == 3.0)
                 SetUserCvar(cpn, "UIX_CL_COMPASSSCALE", 2.0);
+
+            // I'm gonna be an asshole also.
+            if(!GetUserCvar(cpn, "UIX_CL_Enable"))
+                SetUserCvar(cpn, "UIX_CL_Enable", true);
             return;
         }
 }
