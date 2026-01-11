@@ -131,7 +131,7 @@ actor 8BDMItemRespawn
 		PUC6 A 0
 		goto SpawnLoop
 	40Seconds:
-		PUC4 A 0
+		PUC0 A 0
 		goto SpawnLoop
 	60Seconds:
 		PUCC A 0
