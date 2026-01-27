@@ -877,22 +877,24 @@ function void drawWeapon(int pln, int x, int y, int dead)
     }
 
     if(playerWeaponInfo[PI_AMMO_MAX1] > 0 && playerWeaponInfo[PI_AMMO_MAX2] > 0) {
-        drawLayeredBar(
+        drawLayeredBarColor(
             cvars[CV_LAYER],
-            getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
-            getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
-            getAmmoBar(2+cvars[CV_DIR],2,0),
+            barFonts[2][cvars[CV_DIR]],
+            barColors[playerWeaponInfo[PI_CYAN1]],
+            barColors[playerWeaponInfo[PI_BLUE1]],
+            barColors[0],
             X+wv[W_BAR1X], Y+wv[W_BAR1Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
             wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
             playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
             !cvars[CV_DIR]+1, false,
             wv[W_HALIGN], wv[W_VALIGN]
         );
-        drawLayeredBar(
+        drawLayeredBarColor(
             cvars[CV_LAYER],
-            getAmmoBar(2+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN2]),
-            getAmmoBar(2+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE2]),
-            getAmmoBar(2+cvars[CV_DIR],2,0),
+            barFonts[2][cvars[CV_DIR]],
+            barColors[playerWeaponInfo[PI_CYAN2]],
+            barColors[playerWeaponInfo[PI_BLUE2]],
+            barColors[0],
             X+wv[W_BAR2X], Y+wv[W_BAR2Y], wv[W_BARWIDTH], wv[W_BARHEIGHT],
             wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
             playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],
@@ -901,11 +903,12 @@ function void drawWeapon(int pln, int x, int y, int dead)
         );
     } else {
         if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
-            drawLayeredBar(
+            drawLayeredBarColor(
                 cvars[CV_LAYER],
-                getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
-                getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
-                getAmmoBar(4+cvars[CV_DIR],2,0),
+                barFonts[1][cvars[CV_DIR]],
+                barColors[playerWeaponInfo[PI_CYAN1]],
+                barColors[playerWeaponInfo[PI_BLUE1]],
+                barColors[0],
                 X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
                 wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
                 playerWeaponInfo[PI_AMMO_AMT1], playerWeaponInfo[PI_AMMO_MAX1],
@@ -915,11 +918,12 @@ function void drawWeapon(int pln, int x, int y, int dead)
         }
         
         if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
-            drawLayeredBar(
+            drawLayeredBarColor(
                 cvars[CV_LAYER],
-                getAmmoBar(4+cvars[CV_DIR],0,playerWeaponInfo[PI_CYAN1]),
-                getAmmoBar(4+cvars[CV_DIR],1,playerWeaponInfo[PI_BLUE1]),
-                getAmmoBar(4+cvars[CV_DIR],2,0),
+                barFonts[1][cvars[CV_DIR]],
+                barColors[playerWeaponInfo[PI_CYAN1]],
+                barColors[playerWeaponInfo[PI_BLUE1]],
+                barColors[0],
                 X+wv[W_BARX], Y+wv[W_BARY], wv[W_BARSINGLEWIDTH], wv[W_BARSINGLEHEIGHT],
                 wv[W_BARSCALE], wv[W_BARSCALE], cvars[CV_ALPHA],
                 playerWeaponInfo[PI_AMMO_AMT2], playerWeaponInfo[PI_AMMO_MAX2],

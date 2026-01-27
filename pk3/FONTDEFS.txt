@@ -24,3 +24,53 @@ CMPSOBJS
 
 	NOTRANSLATION 4// 247
 }
+
+WBAMOVER
+{
+	A WBVERTA
+	B WBVERTB
+	C WBVERTC
+	// Since all the above graphics are monotone, need a shade of black
+	// Without it, the above graphics always draw as black
+	Z BLACK
+}
+
+WBAMOHOR
+{
+	A WBHORIA
+	B WBHORIB
+	C WBHORIC
+	Z BLACK
+}
+
+TBAM1HOR
+{
+	A TEM1WBHA
+	B TEM1WBHB
+	C TEM1WBHC
+	Z BLACK
+}
+
+TBAM2HOR
+{
+	A TEM2WBHA
+	B TEM2WBHB
+	C TEM2WBHC
+	Z BLACK
+}
+
+TBAM1VER
+{
+	A TEM1WBVA
+	B TEM1WBVB
+	C TEM1WBVC
+	Z BLACK
+}
+
+TBAM2VER
+{
+	A TEM2WBVA
+	B TEM2WBVB
+	C TEM2WBVC
+	Z BLACK
+}

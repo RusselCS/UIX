@@ -143,9 +143,9 @@ function void displayMessageColorFadeBar(int layer, str msg, int offsX, int offs
 	SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
 
 	if(fadeTime > 0)
-		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
+		HudMessage(s:msg; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
 	else
-		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+		HudMessage(s:msg; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
 
     SetHudClipRect(0, 0, 0, 0, 0);
 }
@@ -181,6 +181,35 @@ function void drawLayeredBar(int layer, str bar1, str bar2, str empty, int offsx
     SetHudClipRect(0, 0, 0, 0, 0);
     SetFont(empty);
     HudMessage(s:"A"; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, CR_UNTRANSLATED, calcX, calcY, MSG_TIME, alpha);
+	SetHudClipRect(0,0,0,0);
+}
+
+function void drawLayeredBarColor(int layer, str barFont, str bar1col, str bar2col, str emptycol, int offsx, int offsy, int width, int height, int scalex, int scaley, int alpha, int amount, int maxAmount, int mode, int reverse, int halign, int valign)
+{
+	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
+
+	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (calchalign == ALIGN_RIGHT || calchalign == ALIGN_NEGRIGHT ? -width : 0));
+	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (calcvalign == ALIGN_BOTTOM ? -height : 0));
+
+    if(mode == BAR_DISPLAY_NONE)
+       return;
+    
+    int clip;
+    if(mode == BAR_DISPLAY_VERT) {
+        clip = (amount * height) / maxAmount;
+        SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH + (height - clip), width, clip);
+    }
+    if(mode == BAR_DISPLAY_HORI) {
+        clip = (amount * width) / maxAmount;
+		SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
+    }
+
+	SetFont(barFont);
+	HudMessage(s:"A"; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, bar1col, calcX, calcY, MSG_TIME, alpha);
+	HudMessage(s:"B"; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, bar2col, calcX, calcY, MSG_TIME, alpha);
+    // SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, width, height);
+    SetHudClipRect(0, 0, 0, 0, 0);
+    HudMessage(s:"C"; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, emptycol, calcX, calcY, MSG_TIME, alpha);
 	SetHudClipRect(0,0,0,0);
 }
 
