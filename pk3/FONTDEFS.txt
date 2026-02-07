@@ -8,21 +8,50 @@ SIDEFNTL
 // was probably a little too late to save some other components though
 CMPSOBJS
 {
-	A UXCMOBJA
-	B UXCMOBJB
-	C UXCMOBJC
-	D UXCMOBJD
-	E UXCMOBJE
-	F UXCMOBJF
-	G UXCMOBJG
-	H UXCMOBJH
-	I UXCMOBJI
-	J UXCMOBJJ
-	K UXCMOBJK
-	L UXCMOBJL
-	M UXCMOBJM
+	A UXCMOBJA // flag outline
+	B UXCMOBJB // flag highlight
+	C UXCMOBJC // flag unshaded
+	D UXCMOBJD // helmet outline
+	E UXCMOBJE // helmet highlight
+	F UXCMOBJF // helmet unshaded
+	G UXCMOBJG // deposit highlight
+	H UXCMOBJH // deposit 1
+	I UXCMOBJI // deposit 2
+	J UXCMOBJJ // deposit 3
+	K UXCMOBJK // deposit + (used for custom skulltag points and CTF deposit points)
+	L UXCMOBJL // deposit unshaded
+	M UXCMOBJM // objective dropped
+	N UXCMOBJN // possession outline
+	O UXCMOBJO // possession highlight
+	P UXCMOBJP // possession unshaded
 
-	NOTRANSLATION 4// 247
+	// 4 is white, which is used for some highlights
+	// 72 and 202 are the colors for UIX's possession icon
+	// they had to be recolored because it's normal colors are not on the palette
+	// which would have made these notranslation colors a headache to find
+	NOTRANSLATION 4 72 202
+}
+
+MUGSOBJS
+{
+	A UXMGOBJA // flag outline
+	B UXMGOBJB // flag highlight
+	C UXMGOBJC // flag unshaded
+	D UXMGOBJD // helmet outline
+	E UXMGOBJE // helmet highlight
+	F UXMGOBJF // helmet unshaded
+	G UXMGOBJG // deposit highlight
+	H UXMGOBJH // deposit 1
+	I UXMGOBJI // deposit 2
+	J UXMGOBJJ // deposit 3
+	K UXMGOBJK // deposit + (used for custom skulltag points and CTF deposit points)
+	L UXMGOBJL // deposit unshaded
+	M UXMGOBJM // objective dropped
+	N UXMGOBJN // possession outline
+	O UXMGOBJO // possession highlight
+	P UXMGOBJP // possession unshaded
+
+	NOTRANSLATION 4 72 202
 }
 
 WBAMOVER
@@ -73,4 +102,17 @@ TBAM2VER
 	B TEM2WBVB
 	C TEM2WBVC
 	Z BLACK
+}
+
+MUGSFX
+{
+	A UXMGSKIA // Eye flash
+	B UXMGSKIB
+	C UXMGSKIC
+	D UXMGSKID
+	E UXMGSKIE // skull highlight
+	F UXMGSKIF // skull unshaded
+	G UXMGSKIG // mugshot background
+
+	NOTRANSLATION 4 210
 }

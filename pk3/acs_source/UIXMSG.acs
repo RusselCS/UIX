@@ -41,7 +41,7 @@ script "UIX_KillfeedDispatch" DEATH CLIENTSIDE
         plrFrags[vpln] = vfrags;
         terminate;
     }
-    
+
     int oFrags = plrFrags[apln];
     int nFrags = PlayerFrags();
 
@@ -154,7 +154,7 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
 
         if(timer() > endTime)
             terminate;
-        
+
         // update
         if(fragTime != lastFrag[pln]) {
             update++;
@@ -189,11 +189,21 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
         }
 
         if(!dead) {
+            // [Russ] NOTE: The skulls here are drawn twice, because the specific way the elements are layered.
             if(infiniteRespawns) {
-                displayIcon(layer, respawnFrames[FRAGMSG_RESPAWNFRAMES-1], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+                SetFont("MUGSFX");
+
+                // EYE GLOW
+                displayMessage(layer, respawnFrames[FRAGMSG_RESPAWNFRAMES-1], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+
+                // SKULL
+                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[cyan]);
+                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[blue]);
             } else {
-                if(timer() >= startTime + FRAGMSG_EXPLODE) {
-                
+                int explodeHappened = timer() >= startTime + FRAGMSG_EXPLODE;
+
+                // EXPLOSION
+                if(explodeHappened) {
                     int explodeFrame = timer() - (startTime + FRAGMSG_EXPLODE);
                     if(!canRespawn) {
                         if(explodeFrame < FRAGMSG_EXPLODEFRAMES) {
@@ -202,16 +212,25 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
                             int explodeOffsY = FixedMul(explodeScale, 26);
                             displayIcon(layer, explodeFrames[explodeFrame], x+explodeOffsX, y+explodeOffsY, explodeScale, explodeScale, alpha, ALIGN_CENTER, ALIGN_CENTER);
                         }
-                        displayIcon(layer, skullIcons[0][cyan], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-                        displayIcon(layer, skullIcons[1][blue], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-                        displayIcon(layer, "UIXMGSCR", x, y, scale, scale, FixedMul(alpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
-                    } else {
-                        displayIcon(layer, respawnFrames[min(explodeFrame, FRAGMSG_RESPAWNFRAMES-1)], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
                     }
                 }
+
+                SetFont("MUGSFX");
+
+                // EYE GLOW
+                if(explodeHappened)
+                    if(canRespawn)
+                        displayMessage(layer, respawnFrames[min(explodeFrame, FRAGMSG_RESPAWNFRAMES-1)], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
+
+                // SKULL
+                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[cyan]);
+                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[blue]);
+
+                // SCREEN FADE
+                if(explodeHappened)
+                    if(!canRespawn)
+                        displayMessage(layer, "G", x, y, scale, scale, alpha >> 1, ALIGN_CENTER, ALIGN_CENTER);
             }
-            displayIcon(layer, skullIcons[0][cyan], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
-            displayIcon(layer, skullIcons[1][blue], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
         }
 
         displayIcon(layer, mug, x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);

@@ -382,7 +382,7 @@ function void drawMugshot(int pln, int x, int y, int team, int dead)
         mugShot_StatusX = fixedMul(mugScale, MG_STATUS_X);
         mugShot_StatusY = fixedMul(mugScale, MG_STATUS_Y);
         mugShot_VCY = fixedMul(mugScale, MG_VC_Y);
-        
+
         mugShot_SkullY = fixedMul(mugScale, MG_SKULL_Y);
         mugShot_ExplodeX = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_X);
         mugShot_ExplodeY = fixedMul(mugShot_ExplodeScale, MG_EXPLODE_Y);
@@ -427,9 +427,10 @@ function void drawMugshotDead(int pln, int x, int y, int team, int dead)
     if(dead == STATUS_ALIVE)
         return;
 
-    displayIcon(cvars[CV_LAYER], skullIcons[0][4], x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(cvars[CV_LAYER], skullIcons[1][200], x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(cvars[CV_LAYER], "UIXMGSCR", x, y, mugScale, mugScale, FixedMul(cvars[CV_ALPHA], 0.5), ALIGN_CENTER, ALIGN_CENTER);
+    SetFont("MUGSFX");
+    displayMessageColorString(cvars[CV_LAYER], "E", x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER, fontColors[4]);
+    displayMessageColorString(cvars[CV_LAYER], "F", x, y+mugShot_SkullY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER, fontColors[200]);
+    displayMessage(cvars[CV_LAYER], "G", x, y, mugScale, mugScale, cvars[CV_ALPHA] >> 1, ALIGN_CENTER, ALIGN_CENTER);
 }
 
 script "UIXTeam_Mugshot_Death" DEATH CLIENTSIDE
@@ -473,18 +474,14 @@ function void drawObjective(int pln, int x, int y, int team)
         if(lastPickup == -1)
             lastPickup = Timer();
 
+        SetFont("MUGSOBJS");
+
         if(((Timer()-lastPickup) / 35) % 2 == 1) {
-            displayIcon(cvars[CV_LAYER], getObjectiveIcon(objective, 2, 0), x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
+            displayMessageColorString(cvars[CV_LAYER], objMessage[objective][0], x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP, fontColors[4]);
         }
 
-        str cyan = getObjectiveIcon(objective, 0, CallACS2("core_getteampalette", i, 0));
-        str blue = getObjectiveIcon(objective, 1, CallACS2("core_getteampalette", i, 1));
-
-        displayIcon(cvars[CV_LAYER], cyan, x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
-
-        if(cyan != blue) {
-            displayIcon(cvars[CV_LAYER], blue, x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP);
-        }
+        displayMessageColorString(cvars[CV_LAYER], objMessage[objective][1], x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP, fontColors[CallACS2("core_getteampalette", i, 0)]);
+        displayMessageColorString(cvars[CV_LAYER], objMessage[objective][2], x+mugShot_ObjX, y+mugShot_ObjY, mugScale, mugScale, cvars[CV_ALPHA], ALIGN_LEFT, ALIGN_TOP, fontColors[CallACS2("core_getteampalette", i, 1)]);
     }
 }
 

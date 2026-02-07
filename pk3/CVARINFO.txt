@@ -72,7 +72,7 @@ user int UIX_CL_KILLFEEDLAYER = 0;
 user bool UIX_CL_ACTIONCAM = true;
 
 // debug stuff
-user noarchive bool UIX_DEBUG_SHOWSELF = false;
+user noarchive bool UIX_DEBUG_SHOWSELF = true;
 
 // item wheel
 user bool UIX_CL_ITEMWHEELTAP = true;
