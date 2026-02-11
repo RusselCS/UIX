@@ -1010,7 +1010,7 @@ function void drawLives(int pln, int x, int y, int dead)
         sv[S_OFFSX] = FixedMul(cvars[CV_SCALE], (!cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? -LIVES_OFFS : LIVES_OFFS) : 0));
         sv[S_OFFSY] = FixedMul(cvars[CV_SCALE], ( cvars[CV_DIR] ? (!cvars[CV_MIRROR] ? -LIVES_OFFS : LIVES_OFFS) : 0));
 
-        sv[S_TEXTSCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);        
+        sv[S_TEXTSCALE] = FixedMul(cvars[CV_SCALE], TEXT_SCALE);
         sv[S_TEXTHALIGN] = cvars[CV_DIR] == vertical ? ALIGN_CENTER : ALIGN_LEFT;
         sv[S_TEXTVALIGN] = cvars[CV_DIR] == horizontal ? ALIGN_CENTER : ALIGN_BOTTOM;
     }
@@ -1018,9 +1018,10 @@ function void drawLives(int pln, int x, int y, int dead)
     int team = GetPlayerInfo(pln, PLAYERINFO_TEAM);
     int cyan = ACS_NamedExecuteWithResult("core_getteampalette", team, 0);
     int blue = ACS_NamedExecuteWithResult("core_getteampalette", team, 1);
-    
-    displayIcon(cvars[CV_LAYER], livesIcons[0][cyan], x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
-    displayIcon(cvars[CV_LAYER], livesIcons[1][blue], x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER);
+
+    SetFont("LIVCOUNT");
+    displayMessageColorString(cvars[CV_LAYER], "A", x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER, fontColors[cyan]);
+    displayMessageColorString(cvars[CV_LAYER], "B", x+sv[S_X], y+sv[S_Y], sv[S_SCALE], sv[S_SCALE], cvars[CV_ALPHA], ALIGN_CENTER, ALIGN_CENTER, fontColors[blue]);
 
     SetFont(uiFonts[cvars[CV_FONTIDX]]);
     displayMessage(cvars[CV_LAYER], livesCounts[cvars[CV_DIR] + cvars[CV_REVERSETEXT]][lives < 100 ? lives : 99], x + sv[S_TEXTX], y + sv[S_TEXTY], sv[S_TEXTSCALE], sv[S_TEXTSCALE], cvars[CV_ALPHA], sv[S_TEXTHALIGN], sv[S_TEXTVALIGN]);
