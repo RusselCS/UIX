@@ -261,7 +261,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     int pln = PlayerNumber();
     if(pln == -1)
         terminate;
-    
+
     if(CheckInventory("UIX_NoWeaponBar") > 0)
         terminate;
 
@@ -295,16 +295,16 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         barWidth = (cvDir ? BAR_WIDTH : BAR_HEIGHT);
         barHeight = (cvDir ? BAR_HEIGHT : BAR_WIDTH);
         barScale = FixedMul(cvScale, BAR_SCALE);
-        
+
         barX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR_X_00 : BAR_X_01) : (!cvMirror ? BAR_X_10 : BAR_X_11)));
         barY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR_Y_00 : BAR_Y_01) : (!cvMirror ? BAR_Y_10 : BAR_Y_11)));
 
         barX1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_X_00 : BAR1_X_01) : (!cvMirror ? BAR1_X_10 : BAR1_X_11)));
         barY1 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR1_Y_00 : BAR1_Y_01) : (!cvMirror ? BAR1_Y_10 : BAR1_Y_11)));
-        
+
         barX2 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR2_X_00 : BAR2_X_01) : (!cvMirror ? BAR2_X_10 : BAR2_X_11)));
         barY2 = FixedMul(cvScale, (!cvDir ? (!cvMirror ? BAR2_Y_00 : BAR2_Y_01) : (!cvMirror ? BAR2_Y_10 : BAR2_Y_11)));
-        
+
         slotX = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOT_X_00 : SLOT_X_01) : (!cvMirror ? SLOT_X_10 : SLOT_X_11)));
         slotY = FixedMul(cvScale, (!cvDir ? (!cvMirror ? SLOT_Y_00 : SLOT_Y_01) : (!cvMirror ? SLOT_Y_10 : SLOT_Y_11)));
         HAlign = (cvMirror ? ALIGN_LEFT : ALIGN_RIGHT);
@@ -317,11 +317,11 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         overflowY = cvMaxRow * weightOffsY + FixedMul(cvScale, (!cvDir ? (!cvMirror ? OVERFLOW_Y_00 : OVERFLOW_Y_01) : (!cvMirror ? OVERFLOW_Y_10 : OVERFLOW_Y_11)));
         overflowScale = cvDir ? cvScale : FixedMul(cvScale, 0.7);
     }
-    
+
     int i;
     int slot, icon, ammo1, ammo2;
 
-    int selectedSlot = -1; 
+    int selectedSlot = -1;
     int selected = -1;
 
     int check;
@@ -333,11 +333,11 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         // Don't have it, don't care.
         if(!CheckActorInventory(cam, check))
             continue;
-        
+
         // Buster's got info in the ammo table, don't care.
         if(busterMap(i) != -1)
             continue;
-        
+
         if(selected == -1) {
             if(CheckWeapon(check)) {
                 selectedSlot = SLOT_BUSTER;
@@ -357,9 +357,9 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         // Don't have it, don't care.
         if(!CheckActorInventory(cam, check))
             continue;
-        
+
         slot = getWeaponSlot(i);
-        
+
         if(selected == -1) {
             if(CheckWeapon(check)) {
                 selectedSlot = slot;
@@ -372,7 +372,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
         ammo1 = getWeaponAmmoType(i);
         ammo2 = getWeaponAmmo2Type(i);
-        
+
         if(strLen(ammo1) != 0) {
             slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = CheckInventory(ammo1);
             slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = GetAmmoCapacity(ammo1);
@@ -395,7 +395,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         slot = (sidx + 1) % MAX_SLOTS;
         int baseX = cvOffsX + slotOffsX * slot;
         int baseY = cvOffsY + slotOffsY * slot;
-        
+
         int idx, col;
         if(slot == selectedSlot) {
             idx = selected;
@@ -404,7 +404,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
             idx = -1;
             col = "\c[darkgray]";
         }
-        
+
         for(i = 0; i < min(slotCounts[slot], cvMaxRow + (slot == selectedSlot)); i++)
         {
             int weap;
@@ -420,14 +420,14 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 } else {
                     iconX = baseX + weightOffsX * (i-1);
                     iconY = baseY + weightOffsY * (i-1);
-                    displayIcon(layer, "UXICA0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
+                    displayIcon(layer, "UXICB0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
                 }
             } else {
                 weap = i;
 
                 iconX = baseX + weightOffsX * i;
                 iconY = baseY + weightOffsY * i;
-                displayIcon(layer, "UXICA0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
+                displayIcon(layer, "UXICB0", iconX, iconY, cvScale, cvScale, FixedMul(cvAlpha, 0.5), ALIGN_CENTER, ALIGN_CENTER);
             }
 
             if(!slotVals[slot][weap][WEAP_TYPE]) {
@@ -522,7 +522,7 @@ function int WeaponBarColor(int idx, int col)
         return newProperties[idx][col];
 
     readWeaponBars(getWeaponActor(idx));
-    
+
     newProperties[idx][0] = true;
     newProperties[idx][1] = readCyan1;
     newProperties[idx][2] = readBlue1;
@@ -536,7 +536,7 @@ function int busterMap(int idx)
 {
     if(busterInit[idx][0])
         return busterInit[idx][1];
-    
+
     int wep = findWeaponByActor(getBusterActor(idx));
 
     busterInit[idx][0] = true;
