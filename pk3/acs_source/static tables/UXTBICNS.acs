@@ -5,7 +5,7 @@
 // index 2: orientation
 // -- 0: horizontal
 // -- 1: vertical
-str barFonts[3][2] = {
+str weaponBars[3][2] = {
     {"WBAMOHOR", "WBAMOVER"},
     {"TBAM1HOR", "TBAM1VER"},
     {"TBAM2HOR", "TBAM2VER"},

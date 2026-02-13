@@ -875,7 +875,7 @@ function void drawWeapon(int pln, int x, int y, int dead)
     if(playerWeaponInfo[PI_AMMO_MAX1] > 0 && playerWeaponInfo[PI_AMMO_MAX2] > 0) {
         drawLayeredBarColor(
             cvars[CV_LAYER],
-            barFonts[2][cvars[CV_DIR]],
+            weaponBars[2][cvars[CV_DIR]],
             fontPalette[playerWeaponInfo[PI_CYAN1]],
             fontPalette[playerWeaponInfo[PI_BLUE1]],
             fontPalette[0],
@@ -887,7 +887,7 @@ function void drawWeapon(int pln, int x, int y, int dead)
         );
         drawLayeredBarColor(
             cvars[CV_LAYER],
-            barFonts[2][cvars[CV_DIR]],
+            weaponBars[2][cvars[CV_DIR]],
             fontPalette[playerWeaponInfo[PI_CYAN2]],
             fontPalette[playerWeaponInfo[PI_BLUE2]],
             fontPalette[0],
@@ -901,7 +901,7 @@ function void drawWeapon(int pln, int x, int y, int dead)
         if(playerWeaponInfo[PI_AMMO_MAX1] > 0) {
             drawLayeredBarColor(
                 cvars[CV_LAYER],
-                barFonts[1][cvars[CV_DIR]],
+                weaponBars[1][cvars[CV_DIR]],
                 fontPalette[playerWeaponInfo[PI_CYAN1]],
                 fontPalette[playerWeaponInfo[PI_BLUE1]],
                 fontPalette[0],
@@ -916,7 +916,7 @@ function void drawWeapon(int pln, int x, int y, int dead)
         if(playerWeaponInfo[PI_AMMO_MAX2] > 0) {
             drawLayeredBarColor(
                 cvars[CV_LAYER],
-                barFonts[1][cvars[CV_DIR]],
+                weaponBars[1][cvars[CV_DIR]],
                 fontPalette[playerWeaponInfo[PI_CYAN1]],
                 fontPalette[playerWeaponInfo[PI_BLUE1]],
                 fontPalette[0],

@@ -437,7 +437,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
 
                 if(slotVals[slot][weap][WEAP_AMMO2_MAX] > 0) {
                     drawLayeredBarColor(layer,
-                                   barFonts[0][cvDir],
+                                   weaponBars[0][cvDir],
                                    slotVals[slot][weap][WEAP_CYAN2],
                                    slotVals[slot][weap][WEAP_BLUE2],
                                    fontPalette[0],
@@ -454,7 +454,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                     // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
                         drawLayeredBarColor(layer,
-                                        barFonts[0][cvDir],
+                                        weaponBars[0][cvDir],
                                         slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
                                         fontPalette[0],
@@ -470,7 +470,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 } else {
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
                         drawLayeredBarColor(layer,
-                                        barFonts[0][cvDir],
+                                        weaponBars[0][cvDir],
                                         slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
                                         fontPalette[0],
@@ -843,7 +843,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -863,7 +863,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -883,7 +883,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -900,7 +900,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -920,7 +920,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -940,7 +940,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -977,7 +977,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -997,7 +997,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -1017,7 +1017,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
@@ -1034,7 +1034,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -1054,7 +1054,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -1074,7 +1074,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
@@ -1130,7 +1130,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
@@ -1150,7 +1150,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
@@ -1170,7 +1170,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
@@ -1187,7 +1187,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
@@ -1207,7 +1207,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
@@ -1227,7 +1227,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
 
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
+    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
     el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
