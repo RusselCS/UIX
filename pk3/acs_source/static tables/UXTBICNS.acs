@@ -1,3 +1,16 @@
+// index 1: team version or not
+// -- 0: not team
+// -- 1: yes team, single
+// -- 2: yes team, double
+// index 2: orientation
+// -- 0: horizontal
+// -- 1: vertical
+str barFonts[3][2] = {
+    {"WBAMOHOR", "WBAMOVER"},
+    {"TBAM1HOR", "TBAM1VER"},
+    {"TBAM2HOR", "TBAM2VER"},
+};
+
 // Health bars
 str healthBars[2][2] = {
     {"UXTEMHH1", "UXTEMHV1"},
@@ -18,7 +31,7 @@ str respawnFrames[FRAGMSG_RESPAWNFRAMES] = {
     "A","B","C","D",
 };
 
-str fontColors[256] = {
+str fontPalette[256] = {
     "Crayon0","Crayon1","Crayon2","Crayon3","Crayon4","Crayon5","Crayon6","Crayon7",
     "Crayon8","Crayon9","Crayon10","Crayon11","Crayon12","Crayon13","Crayon14","Crayon15",
     "Crayon16","Crayon17","Crayon18","Crayon19","Crayon20","Crayon21","Crayon22","Crayon23",

@@ -6,7 +6,7 @@
 
 #include "SHRTFUNC.acs"
 
-#include "UXTBWBAR.acs"
+#include "UXTBICNS.acs"
 #include "UXTBWOVR.acs"
 
 #include "UXWHLDEF.acs"
@@ -376,15 +376,15 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         if(strLen(ammo1) != 0) {
             slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = CheckInventory(ammo1);
             slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = GetAmmoCapacity(ammo1);
-            slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = barColors[weaponBarColor(i, 1)];
-            slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = barColors[weaponBarColor(i, 2)];
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = fontPalette[weaponBarColor(i, 1)];
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = fontPalette[weaponBarColor(i, 2)];
         }
 
         if(strLen(ammo2) != 0) {
             slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] = CheckInventory(ammo2);
             slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] = GetAmmoCapacity(ammo2);
-            slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = barColors[weaponBarColor(i, 3)];
-            slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = barColors[weaponBarColor(i, 4)];
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = fontPalette[weaponBarColor(i, 3)];
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = fontPalette[weaponBarColor(i, 4)];
         }
         slotCounts[slot]++;
     }
@@ -440,7 +440,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    barFonts[0][cvDir],
                                    slotVals[slot][weap][WEAP_CYAN2],
                                    slotVals[slot][weap][WEAP_BLUE2],
-                                   barColors[0],
+                                   fontPalette[0],
                                    iconX + barX2,
                                    iconY + barY2,
                                    barWidth, barHeight,
@@ -457,7 +457,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barFonts[0][cvDir],
                                         slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
-                                        barColors[0],
+                                        fontPalette[0],
                                         iconX + barX1,
                                         iconY + barY1,
                                         barWidth, barHeight,
@@ -473,7 +473,7 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         barFonts[0][cvDir],
                                         slotVals[slot][weap][WEAP_CYAN1],
                                         slotVals[slot][weap][WEAP_BLUE1],
-                                        barColors[0],
+                                        fontPalette[0],
                                         iconX + barX,
                                         iconY + barY,
                                         barWidth, barHeight,
@@ -884,7 +884,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -941,7 +941,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -1018,7 +1018,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -1075,7 +1075,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -1171,7 +1171,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -1228,7 +1228,7 @@ script "uix_weapwheel_pop" OPEN CLIENTSIDE
     e++;
     el_p[s][e][UIX_IL_CONTENT  ] = "C";
     el_p[s][e][UIX_IL_FONT     ] = barFonts[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = barColors[0];
+    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
     el_p[s][e][UIX_IL_OFFSX    ] = 0;
     el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
     el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
@@ -1247,9 +1247,9 @@ script "uixweap_wheel_geticon" (int idx) { SetResultValue(getWeaponProperty(idx,
 script "uixweap_wheel_getlabel" (int idx) { SetResultValue(StrParam(l:getWeaponProperty(idx, AP_TAG))); }
 
 script "uixweap_wheel_getammo1factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR1)); }
-script "uixweap_wheel_getammo1cyan" (int idx) { SetResultValue(barColors[getWeaponProperty(idx, AP_BARCYAN1)]); }
-script "uixweap_wheel_getammo1blue" (int idx) { SetResultValue(barColors[getWeaponProperty(idx, AP_BARBLUE1)]); }
+script "uixweap_wheel_getammo1cyan" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARCYAN1)]); }
+script "uixweap_wheel_getammo1blue" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARBLUE1)]); }
 
 script "uixweap_wheel_getammo2factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR2)); }
-script "uixweap_wheel_getammo2cyan" (int idx) { SetResultValue(barColors[getWeaponProperty(idx, AP_BARCYAN2)]); }
-script "uixweap_wheel_getammo2blue" (int idx) { SetResultValue(barColors[getWeaponProperty(idx, AP_BARBLUE2)]); }
+script "uixweap_wheel_getammo2cyan" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARCYAN2)]); }
+script "uixweap_wheel_getammo2blue" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARBLUE2)]); }

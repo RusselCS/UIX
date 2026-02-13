@@ -666,9 +666,9 @@ script "uix_objective_iconner" OPEN CLIENTSIDE
 
             if(GetActorProperty(tid, AProp_Dropped)) {
                 if((Timer() / 17) % 2) {
-                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[4]);
                 } else {
-                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[CallACS2("core_getteampalette", i, 1)]);
+                    CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[CallACS2("core_getteampalette", i, 1)]);
                 }
                 CallACS2("uix_setcompassproperty", UIC_MESSAGE, "M");
                 CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
@@ -676,15 +676,15 @@ script "uix_objective_iconner" OPEN CLIENTSIDE
 
             if(carrying && (Timer() / 17) % 2) {
                 CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][0]);
-                CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[4]);
                 CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
             }
 
             CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][1]);
-            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(i, 0)]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[getTeamColor(i, 0)]);
             CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
             CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[ctfMode][2]);
-            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(i, 1)]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[getTeamColor(i, 1)]);
             CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
 
             // CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", tid);
@@ -713,16 +713,16 @@ script "uix_objective_iconner" OPEN CLIENTSIDE
 
             if((Timer() / 17) % 2) {
                 CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][0]);
-                CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[4]);
+                CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[4]);
                 CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
             }
 
             CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][dscore]);
-            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(dteam, 0)]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[getTeamColor(dteam, 0)]);
             CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
 
             CallACS2("uix_setcompassproperty", UIC_MESSAGE, objMessage[4][5]);
-            CallACS2("uix_setcompassproperty", UIC_COLOR, fontColors[getTeamColor(dteam, 1)]);
+            CallACS2("uix_setcompassproperty", UIC_COLOR, fontPalette[getTeamColor(dteam, 1)]);
             CallACS2("uix_drawcompassicon", "uix_compass_objectiveicon", i);
         }
     }

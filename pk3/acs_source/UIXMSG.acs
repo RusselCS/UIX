@@ -197,8 +197,8 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
                 displayMessage(layer, respawnFrames[FRAGMSG_RESPAWNFRAMES-1], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
 
                 // SKULL
-                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[cyan]);
-                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[blue]);
+                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontPalette[cyan]);
+                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontPalette[blue]);
             } else {
                 int explodeHappened = timer() >= startTime + FRAGMSG_EXPLODE;
 
@@ -223,8 +223,8 @@ script "UIX_Killfeed" (int cam, int who, int dead) CLIENTSIDE
                         displayMessage(layer, respawnFrames[min(explodeFrame, FRAGMSG_RESPAWNFRAMES-1)], x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER);
 
                 // SKULL
-                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[cyan]);
-                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontColors[blue]);
+                displayMessageColorString(layer, "E", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontPalette[cyan]);
+                displayMessageColorString(layer, "F", x, y, scale, scale, alpha, ALIGN_CENTER, ALIGN_CENTER, fontPalette[blue]);
 
                 // SCREEN FADE
                 if(explodeHappened)
