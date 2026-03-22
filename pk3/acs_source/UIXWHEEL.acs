@@ -82,22 +82,8 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             }
         }
 
-        // Aim lock - has different methods for online and offline.
-        // Offline, it's as simple as forcing the user to keep their pitch/yaw.
-        // Online, it needs to be "PROP_TOTALLYFROZEN" because force-setting the pitch/yaw causes jitter.
-        // This makes chasecam look a bit weird, but UIX's guiding mantra has always been "don't let perfect be the enemy of good" 🤷
-        if(!isOnline) {
-            SetActorPitch(0, sPosY);
-            SetActorAngle(0, sPosX);
-        } else {
-            int buttons = GetPlayerInput(cln, INPUT_BUTTONS);
-            if(buttons & BT_ATTACK || buttons & BT_ALTATTACK || buttons & BT_RELOAD || buttons & BT_ZOOM || buttons & BT_USER1 || buttons & BT_USER2 || buttons & BT_USER3 || buttons & BT_USER4) {
-                Log(s:"Wheel menus cannot be used while attacking.");
-                selected = -1;
-                break;
-            }
-            SetPlayerProperty(0, 1, PROP_TOTALLYFROZEN);
-        }
+        SetActorPitch(0, sPosY);
+        SetActorAngle(0, sPosX);
 
         // These need to always be up to date because they drive critical logic
         // And since this will be tied to player's inventory, it NEEDS to be up to date at all times.
