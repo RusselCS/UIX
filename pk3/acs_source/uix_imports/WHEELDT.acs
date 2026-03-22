@@ -1,0 +1,5 @@
+// CORE8BDT: Vanilla's copy of the library file. Do not edit or compile unless you are overwriting it.
+// 8BDT: The importable version that can be used in mods. Can remove whatever you aren't using from this file.
+//
+#library "WHEELDTC"
+
