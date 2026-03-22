@@ -250,12 +250,13 @@ OptionMenu "UIXOptions_ItemWheel"
 	Control "Open Item Wheel", "+invwheel"
 	Control "Use Item", "invuse"
 	StaticText " "
-	Option "Tap Item Wheel to Use", "UIX_CL_ITEMWHEELTAP", "OnOff"
+	Option "Use Item On Release", "UIX_CL_ITEMWHEELTAP", "InvWheelTap"
 	Slider "Tap use window (tics)", "UIX_CL_ITEMWHEELBUFFER", 1, 10, 1, 0
 	StaticText " "
 	Control "Open Weapon Wheel", "+weapwheel"
 	StaticText " "
 	Slider "Wheel Menu Scale", "UIX_CL_ITEMWHEELSCALE", 0.25, 5.00, 0.25, 2
+	Slider "Wheel Menu Dim", "UIX_CL_ITEMWHEELDIM", 0.0, 1.0, 0.05, 2
 	StaticText " "
 }
 
@@ -344,4 +345,11 @@ OptionValue "CompassUnit"
 	0, "Degrees"
 	1, "Fixed Point Angle"
 	2, "Byte Angle"
+}
+
+OptionValue "InvWheelTap"
+{
+	0, "Off"
+	1, "Tap Only"
+	2, "Always"
 }

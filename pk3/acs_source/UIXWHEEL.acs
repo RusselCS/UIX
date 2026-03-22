@@ -51,7 +51,6 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
     int sPosY = GetActorPitch(0);
     int sPosX = GetActorAngle(0);
-    int isOnline = IsNetworkGame();
 
     int USE_BUFFER = GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER");
 
@@ -82,6 +81,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
             }
         }
 
+        // Lock the player's aim...
         SetActorPitch(0, sPosY);
         SetActorAngle(0, sPosX);
 
@@ -111,7 +111,7 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
 
         int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
         int userAlpha = 1.0;
-        int menuAlpha = GetCvar("dimamount");
+        int menuAlpha = GetUserCvar(cln, "UIX_CL_ITEMWHEELDIM");
 
         // Fade time is 1/10th of a second.
         // There's no point in drawing something that has 0 alpha, so the timer
@@ -324,10 +324,6 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
         selected = CallACS1(settingsScript, UIW_CURSELECT);
 
     ACS_NamedExecuteWithResult(selectScript, selected);
-
-    if(IsNetworkGame()) {
-        SetPlayerProperty(0, 0, PROP_TOTALLYFROZEN);
-    }
 }
 
 script "uix_wheelDeactivate" (void) CLIENTSIDE

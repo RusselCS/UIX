@@ -347,19 +347,25 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
 
     CallACS0("uix_wheelDeactivate");
 
-    if(!GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP"))
+    int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
+
+    if(!tap)
         terminate;
 
-    if(Timer()-wheelTime < GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER")) {
-        // i could write an essay on why i think it's absoluely fucking headass that
-        // the function designed to USE THE FUCKING INVENTORY ITEM
-        // DOES NOT WORK WHEN CALLED FROM A CLIENTSIDE SCRIPT
-        // IN AN ENGINE WITH CLIENTSIDE PREDICTION
-        // but i will just leave this as my all-caps rant.
-        // sorry to tappers.
-        // UseInventory(myInventory[mySelection][MI_ITEM]);
-        ConsoleCommand(StrParam(s:"use ", s:myInventory[mySelection][MI_ITEM]));
+    if(Timer()-wheelTime >= GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER")) {
+        if(tap < 2)
+            terminate;
+        delay(1); // this delay is needed because of the reshuffle script being executed...
     }
+
+    // i could write an essay on why i think it's absoluely fucking headass that
+    // the function designed to USE THE FUCKING INVENTORY ITEM
+    // DOES NOT WORK WHEN CALLED FROM A CLIENTSIDE SCRIPT
+    // IN AN ENGINE WITH CLIENTSIDE PREDICTION
+    // but i will just leave this as my all-caps rant.
+    // sorry to tappers.
+    // UseInventory(myInventory[mySelection][MI_ITEM]);
+    ConsoleCommand(StrParam(s:"use ", s:myInventory[mySelection][MI_ITEM]));
 }
 
 // These are called by "uix_wheelActivate" per the above scripts...

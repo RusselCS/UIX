@@ -75,9 +75,10 @@ user bool UIX_CL_ACTIONCAM = true;
 user noarchive bool UIX_DEBUG_SHOWSELF = false;
 
 // item wheel
-user bool UIX_CL_ITEMWHEELTAP = true;
+user int UIX_CL_ITEMWHEELTAP = 1;
 user int UIX_CL_ITEMWHEELBUFFER = 1;
 user float UIX_CL_ITEMWHEELSCALE = 1.0;
+user float UIX_CL_ITEMWHEELDIM = 0.8;
 
 // pb-skinsupport
 user noarchive int pbskins_maestromug = -1;
