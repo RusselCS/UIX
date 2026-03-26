@@ -41,6 +41,20 @@ function int defaultWheelSelection(int mode, int idx, int a, int b)
 #define IP_X 0
 #define IP_Y 1
 
+str uixWheelBGs[11] = {
+    "UXWGRP02",
+    "UXWGRP03",
+    "UXWGRP04",
+    "UXWGRP05",
+    "UXWGRP06",
+    "UXWGRP07",
+    "UXWGRP08",
+    "UXWGRP09",
+    "UXWGRP10",
+    "UXWGRP11",
+    "UXWGRP12",
+};
+
 // [Russ] Keeping aggressive comments on this because I reckon it's gonna be a pain in the tail to maintain otherwise
 script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript) CLIENTSIDE
 {
@@ -280,25 +294,9 @@ script "uix_wheelActivate" (int settingsScript, int loopScript, int selectScript
         // --------------------------------------
 
         // Sector divisions ---------------------
-        for(i = 0; i < groupCount; i++) {
-            ang = (groupAng >> 1) + (groupAng * i) + BASE_ANG;
-            int dotRange = (166*baseScale)>>16;
-            int dotCount = 30;
-            int dotBase = 80;
-            for(ii = 1; ii<dotCount; ii++){
-                int dotDist = dotBase+ii*(dotRange-dotBase)/dotCount;
-                int dotx = (dotDist * cos(ang)) >> 16;
-                int doty = (dotDist * sin(ang)) >> 16;
-                int dotAlpha = min(ii * userAlpha / 10, userAlpha);
-
-                displayIconFade(LAYER_DEFAULT, "UXIWDOT", dotx, doty, baseScale, baseScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
-            }
-
-            // dotx = (dotRange * cos(ang)) >> 16;
-            // doty = (dotRange * sin(ang)) >> 16;
-            // dotAlpha = userAlpha; // min(userAlpha / (dotRange / 4) * (ii - dotBase), userAlpha);
-
-            // displayIconFade(LAYER_DEFAULT, "UXIWDT2", dotx, doty, sIconScale, sIconScale, dotAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+        if(groupCount > 1 && groupCount < 13) {
+            int groupScale = 5 * (baseScale >> 2);
+            displayIconFade(LAYER_DEFAULT, uixWheelBGs[groupCount-2], 0, 0, groupScale, groupScale, userAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
         }
         // --------------------------------------
 
