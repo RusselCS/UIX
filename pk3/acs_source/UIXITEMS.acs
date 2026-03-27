@@ -6,6 +6,7 @@
 #include "UXWHLDEF.acs"
 
 #import "8BDT.acs"
+#import "WHEELDT.acs"
 
 // Preliminary data preparatation =====================================================================================
 
@@ -39,7 +40,7 @@ int groupMapping[MAX_GROUPS] = {
 int UIX_INV = 0;
 int UIX_BUSTERS = 0;
 
-#define IT_IDX        0
+#define IT_INIT       0
 #define IT_TYPE       1 // 0 - buster / 1 - item - atm unsure what's needed
 #define IT_ACTOR      2
 #define IT_TAG        3
@@ -48,45 +49,43 @@ int UIX_BUSTERS = 0;
 #define IT_ICON       6
 #define IT_INGROUPIDX 7 // determined by the open script
 
-int itemStore[8] = {-1};
+int itemStore[UIX_INV_LMT][9];
 int groupIndex[UIX_INV_LMT]; // populated by the open script
 
 function int getItemProperty(int type, int idx)
 {
-    if(idx != itemStore[IT_IDX]) {
-        itemStore[IT_IDX] = idx;
+    if(!itemStore[idx][IT_INIT]) {
+        itemStore[idx][IT_INIT] = true;
         if(idx < UIX_BUSTERS) {
-            itemStore[IT_INGROUPIDX] = groupIndex[idx];
+            itemStore[idx][IT_INGROUPIDX] = groupIndex[idx];
 
-            itemStore[IT_TYPE]  = 0;
-            itemStore[IT_ACTOR] = getBusterUpgrade(idx);
-            itemStore[IT_TAG]   = getBusterUpgradeTag(idx);
-            itemStore[IT_GROUP] = IWGRP_BUSTER;
-            itemStore[IT_AMOUNT] = 1;
-            itemStore[IT_ICON] = getBusterIcon(idx);
+            itemStore[idx][IT_TYPE]  = 0;
+            itemStore[idx][IT_ACTOR] = getBusterUpgrade(idx);
+            itemStore[idx][IT_TAG]   = getBusterUpgradeTag(idx);
+            itemStore[idx][IT_GROUP] = IWGRP_BUSTER;
+            itemStore[idx][IT_AMOUNT] = 1;
+            itemStore[idx][IT_ICON] = getBusterIcon(idx);
         } else {
-            itemStore[IT_INGROUPIDX] = groupIndex[idx];
+            itemStore[idx][IT_INGROUPIDX] = groupIndex[idx];
 
-            idx -= UIX_BUSTERS;
-            int group = getAssistItemGroup(idx);
+            int dtidx = idx - UIX_BUSTERS;
+            int group = getAssistItemGroup(dtidx);
             if(group <= MAX_GROUPS)
                 group = groupMapping[group];
             else
                 group -= IWGRP_MAX;
 
-            itemStore[IT_TYPE]  = 1;
-            itemStore[IT_ACTOR] = getAssistItemActor(idx);
-            itemStore[IT_TAG]   = getAssistItemTag(idx);
-            itemStore[IT_GROUP] = group;
-            itemStore[IT_AMOUNT] = getAssistItemAmount(idx);
-            itemStore[IT_ICON] = getAssistItemIcon(idx);
+            itemStore[idx][IT_TYPE]  = 1;
+            itemStore[idx][IT_ACTOR] = getAssistItemActor(dtidx);
+            itemStore[idx][IT_TAG]   = getAssistItemTag(dtidx);
+            itemStore[idx][IT_GROUP] = group;
+            itemStore[idx][IT_AMOUNT] = getAssistItemAmount(dtidx);
+            itemStore[idx][IT_ICON] = getAssistItemIcon(dtidx);
         }
     }
-    return itemStore[type];
+    return itemStore[idx][type];
 }
 
-int wheelActive = false;
-int wheelTime = 0;
 int whichIds[UIX_INV_LMT];
 
 /*
@@ -117,7 +116,7 @@ int wheelInitialized = false;
 script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 {
     delay(3);
-    while(MAX_ITEMS_GLOBAL == 0 && MAX_BUSTERUPGRADES == 0) delay(1);
+    while(MAX_ITEMS_GLOBAL == 0 || MAX_BUSTERUPGRADES == 0) delay(1);
 
     UIX_BUSTERS = MAX_BUSTERUPGRADES;
     UIX_INV = UIX_BUSTERS + MAX_ITEMS_GLOBAL;
@@ -146,10 +145,6 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
         // Log(i:groupCounts[i]);
     }
 
-    // reset this in case the next access is somehow the last access.
-    // since not all data was initialized before this point, it could, in a 1/N chance, produce a shitty result.
-    // so. just do this to force it to use the fully initialized data.
-    itemStore[0] = -1;
     wheelInitialized = true;
     GROUP_ANG /= GROUP_COUNT;
 }
@@ -335,8 +330,10 @@ script "uixitem_activate" (void) NET CLIENTSIDE
 
     if(!wheelInitialized)
         terminate;
-    wheelTime = Timer();
-    CallACS3("uix_wheelActivate", "uixitem_settings", -1, "uixitem_selectitem");
+
+    newWheel("uixitem");
+    CallACS2("uixitem_settings", mySelection, wheelTime);
+    CallACS2("uix_wheelActivate", "uixitem_settings", "uixitem_selectitem");
 }
 
 script "uixitem_deactivate" (void) NET CLIENTSIDE
@@ -346,6 +343,7 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
         terminate;
 
     CallACS0("uix_wheelDeactivate");
+    destroyWheel();
 
     int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
 
@@ -368,231 +366,12 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
     ConsoleCommand(StrParam(s:"use ", s:myInventory[mySelection][MI_ITEM]));
 }
 
-// These are called by "uix_wheelActivate" per the above scripts...
-script "uixitem_settings" (int mode, int idx, int a, int b) { SetResultValue(itemWheelSelection(mode, idx, a, b)); }
-function int itemWheelSelection(int mode, int idx, int a, int b)
-{
-    if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
-        return itemWheelElementProperty(mode-UIW_ELEMENT_START, idx, a, b);
-    }
-    switch(mode) {
-        case UIW_CURSELECT:     return mySelection;
-        case UIW_GROUPCOUNT:    return GROUP_COUNT;
-        case UIW_ITEMCOUNT:     return myInvCount;
-        case UIW_ITEMGROUP:     return getItemProperty(IT_GROUP, myInventory[idx][MI_IDX]);
-        case UIW_ITEMGROUPMAX:  return myInventoryGroupMax[idx]; // IDX is group in this case
-        case UIW_ELEMENT_COUNT:
-            if(b == 1) return 2;
-            return 3;
-    }
-    // if the default clause ever gets invoked in this script, we have problems.
-    return -1;
-}
-
 #define UIX_IW_LABELPOS -7
 #define UIX_IW_ICONX    8
 #define UIX_IW_ICONY    16
 
 #define UIX_IW_CNTMUL   0.8
 #define UIX_IW_CNTSCALE 1.2
-
-str properties_str[3][3][UIX_IL_MAX] = {
-    { // selected == 0
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixitem_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (count)
-            "uixitem_getcount", // UIX_IL_CONTENT
-            "INDEXFONT", // UIX_IL_FONT
-        },
-        { // slot == 2 (background)
-            "A", // UIX_IL_CONTENT
-            "UXICB0", // UIX_IL_FONT
-        },
-    },
-    { // selected == 1
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixitem_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (count)
-            "uixitem_getcount", // UIX_IL_CONTENT
-            "INDEXFONT", // UIX_IL_FONT
-        },
-    },
-    { // selected == 2
-        { // slot == 0 (icon)
-            "A", // UIX_IL_CONTENT
-            "uixitem_geticon", // UIX_IL_FONT
-        },
-        { // slot == 1 (count)
-            "uixitem_getcount", // UIX_IL_CONTENT
-            "INDEXFONT", // UIX_IL_FONT
-        },
-        { // slot == 2 (label)
-            "uixitem_getlabel", // UIX_IL_CONTENT
-            "SMALLFNT", // UIX_IL_FONT
-        },
-    },
-};
-
-int properties_int[3][3][UIX_IL_MAX] = {
-    { // selected == 0
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            0.5, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-        { // slot == 1 (count)
-            CR_DARKGREY, // UIX_IL_COLOR
-            UIX_IW_CNTMUL, // UIX_IL_OFFSX
-            UIX_IW_CNTMUL, // UIX_IL_OFFSY
-            IL_OP_MULTIPLY, // UIX_IL_OFFSXOP
-            IL_OP_MULTIPLY, // UIX_IL_OFFSYOP
-            1, // UIX_IL_OFFSXTYPE
-            1, // UIX_IL_OFFSYTYPE
-            UIX_IW_CNTSCALE, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-        { // slot == 2 (background)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-    },
-    { // selected == 1
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.5, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-        { // slot == 1 (count)
-            CR_GOLD, // UIX_IL_COLOR
-            UIX_IW_CNTMUL, // UIX_IL_OFFSX
-            UIX_IW_CNTMUL, // UIX_IL_OFFSY
-            IL_OP_MULTIPLY, // UIX_IL_OFFSXOP
-            IL_OP_MULTIPLY, // UIX_IL_OFFSYOP
-            1, // UIX_IL_OFFSXTYPE
-            1, // UIX_IL_OFFSYTYPE
-            UIX_IW_CNTSCALE, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-    },
-    { // selected == 2
-        { // slot == 0 (icon)
-            0, // UIX_IL_COLOR
-            UIX_IW_ICONX, // UIX_IL_OFFSX
-            UIX_IW_ICONY+UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.5, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-        { // slot == 1 (count)
-            CR_WHITE, // UIX_IL_COLOR
-            -6, // UIX_IL_OFFSX
-            -5, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            2.0, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_RIGHT, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-        { // slot == 2 (label)
-            0, // UIX_IL_COLOR
-            0, // UIX_IL_OFFSX
-            -UIX_IW_LABELPOS, // UIX_IL_OFFSY
-            IL_OP_ADD, // UIX_IL_OFFSXOP
-            IL_OP_ADD, // UIX_IL_OFFSYOP
-            0, // UIX_IL_OFFSXTYPE
-            0, // UIX_IL_OFFSYTYPE
-            1.0, // UIX_IL_SCALE
-            1.0, // UIX_IL_ALPHA
-            ALIGN_CENTER, // UIX_IL_HALIGN
-            ALIGN_CENTER, // UIX_IL_VALIGN
-        },
-    },
-};
-
-// values here mean "do this thing"
-// 0: take the value as-is, as an int
-// 1: take the value as-is, as a str
-// 2: pass the given script the variables and pass that return back
-// perhaps an over-complicated way of handling this, but
-// it's simpler on computation side than a function with a bunch of exceptions to handle the edge cases
-int propertiesTypes[3][3][UIX_IL_MAX] = {
-    {
-        {1,2,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0},
-        {1,1,0,0,0,0,0,0,0,0,0},
-    },
-    {
-        {1,2,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0},
-    },
-    {
-        {1,2,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0},
-        {2,1,0,0,0,0,0,0,0,0,0},
-    },
-};
-
-script "uixitem_geticon" (int idx) { SetResultValue(myInventory[idx][MI_ICON]); }
-script "uixitem_getcount" (int idx)
-{
-    int count = CheckInventory(myInventory[idx][MI_ITEM]);
-    if(count > 1) {
-        SetResultValue(StrParam(i:count));
-        terminate;
-    }
-    SetResultValue(-1);
-}
-
-script "uixitem_getlabel" (int idx) { SetResultValue(StrParam(l:myInventory[idx][MI_TAG])); }
-
-
-function int itemWheelElementProperty(int idx, int slot, int property, int selected)
-{
-    if(propertiesTypes[selected][slot][property] == 1) return properties_str[selected][slot][property];
-    if(propertiesTypes[selected][slot][property] == 2) return CallACS1(properties_str[selected][slot][property], idx);
-    return properties_int[selected][slot][property-2];
-}
 
 #define ICON_PX 16
 
@@ -606,6 +385,79 @@ function int itemWheelElementProperty(int idx, int slot, int property, int selec
 #define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
 #define bits 8
+
+script "uixitem_settings" (int selected, int time)
+{
+    if(wheelTime != Timer())
+        terminate;
+
+    destroyWheel();
+    wheelSelection = selected;
+    WHEEL_GROUPS = 5;
+
+    for(int i = 0; i < myInvCount; i++) {
+        int item = myInventory[i][MI_IDX];
+        str actor = getItemProperty(IT_ACTOR, item);
+        str icon = getItemProperty(IT_ICON, item);
+        str tag = getItemProperty(IT_TAG, item);
+        int group = getItemProperty(IT_GROUP, item);
+        str count = getNumberString(checkInventory(actor));
+
+        addWheelItem(actor, group);
+
+        // Add the wheel elements. Back first.
+
+        // ----- Deselected -----
+        // Icon
+        addWheelElement("A",icon,0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,0.5,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+        // Count
+        addWheelElement(count,"INDEXFONT",CR_DARKGREY,WHEEL_MODE_UNSELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+        // Background
+        addWheelElement("A","UXICB0",0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+        // ----- Selected -----
+        // Icon
+        addWheelElement("A",icon,0,WHEEL_MODE_SELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+        // Count
+        addWheelElement(count,"INDEXFONT",CR_GOLD,WHEEL_MODE_SELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+        // ----- Centered -----
+        // Icon
+        addWheelElement("A",icon,0,WHEEL_MODE_MIDDLE,UIX_IW_ICONX,UIX_IW_ICONY+UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+        // Count
+        addWheelElement(count,"INDEXFONT",CR_WHITE,WHEEL_MODE_MIDDLE,-6,-5,IL_OP_ADD,IL_OP_ADD,0,0,2.0,1.0,ALIGN_RIGHT,ALIGN_CENTER,0,0,0);
+        // Tag
+        addWheelElement(StrParam(l:tag),"SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,-UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    }
+
+    SetResultValue(true);
+}
+
+#define INV_NUMS_CACHE 1000
+str invNumbersCache[INV_NUMS_CACHE];
+int invNumbersCached[INV_NUMS_CACHE];
+
+function str getNumberString(int num)
+{
+    int idx = num-1;
+    if(idx < 0)
+        idx = 0;
+    if(idx >= INV_NUMS_CACHE)
+        idx = INV_NUMS_CACHE-1;
+
+    if(!invNumbersCached[num]) {
+        if(num <= 1) {
+            invNumbersCache[idx] = "";
+        } else if(num >= INV_NUMS_CACHE) {
+            invNumbersCache[idx] = StrParam(i:idx, s:"+");
+        } else {
+            invNumbersCache[idx] = StrParam(i:num);
+        }
+        invNumbersCached[idx] = true;
+    }
+
+    return invNumbersCache[idx];
+}
 
 // Test functions =====================================================================================================
 

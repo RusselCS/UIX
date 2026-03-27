@@ -1,5 +1,258 @@
-// CORE8BDT: Vanilla's copy of the library file. Do not edit or compile unless you are overwriting it.
-// 8BDT: The importable version that can be used in mods. Can remove whatever you aren't using from this file.
-//
-#library "WHEELDTC"
+// Shared object file for wheel scripts to populate.
+#library "WHEELDT"
 
+#define _true 1
+#define _false 0
+
+#libdefine WHEEL_MODE_NONE 0
+#libdefine WHEEL_MODE_UNSELECTED 1
+#libdefine WHEEL_MODE_SELECTED 2
+#libdefine WHEEL_MODE_MIDDLE 3
+
+#define WHEEL_ITEMS_LIMIT 5000
+int WHEEL_ITEMS = 0;
+int wheel_items_properties_int[WHEEL_ITEMS_LIMIT][4];
+str wheel_items_properties_str[WHEEL_ITEMS_LIMIT][1];
+function int getWheelItemInit(int item) { return wheel_items_properties_int[item][3]; }
+function int getWheelItemGroup(int item) { return wheel_items_properties_int[item][0]; }
+function int getWheelItemGroupIndex(int item) { return wheel_items_properties_int[item][1]; }
+function int getWheelItemElementCount(int item) { return wheel_items_properties_int[item][2]; }
+function str getWheelItemName(int item) { return wheel_items_properties_str[item][0]; }
+function void setWheelItemInit(int item, int val) { wheel_items_properties_int[item][3] = val; }
+function void setWheelItemGroup(int item, int val) { wheel_items_properties_int[item][0] = val; }
+function void setWheelItemGroupIndex(int item, int val) { wheel_items_properties_int[item][1] = val; }
+function void setWheelItemElementCount(int item, int val) { wheel_items_properties_int[item][2] = val; }
+function void setWheelItemName(int item, str val) { wheel_items_properties_str[item][0] = val; }
+function int incWheelItemElementCount(int item) { return wheel_items_properties_int[item][2]++; }
+
+#define WHEEL_ELEMENTS_LIMIT 100
+str wheel_elements_properties_str[WHEEL_ITEMS_LIMIT][WHEEL_ELEMENTS_LIMIT][3];
+int wheel_elements_properties_int[WHEEL_ITEMS_LIMIT][WHEEL_ELEMENTS_LIMIT][14];
+function str getWheelElementContent(int item, int el) { return wheel_elements_properties_str[item][el][0]; }
+function str getWheelElementFont(int item, int el) { return wheel_elements_properties_str[item][el][1]; }
+function str getWheelElementColor(int item, int el) { return wheel_elements_properties_str[item][el][2]; }
+function int getWheelElementMode(int item, int el) { return wheel_elements_properties_int[item][el][0]; }
+function int getWheelElementOffsX(int item, int el) { return wheel_elements_properties_int[item][el][1]; }
+function int getWheelElementOffsY(int item, int el) { return wheel_elements_properties_int[item][el][2]; }
+function int getWheelElementOffsXOp(int item, int el) { return wheel_elements_properties_int[item][el][3]; }
+function int getWheelElementOffsYOp(int item, int el) { return wheel_elements_properties_int[item][el][4]; }
+function int getWheelElementOffsXType(int item, int el) { return wheel_elements_properties_int[item][el][5]; }
+function int getWheelElementOffsYType(int item, int el) { return wheel_elements_properties_int[item][el][6]; }
+function int getWheelElementScale(int item, int el) { return wheel_elements_properties_int[item][el][7]; }
+function int getWheelElementAlpha(int item, int el) { return wheel_elements_properties_int[item][el][8]; }
+function int getWheelElementHAlign(int item, int el) { return wheel_elements_properties_int[item][el][9]; }
+function int getWheelElementVAlign(int item, int el) { return wheel_elements_properties_int[item][el][10]; }
+function int getWheelElementBarWidth(int item, int el) { return wheel_elements_properties_int[item][el][11]; }
+function int getWheelElementBarAmt(int item, int el) { return wheel_elements_properties_int[item][el][12]; }
+function int getWheelElementBarMax(int item, int el) { return wheel_elements_properties_int[item][el][13]; }
+function void setWheelElementContent(int item, int el, str val) { wheel_elements_properties_str[item][el][0] = val; }
+function void setWheelElementFont(int item, int el, str val) { wheel_elements_properties_str[item][el][1] = val; }
+function void setWheelElementColor(int item, int el, str val) { wheel_elements_properties_str[item][el][2] = val; }
+function void setWheelElementMode(int item, int el, int val) { wheel_elements_properties_int[item][el][0] = val; }
+function void setWheelElementOffsX(int item, int el, int val) { wheel_elements_properties_int[item][el][1] = val; }
+function void setWheelElementOffsY(int item, int el, int val) { wheel_elements_properties_int[item][el][2] = val; }
+function void setWheelElementOffsXOp(int item, int el, int val) { wheel_elements_properties_int[item][el][3] = val; }
+function void setWheelElementOffsYOp(int item, int el, int val) { wheel_elements_properties_int[item][el][4] = val; }
+function void setWheelElementOffsXType(int item, int el, int val) { wheel_elements_properties_int[item][el][5] = val; }
+function void setWheelElementOffsYType(int item, int el, int val) { wheel_elements_properties_int[item][el][6] = val; }
+function void setWheelElementScale(int item, int el, int val) { wheel_elements_properties_int[item][el][7] = val; }
+function void setWheelElementAlpha(int item, int el, int val) { wheel_elements_properties_int[item][el][8] = val; }
+function void setWheelElementHAlign(int item, int el, int val) { wheel_elements_properties_int[item][el][9] = val; }
+function void setWheelElementVAlign(int item, int el, int val) { wheel_elements_properties_int[item][el][10] = val; }
+function void setWheelElementBarWidth(int item, int el, int val) { wheel_elements_properties_int[item][el][11] = val; }
+function void setWheelElementBarAmt(int item, int el, int val) { wheel_elements_properties_int[item][el][12] = val; }
+function void setWheelElementBarMax(int item, int el, int val) { wheel_elements_properties_int[item][el][13] = val; }
+
+#define WHEEL_GROUPS_LIMIT 50
+int WHEEL_GROUPS = 0;
+int wheel_group_max[WHEEL_GROUPS_LIMIT];
+function int getWheelGroupMax(int grp) { return wheel_group_max[grp]; }
+function void setWheelGroupMax(int grp, int val) { wheel_group_max[grp] = val; }
+function void incWheelGroupMax(int grp) { wheel_group_max[grp]++; }
+
+str wheelName = -1;
+int wheelTime = -1;
+int wheelActive = _false;
+int wheelSelection = -1;
+
+function int newWheel(str name)
+{
+    if(wheelTime > -1) {
+        destroyWheel();
+    }
+    wheelTime = Timer();
+    wheelName = name;
+
+    return wheelTime;
+}
+
+function int addWheelItem(str name, int group)
+{
+    if(group >= WHEEL_GROUPS) {
+        WHEEL_GROUPS = group+1;
+    }
+    int grpIdx = wheel_group_max[group]++;
+    int item = WHEEL_ITEMS++;
+
+    setWheelItemInit(item, _true);
+    setWheelItemName(item, name);
+    setWheelItemGroup(item, group);
+    setWheelItemGroupIndex(item, grpIdx);
+    setWheelItemElementCount(item, 0);
+
+    return item;
+}
+
+function void removeWheelItem(int item) {
+    if(item == WHEEL_ITEMS-1) {
+        destroyItem(item);
+    } else {
+        int next = item+1;
+        int curEl = getWheelItemElementCount(item);
+        int nextEl = getWheelItemElementCount(next);
+        int mx = (curEl > nextEl ? curEl : nextEl);
+
+        for(int i = 0; i < mx; i++) {
+            if(i < nextEl) {
+                setWheelElementMode(item, i, getWheelElementMode(next, i));
+                setWheelElementContent(item, i, getWheelElementContent(next, i));
+                setWheelElementFont(item, i, getWheelElementFont(next, i));
+                setWheelElementColor(item, i, getWheelElementColor(next, i));
+                setWheelElementOffsX(item, i, getWheelElementOffsX(next, i));
+                setWheelElementOffsY(item, i, getWheelElementOffsY(next, i));
+                setWheelElementOffsXOp(item, i, getWheelElementOffsXOp(next, i));
+                setWheelElementOffsYOp(item, i, getWheelElementOffsYOp(next, i));
+                setWheelElementOffsXType(item, i, getWheelElementOffsXType(next, i));
+                setWheelElementOffsYType(item, i, getWheelElementOffsYType(next, i));
+                setWheelElementScale(item, i, getWheelElementScale(next, i));
+                setWheelElementAlpha(item, i, getWheelElementAlpha(next, i));
+                setWheelElementHAlign(item, i, getWheelElementHAlign(next, i));
+                setWheelElementVAlign(item, i, getWheelElementVAlign(next, i));
+                setWheelElementBarWidth(item, i, getWheelElementBarWidth(next, i));
+                setWheelElementBarAmt(item, i, getWheelElementBarAmt(next, i));
+                setWheelElementBarMax(item, i, getWheelElementBarMax(next, i));
+            } else {
+                destroyElement(item, i);
+            }
+        }
+        removeWheelItem(next);
+    }
+}
+
+function int addWheelElement(
+    str content,
+    str font,
+    str color,
+    int mode,
+    int offsx,
+    int offsy,
+    int offsxop,
+    int offsyop,
+    int offsxtype,
+    int offsytype,
+    int scale,
+    int alpha,
+    int halign,
+    int valign,
+    int barwidth,
+    int baramt,
+    int barmax
+)
+{
+    int item = WHEEL_ITEMS-1;
+    int el = incWheelItemElementCount(item);
+
+    updateWheelElement(item,el,content,font,color,mode,offsx,offsy,offsxop,offsyop,offsxtype,offsytype,scale,alpha,halign,valign,barwidth,baramt,barmax);
+    return el;
+}
+
+function void updateWheelElement(
+    int item, int el,
+    str content,
+    str font,
+    str color,
+    int mode,
+    int offsx,
+    int offsy,
+    int offsxop,
+    int offsyop,
+    int offsxtype,
+    int offsytype,
+    int scale,
+    int alpha,
+    int halign,
+    int valign,
+    int barwidth,
+    int baramt,
+    int barmax
+) {
+    setWheelElementContent(item, el, content);
+    setWheelElementFont(item, el, font);
+    setWheelElementColor(item, el, color);
+    setWheelElementMode(item, el, mode);
+    setWheelElementOffsX(item, el, offsx);
+    setWheelElementOffsY(item, el, offsy);
+    setWheelElementOffsXOp(item, el, offsxop);
+    setWheelElementOffsYOp(item, el, offsyop);
+    setWheelElementOffsXType(item, el, offsxtype);
+    setWheelElementOffsYType(item, el, offsytype);
+    setWheelElementScale(item, el, scale);
+    setWheelElementAlpha(item, el, alpha);
+    setWheelElementHAlign(item, el, halign);
+    setWheelElementVAlign(item, el, valign);
+    setWheelElementBarWidth(item, el, barwidth);
+    setWheelElementBarAmt(item, el, baramt);
+    setWheelElementBarMax(item, el, barmax);
+}
+
+// Functions to free memory.
+function void destroyWheel(void)
+{
+    for(int item = 0; item < WHEEL_ITEMS; item++)
+    {
+        destroyItem(item);
+    }
+    WHEEL_ITEMS = 0;
+
+    for(int grp = 0; grp < WHEEL_GROUPS; grp++)
+        setWheelGroupMax(grp, 0);
+    WHEEL_GROUPS = 0;
+
+    wheelName = -1;
+    wheelTime = -1;
+}
+
+function void destroyItem(int item)
+{
+    int elMax = getWheelItemElementCount(item);
+    for(int el = 0; el < elMax; el++) {
+        destroyElement(item, el);
+    }
+    setWheelItemInit(item, 0);
+    setWheelItemGroup(item, 0);
+    setWheelItemGroupIndex(item, 0);
+    setWheelItemElementCount(item, 0);
+}
+
+function void destroyElement(int item, int el)
+{
+    if(getWheelElementMode(item, el)) {
+        setWheelElementContent(item, el, 0);
+        setWheelElementFont(item, el, 0);
+        setWheelElementColor(item, el, 0);
+        setWheelElementMode(item, el, 0);
+        setWheelElementOffsX(item, el, 0);
+        setWheelElementOffsY(item, el, 0);
+        setWheelElementOffsXOp(item, el, 0);
+        setWheelElementOffsYOp(item, el, 0);
+        setWheelElementOffsXType(item, el, 0);
+        setWheelElementOffsYType(item, el, 0);
+        setWheelElementScale(item, el, 0);
+        setWheelElementAlpha(item, el, 0);
+        setWheelElementHAlign(item, el, 0);
+        setWheelElementVAlign(item, el, 0);
+        setWheelElementBarWidth(item, el, 0);
+        setWheelElementBarAmt(item, el, 0);
+        setWheelElementBarMax(item, el, 0);
+    }
+}

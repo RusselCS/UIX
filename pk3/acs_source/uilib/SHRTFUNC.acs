@@ -126,7 +126,7 @@ function void displayMessageColorFade(int layer, str msg, int offsX, int offsY, 
 #define BAR_DISPLAY_VERT 1
 #define BAR_DISPLAY_HORI 2
 
-function void displayMessageColorFadeBar(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color, int fadeTime, int width, int barFactor)
+function void displayMessageColorFadeBar(int layer, str msg, int offsX, int offsY, int scaleX, int scaleY, int alpha, int halign, int valign, int color, int fadeTime, int width, int barAmt, int barMax)
 {
 	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
 
@@ -139,7 +139,7 @@ function void displayMessageColorFadeBar(int layer, str msg, int offsX, int offs
 	int clipOffsW = (halign == ALIGN_CENTER ? -width / 2 : (calchalign == ALIGN_RIGHT || calchalign == ALIGN_NEGRIGHT ? -width : 0));
 	int clipOffsH = (valign == ALIGN_CENTER ? -height / 2 : (calcvalign == ALIGN_BOTTOM ? -height : 0));
 
-    int clip = (barFactor * width) >> 16;
+    int clip = (barAmt * width) / barMax;
 	SetHudClipRect((calcX >> 16) + clipOffsW, (calcY >> 16) + clipOffsH, clip, height);
 
 	if(fadeTime > 0)
@@ -162,7 +162,7 @@ function void drawLayeredBar(int layer, str bar1, str bar2, str empty, int offsx
 
     if(mode == BAR_DISPLAY_NONE)
        return;
-    
+
     int clip;
     if(mode == BAR_DISPLAY_VERT) {
         clip = (amount * height) / maxAmount;
@@ -193,7 +193,7 @@ function void drawLayeredBarColor(int layer, str barFont, str bar1col, str bar2c
 
     if(mode == BAR_DISPLAY_NONE)
        return;
-    
+
     int clip;
     if(mode == BAR_DISPLAY_VERT) {
         clip = (amount * height) / maxAmount;
