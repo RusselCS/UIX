@@ -152,12 +152,7 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 // Inventory Stack Big Brother ========================================================================================
 
 // myInventory
-#define MI_ITEM  0
-#define MI_IDX   1
-#define MI_ICON  2
-#define MI_TAG   3
-#define MI_GROUP 4
-str myInventory[UIX_INV_LMT][5];
+str myInventory[UIX_INV_LMT];
 int myInventoryGroupMax[GROUP_COUNT_LIMIT];
 
 int myInvCount = 0;
@@ -182,19 +177,18 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             terminate;
 
         // rebuild inventory if something is missing
-        str myNewInventory[UIX_INV_LMT][2];
+        str myNewInventory[UIX_INV_LMT];
         int myNewInvCount = 0;
 
         int myHoldById[UIX_INV_LMT];
 
         for(i = 0; i < myInvCount; i++) {
-            if(checkInventory(myInventory[i][MI_ITEM]) > 0) {
-                myNewInventory[myNewInvCount][MI_ITEM] = myInventory[i][MI_ITEM];
-                myNewInventory[myNewInvCount][MI_IDX] = myInventory[i][MI_IDX];
-                myHoldById[myInventory[i][MI_IDX]] = true;
+            if(checkInventory(getItemProperty(IT_ACTOR, myInventory[i])) > 0) {
+                myNewInventory[myNewInvCount] = myInventory[i];
+                myHoldById[myInventory[i]] = true;
                 myNewInvCount++;
             } else {
-                myInventoryGroupMax[getItemProperty(IT_GROUP, myInventory[i][MI_IDX])]--;
+                myInventoryGroupMax[getItemProperty(IT_GROUP, myInventory[i])]--;
             }
         }
 
@@ -204,7 +198,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                     mySelection = -1;
                 } else {
                     while(true) { // 👻
-                        if(CheckInventory(myInventory[mySelection][MI_ITEM]) > 0)
+                        if(CheckInventory(getItemProperty(IT_ACTOR, myInventory[mySelection])) > 0)
                             break;
 
                         mySelection++;
@@ -212,7 +206,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                     }
 
                     for(i = 0; i < myNewInvCount; i++) {
-                        if(StrCmp(myNewInventory[i][MI_ITEM], myInventory[mySelection][MI_ITEM])==0) {
+                        if(StrCmp(getItemProperty(IT_ACTOR, myNewInventory[i]), getItemProperty(IT_ACTOR, myInventory[mySelection]))==0) {
                             mySelection = i;
                             break;
                         }
@@ -224,10 +218,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             // Log(s:"Rebuilding: new size = ", i:myNewInvCount);
             myInvCount = myNewInvCount;
             for(i = 0; i < myNewInvCount; i++) {
-                myInventory[i][MI_ITEM] = myNewInventory[i][MI_ITEM];
-                myInventory[i][MI_IDX] = myNewInventory[i][MI_IDX];
-                myInventory[i][MI_ICON] = getItemProperty(IT_ICON, myInventory[i][MI_IDX]);
-                myInventory[i][MI_TAG] = getItemProperty(IT_TAG, myInventory[i][MI_IDX]);
+                myInventory[i] = myNewInventory[i];
             }
         }
 
@@ -248,10 +239,7 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             str act = getItemProperty(IT_ACTOR, i);
             int c = CheckInventory(act);
             if(c > 0) {
-                myInventory[myInvCount][MI_ITEM] = act;
-                myInventory[myInvCount][MI_IDX] = i;
-                myInventory[myInvCount][MI_ICON] = getItemProperty(IT_ICON, i);
-                myInventory[myInvCount][MI_TAG] = getItemProperty(IT_TAG, i);
+                myInventory[myInvCount] = i;
                 // Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
                 if(mySelection == -1)
                     mySelection = myInvCount;
@@ -303,7 +291,7 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
     for(i = selected+1; i < selected+myInvCount; i++) {
         int idx = i%myInvCount;
 
-        int act = myInventory[idx][MI_ITEM];
+        int act = getItemProperty(IT_ACTOR, myInventory[idx]);
         int c = CheckInventory(act);
         TakeInventory(act, c);
         GiveInventory(act, c);
@@ -343,7 +331,6 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
         terminate;
 
     CallACS0("uix_wheelDeactivate");
-    destroyWheel();
 
     int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
 
@@ -363,7 +350,7 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
     // but i will just leave this as my all-caps rant.
     // sorry to tappers.
     // UseInventory(myInventory[mySelection][MI_ITEM]);
-    ConsoleCommand(StrParam(s:"use ", s:myInventory[mySelection][MI_ITEM]));
+    ConsoleCommand(StrParam(s:"use ", s:getItemProperty(IT_ACTOR, myInventory[mySelection])));
 }
 
 #define UIX_IW_LABELPOS -7
@@ -396,7 +383,7 @@ script "uixitem_settings" (int selected, int time)
     WHEEL_GROUPS = 5;
 
     for(int i = 0; i < myInvCount; i++) {
-        int item = myInventory[i][MI_IDX];
+        int item = myInventory[i];
         str actor = getItemProperty(IT_ACTOR, item);
         str icon = getItemProperty(IT_ICON, item);
         str tag = getItemProperty(IT_TAG, item);

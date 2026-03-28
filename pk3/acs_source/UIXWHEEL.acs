@@ -54,6 +54,8 @@ str uixWheelBGs[11] = {
     "UXWGRP12",
 };
 
+#define FADEOUT_TIME 0.1
+
 // [Russ] Keeping aggressive comments on this because I reckon it's gonna be a pain in the tail to maintain otherwise
 script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
 {
@@ -103,7 +105,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
                 Log(s:"This could also be.");
                 break;
             } else {
-                fadeTime = 0.1;
+                fadeTime = FADEOUT_TIME;
             }
         } else {
             if(!CallACS2 (settingsScript, selected, curTime)) {
@@ -121,7 +123,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
         // Even if the current loop doesn't continue.
         oldItemCount = itemCount;
         itemCount = WHEEL_ITEMS;
-        groupCount = WHEEL_GROUPS;
+            groupCount = WHEEL_GROUPS;
 
         int scaleMult = GetUserCvar(cln, "UIX_CL_ITEMWHEELSCALE");
         int userAlpha = 1.0;
