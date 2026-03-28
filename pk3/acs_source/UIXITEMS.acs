@@ -360,16 +360,8 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
 #define UIX_IW_CNTMUL   0.8
 #define UIX_IW_CNTSCALE 1.2
 
-#define ICON_PX 16
-
 #define ICON_X 16
 #define ICON_Y 32
-
-#define BASE_SCALE 2.0
-#define SELECT_X ICON_X
-#define SELECT_Y ICON_Y
-
-#define LAYER_DEFAULT HUDMSG_LAYER_OVERHUD
 
 #define bits 8
 
@@ -378,46 +370,68 @@ script "uixitem_settings" (int selected, int time)
     if(wheelTime != Timer())
         terminate;
 
-    destroyWheel();
     wheelSelection = selected;
+    rebuildWheel();
+
+    SetResultValue(true);
+}
+
+function void rebuildWheel(void)
+{
+    destroyWheel();
     WHEEL_GROUPS = 5;
 
     for(int i = 0; i < myInvCount; i++) {
-        int item = myInventory[i];
-        str actor = getItemProperty(IT_ACTOR, item);
-        str icon = getItemProperty(IT_ICON, item);
-        str tag = getItemProperty(IT_TAG, item);
-        int group = getItemProperty(IT_GROUP, item);
-        str count = getNumberString(checkInventory(actor));
-
-        addWheelItem(actor, group);
-
-        // Add the wheel elements. Back first.
-
-        // ----- Deselected -----
-        // Icon
-        addWheelElement("A",icon,0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,0.5,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-        // Count
-        addWheelElement(count,"INDEXFONT",CR_DARKGREY,WHEEL_MODE_UNSELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-        // Background
-        addWheelElement("A","UXICB0",0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-
-        // ----- Selected -----
-        // Icon
-        addWheelElement("A",icon,0,WHEEL_MODE_SELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-        // Count
-        addWheelElement(count,"INDEXFONT",CR_GOLD,WHEEL_MODE_SELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-
-        // ----- Centered -----
-        // Icon
-        addWheelElement("A",icon,0,WHEEL_MODE_MIDDLE,UIX_IW_ICONX,UIX_IW_ICONY+UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-        // Count
-        addWheelElement(count,"INDEXFONT",CR_WHITE,WHEEL_MODE_MIDDLE,-6,-5,IL_OP_ADD,IL_OP_ADD,0,0,2.0,1.0,ALIGN_RIGHT,ALIGN_CENTER,0,0,0);
-        // Tag
-        addWheelElement(StrParam(l:tag),"SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,-UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+        addItemFromMyInv(i);
     }
+}
 
-    SetResultValue(true);
+function void addItemFromMyInv(int idx)
+{
+    int item = myInventory[idx];
+    str actor = getItemProperty(IT_ACTOR, item);
+    str icon = getItemProperty(IT_ICON, item);
+    str tag = getItemProperty(IT_TAG, item);
+    int group = getItemProperty(IT_GROUP, item);
+    str count = getNumberString(checkInventory(actor));
+
+    int newItem = addWheelItem(actor, group);
+    Log(i:idx, s:" ", i:newItem);
+
+    // Add the wheel elements. Back first.
+
+    // ----- Deselected -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,0.5,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Count
+    addWheelElement(count,"INDEXFONT",CR_DARKGREY,WHEEL_MODE_UNSELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Background
+    addWheelElement("A","UXICB0",0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // ----------------------
+
+    // ----- Selected -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_SELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Count
+    addWheelElement(count,"INDEXFONT",CR_GOLD,WHEEL_MODE_SELECTED,UIX_IW_CNTMUL,UIX_IW_CNTMUL,IL_OP_MULTIPLY,IL_OP_MULTIPLY,1,1,UIX_IW_CNTSCALE,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // --------------------
+
+    // ----- Centered -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_MIDDLE,UIX_IW_ICONX,UIX_IW_ICONY+UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Count
+    addWheelElement(count,"INDEXFONT",CR_WHITE,WHEEL_MODE_MIDDLE,-6,-5,IL_OP_ADD,IL_OP_ADD,0,0,2.0,1.0,ALIGN_RIGHT,ALIGN_CENTER,0,0,0);
+    // Tag
+    addWheelElement(StrParam(l:tag),"SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,-UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // --------------------
+}
+
+function void updateItemCount(int idx, int num)
+{
+    str count = getNumberString(num);
+    setWheelElementContent(idx, 1, count);
+    setWheelElementContent(idx, 4, count);
+    setWheelElementContent(idx, 6, count);
 }
 
 #define INV_NUMS_CACHE 1000
