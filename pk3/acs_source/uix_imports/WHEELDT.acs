@@ -208,6 +208,12 @@ function void updateWheelElement(
 // Functions to free memory.
 function void destroyWheel(void)
 {
+    wheelName = -1;
+    wheelTime = -1;
+}
+
+function void emptyWheel(void)
+{
     for(int item = 0; item < WHEEL_ITEMS; item++)
     {
         destroyItem(item);
@@ -217,9 +223,6 @@ function void destroyWheel(void)
     for(int grp = 0; grp < WHEEL_GROUPS; grp++)
         setWheelGroupMax(grp, 0);
     WHEEL_GROUPS = 0;
-
-    wheelName = -1;
-    wheelTime = -1;
 }
 
 function void destroyItem(int item)

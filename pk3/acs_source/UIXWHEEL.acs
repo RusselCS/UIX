@@ -61,6 +61,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
 {
     if(wheelActive) terminate;
     wheelActive = true;
+    int name = wheelName;
 
     int cln = ConsolePlayerNumber();
 
@@ -100,17 +101,20 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
             continue;
         }
 
+        if(name != wheelName)
+            wheelActive = false;
+
         if(!wheelActive) {
             if(curTime <= 0) {
-                Log(s:"This could also be.");
                 break;
             } else {
                 fadeTime = FADEOUT_TIME;
             }
         } else {
-            if(!CallACS2 (settingsScript, selected, curTime)) {
-                Log(s:"I think this is why?");
-                break;
+            if(settingsScript != -1) {
+                if(!CallACS2 (settingsScript, selected, curTime)) {
+                    fadeTime = FADEOUT_TIME;
+                }
             }
         }
 
@@ -326,10 +330,10 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
 
         delay(1);
     }
-    if(selected == -1)
-        selected = CallACS1(settingsScript, UIW_CURSELECT);
+    destroyWheel();
 
-    ACS_NamedExecuteWithResult(selectScript, selected);
+    if(selectScript!=-1)
+        ACS_NamedExecuteWithResult(selectScript, selected);
 }
 
 script "uix_wheelDeactivate" (void) CLIENTSIDE

@@ -153,6 +153,7 @@ script "UIX_ItemWheelInit" OPEN CLIENTSIDE
 
 // myInventory
 str myInventory[UIX_INV_LMT];
+int myInvCountsById[UIX_INV_LMT];
 int myInventoryGroupMax[GROUP_COUNT_LIMIT];
 
 int myInvCount = 0;
@@ -177,22 +178,30 @@ script "uix_items_inventory" ENTER CLIENTSIDE
             terminate;
 
         // rebuild inventory if something is missing
-        str myNewInventory[UIX_INV_LMT];
+        int myNewInventory[UIX_INV_LMT];
         int myNewInvCount = 0;
 
         int myHoldById[UIX_INV_LMT];
+        int myInvById[UIX_INV_LMT];
+
+        // Wheel must be rebuilt when something fully leaves the inventory.
+        bool rebuild = false;
 
         for(i = 0; i < myInvCount; i++) {
-            if(checkInventory(getItemProperty(IT_ACTOR, myInventory[i])) > 0) {
+            int c = checkInventory(getItemProperty(IT_ACTOR, myInventory[i]));
+            if(c > 0) {
                 myNewInventory[myNewInvCount] = myInventory[i];
-                myHoldById[myInventory[i]] = true;
+                myHoldById[myInventory[i]] = c;
+                myInvById[myInventory[i]] = i;
                 myNewInvCount++;
             } else {
+                myHoldById[myInventory[i]] = -1;
                 myInventoryGroupMax[getItemProperty(IT_GROUP, myInventory[i])]--;
             }
         }
 
         if(myNewInvCount != myInvCount) {
+            rebuild = true;
             if(mySelection > -1) {
                 if(myNewInvCount == 0) {
                     mySelection = -1;
@@ -225,9 +234,17 @@ script "uix_items_inventory" ENTER CLIENTSIDE
         // now that we've dealt with what the player had and left behind...
         // let's handle the new items!
         for(i = 0; i < UIX_INV; i++) {
-            // per the first loop, we already know that this item is held. Skip!
-            if(myHoldById[i]) {
-                myHoldById[i] = false;
+            // per the first loop, we already know if this item is held. Skip!
+            if(myHoldById[i] != 0) {
+                if(!rebuild) {
+                    c = myHoldById[i];
+                    if(myInvCountsById[i] != c) {
+                        ItemWheel_UpdateCount(myInvById[i], c);
+                    }
+                }
+
+                myHoldById[i] = 0;
+                myInvById[i] = 0;
                 continue;
             }
 
@@ -237,9 +254,13 @@ script "uix_items_inventory" ENTER CLIENTSIDE
 
             // Check if the player has this other thing now.
             str act = getItemProperty(IT_ACTOR, i);
-            int c = CheckInventory(act);
+            c = CheckInventory(act);
             if(c > 0) {
                 myInventory[myInvCount] = i;
+
+                if(myInvCountsById[i] != c)
+                    ItemWheel_AddItem(myInvCount);
+
                 // Log(s:"[", i:myInvCount, s:"] ", s:act, s:" group: ", i:grp);
                 if(mySelection == -1)
                     mySelection = myInvCount;
@@ -254,6 +275,9 @@ script "uix_items_inventory" ENTER CLIENTSIDE
                 GiveInventory(act, c);
             }
         }
+
+        if(rebuild)
+            itemWheel_Rebuild();
 
         // str testOut = "";
         // for(i = 0; i < GROUP_COUNT; i++) {
@@ -310,18 +334,20 @@ script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
 // loopScript: uixitem_loop
 // selectScript: uixitem_selectitem
 
+#define WHEEL_NAME "uixitem"
+
 script "uixitem_activate" (void) NET CLIENTSIDE
 {
     int cln = ConsolePlayerNumber();
     if(cln != PlayerNumber())
         terminate;
-
-    if(!wheelInitialized)
+    if(wheelName != -1)
         terminate;
 
-    newWheel("uixitem");
-    CallACS2("uixitem_settings", mySelection, wheelTime);
-    CallACS2("uix_wheelActivate", "uixitem_settings", "uixitem_selectitem");
+    newWheel(WHEEL_NAME);
+    wheelSelection = mySelection;
+    itemWheel_Rebuild();
+    CallACS2("uix_wheelActivate", -1, "uixitem_selectitem");
 }
 
 script "uixitem_deactivate" (void) NET CLIENTSIDE
@@ -365,38 +391,36 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
 
 #define bits 8
 
-script "uixitem_settings" (int selected, int time)
+function void itemWheel_Rebuild(void)
 {
-    if(wheelTime != Timer())
-        terminate;
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
 
-    wheelSelection = selected;
-    rebuildWheel();
+    emptyWheel();
+    WHEEL_GROUPS = IWGRP_MAX;
 
-    SetResultValue(true);
+    for(int i = 0; i < myInvCount; i++)
+        ItemWheel_AddItem(i);
 }
 
-function void rebuildWheel(void)
+function void ItemWheel_AddItem(int idx)
 {
-    destroyWheel();
-    WHEEL_GROUPS = 5;
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
 
-    for(int i = 0; i < myInvCount; i++) {
-        addItemFromMyInv(i);
-    }
-}
-
-function void addItemFromMyInv(int idx)
-{
     int item = myInventory[idx];
     str actor = getItemProperty(IT_ACTOR, item);
     str icon = getItemProperty(IT_ICON, item);
     str tag = getItemProperty(IT_TAG, item);
     int group = getItemProperty(IT_GROUP, item);
-    str count = getNumberString(checkInventory(actor));
+    myInvCountsById[idx] = checkInventory(actor);
+    str count = getNumberString(myInvCountsById[idx]);
 
     int newItem = addWheelItem(actor, group);
-    Log(i:idx, s:" ", i:newItem);
 
     // Add the wheel elements. Back first.
 
@@ -426,8 +450,14 @@ function void addItemFromMyInv(int idx)
     // --------------------
 }
 
-function void updateItemCount(int idx, int num)
+function void ItemWheel_UpdateCount(int idx, int num)
 {
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
+
+    myInvCountsById[idx] = num;
     str count = getNumberString(num);
     setWheelElementContent(idx, 1, count);
     setWheelElementContent(idx, 4, count);
