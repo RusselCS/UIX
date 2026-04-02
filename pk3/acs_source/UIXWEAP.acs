@@ -3,6 +3,7 @@
 #include "zcommon.acs"
 
 #import "8BDT.acs"
+#import "WHEELDT.acs"
 
 #include "SHRTFUNC.acs"
 
@@ -220,7 +221,8 @@ int layer;
 #define BUSTER 0
 #define COPYWEP 1
 
-#define MAX_SLOTS 10
+#define MAX_SLOTS_LIMIT 10
+int MAX_SLOTS = 0;
 
 #define SLOT_BUSTER 1
 
@@ -228,7 +230,7 @@ int layer;
 #define BAR_WIDTH 40
 #define BAR_SCALE 0.1
 
-str slotBinds[MAX_SLOTS] = {
+str slotBinds[MAX_SLOTS_LIMIT] = {
     "slot 0","slot 1","slot 2","slot 3","slot 4",
     "slot 5","slot 6","slot 7","slot 8","slot 9",
 };
@@ -243,9 +245,140 @@ str slotBinds[MAX_SLOTS] = {
 #define WEAP_AMMO2_MAX 7
 #define WEAP_CYAN2 8
 #define WEAP_BLUE2 9
+#define WEAP_WHEELREF 10
 
-int slotVals[MAX_SLOTS][MAX_BUSTER_LIMIT+MAX_WEAPONS_GLOBAL_LIMIT][10];
-int slotCounts[MAX_SLOTS];
+int slotVals[MAX_SLOTS_LIMIT][MAX_BUSTER_LIMIT+MAX_WEAPONS_GLOBAL_LIMIT][11];
+int carriedWeapons[2][MAX_BUSTER_LIMIT+MAX_WEAPONS_GLOBAL_LIMIT];
+int slotCounts[MAX_SLOTS_LIMIT];
+int selectedWep = -1;
+int selectedSlot = -1;
+int lastUpdated = -1;
+
+function void updateSlotData(void)
+{
+    if(lastUpdated == Timer())
+        return;
+    lastUpdated = Timer();
+
+    int i;
+    int slot, icon, ammo1, ammo2;
+
+    int check, cry;
+    selectedWep = -1;
+    int resetWheel = false;
+
+    for(i = MAX_BUSTERUPGRADES-1; i >= 0; i--)
+    {
+        check = getBusterActor(i);
+        cry = !!CheckInventory(check);
+
+        if(carriedWeapons[0][i] != cry) {
+            carriedWeapons[0][i] = cry;
+            resetWheel = true;
+        }
+
+        // Don't have it, don't care.
+        if(!CheckInventory(check))
+            continue;
+
+        // Buster's got info in the ammo table, don't care.
+        if(busterMap(i) != -1)
+            continue;
+
+        if(selectedWep == -1) {
+            if(CheckWeapon(check)) {
+                selectedSlot = SLOT_BUSTER;
+                selectedWep = slotCounts[SLOT_BUSTER];
+            }
+        }
+
+        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_IDX] = i;
+        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_TYPE] = BUSTER;
+        slotCounts[SLOT_BUSTER]++;
+    }
+
+    for(i = MAX_WEAPONS_GLOBAL-1; i >= 0; i--)
+    {
+        check = getWeaponActor(i);
+        cry = !!CheckInventory(check);
+
+        // Don't have it, don't care.
+        if(!CheckInventory(check))
+            continue;
+
+        if(carriedWeapons[1][i] != cry) {
+            carriedWeapons[1][i] = cry;
+            resetWheel = true;
+        }
+
+        slot = getWeaponSlot(i);
+
+        if(selectedWep == -1) {
+            if(CheckWeapon(check)) {
+                selectedSlot = slot;
+                selectedWep = slotCounts[slot];
+            }
+        }
+
+        slotVals[slot][slotCounts[slot]][WEAP_IDX] = i;
+        slotVals[slot][slotCounts[slot]][WEAP_TYPE] = COPYWEP;
+
+        ammo1 = getWeaponAmmoType(i);
+        ammo2 = getWeaponAmmo2Type(i);
+
+        int barRefresh = false;
+
+        if(strLen(ammo1) != 0) {
+
+            if(slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] != CheckInventory(ammo1) ||
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] != GetAmmoCapacity(ammo1))
+            {
+                barRefresh = true;
+                // Log(s:"Updating from bar 1: ", i:slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT], s:"/", i:slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX], s:"=>", i:CheckInventory(ammo1), s:"/", i:GetAmmoCapacity(ammo1));
+                slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = CheckInventory(ammo1);
+                slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = GetAmmoCapacity(ammo1);
+                slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = fontPalette[weaponBarColor(i, 1)];
+                slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = fontPalette[weaponBarColor(i, 2)];
+            }
+        } else {
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = 0;
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = 0;
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = -1;
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = -1;
+        }
+
+        if(strLen(ammo2) != 0) {
+            if(slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] != CheckInventory(ammo2) ||
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] != GetAmmoCapacity(ammo2))
+            {
+                barRefresh = true;
+                slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] = CheckInventory(ammo2);
+                slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] = GetAmmoCapacity(ammo2);
+                slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = fontPalette[weaponBarColor(i, 3)];
+                slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = fontPalette[weaponBarColor(i, 4)];
+                // Log(s:"Updating from bar 2");
+            }
+        } else {
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] = 0;
+            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] = 0;
+            slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = -1;
+            slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = -1;
+        }
+
+        if(!resetWheel) {
+            if(barRefresh)
+                WeaponWheel_UpdateBars(slot, slotCounts[slot]);
+        } else {
+            slotVals[slot][slotCounts[slot]][WEAP_WHEELREF] = -1;
+            // Log(s:"Resetting...");
+        }
+
+        slotCounts[slot]++;
+    }
+
+    if(resetWheel)
+        WeaponWheel_Rebuild();
+}
 
 script "UIX_WeapBar" (int cam, int cpn, int cv)
 {
@@ -321,84 +454,18 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
     int i;
     int slot, icon, ammo1, ammo2;
 
-    int selectedSlot = -1;
-    int selected = -1;
-
-    int check;
-
-    for(i = MAX_BUSTERUPGRADES-1; i >= 0; i--)
-    {
-        check = getBusterActor(i);
-
-        // Don't have it, don't care.
-        if(!CheckActorInventory(cam, check))
-            continue;
-
-        // Buster's got info in the ammo table, don't care.
-        if(busterMap(i) != -1)
-            continue;
-
-        if(selected == -1) {
-            if(CheckWeapon(check)) {
-                selectedSlot = SLOT_BUSTER;
-                selected = slotCounts[SLOT_BUSTER];
-            }
-        }
-
-        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_IDX] = i;
-        slotVals[SLOT_BUSTER][slotCounts[SLOT_BUSTER]][WEAP_TYPE] = BUSTER;
-        slotCounts[SLOT_BUSTER]++;
-    }
-
-    for(i = MAX_WEAPONS_GLOBAL-1; i >= 0; i--)
-    {
-        check = getWeaponActor(i);
-
-        // Don't have it, don't care.
-        if(!CheckActorInventory(cam, check))
-            continue;
-
-        slot = getWeaponSlot(i);
-
-        if(selected == -1) {
-            if(CheckWeapon(check)) {
-                selectedSlot = slot;
-                selected = slotCounts[slot];
-            }
-        }
-
-        slotVals[slot][slotCounts[slot]][WEAP_IDX] = i;
-        slotVals[slot][slotCounts[slot]][WEAP_TYPE] = COPYWEP;
-
-        ammo1 = getWeaponAmmoType(i);
-        ammo2 = getWeaponAmmo2Type(i);
-
-        if(strLen(ammo1) != 0) {
-            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_AMT] = CheckInventory(ammo1);
-            slotVals[slot][slotCounts[slot]][WEAP_AMMO1_MAX] = GetAmmoCapacity(ammo1);
-            slotVals[slot][slotCounts[slot]][WEAP_CYAN1] = fontPalette[weaponBarColor(i, 1)];
-            slotVals[slot][slotCounts[slot]][WEAP_BLUE1] = fontPalette[weaponBarColor(i, 2)];
-        }
-
-        if(strLen(ammo2) != 0) {
-            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_AMT] = CheckInventory(ammo2);
-            slotVals[slot][slotCounts[slot]][WEAP_AMMO2_MAX] = GetAmmoCapacity(ammo2);
-            slotVals[slot][slotCounts[slot]][WEAP_CYAN2] = fontPalette[weaponBarColor(i, 3)];
-            slotVals[slot][slotCounts[slot]][WEAP_BLUE2] = fontPalette[weaponBarColor(i, 4)];
-        }
-        slotCounts[slot]++;
-    }
+    updateSlotData();
     SetActivator(-1);
 
-    for(int sidx = 0; sidx < MAX_SLOTS; sidx++)
+    for(int sidx = 0; sidx < MAX_SLOTS_LIMIT; sidx++)
     {
-        slot = (sidx + 1) % MAX_SLOTS;
+        slot = (sidx + 1) % MAX_SLOTS_LIMIT;
         int baseX = cvOffsX + slotOffsX * slot;
         int baseY = cvOffsY + slotOffsY * slot;
 
         int idx, col;
         if(slot == selectedSlot) {
-            idx = selected;
+            idx = selectedWep;
             col = "\c[gold]";
         } else {
             idx = -1;
@@ -408,13 +475,12 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
         for(i = 0; i < min(slotCounts[slot], cvMaxRow + (slot == selectedSlot)); i++)
         {
             int weap;
-
             int iconX, iconY;
 
             if(idx > -1) {
                 weap = (i + idx) % slotCounts[slot];
 
-                if(weap == selected) {
+                if(weap == selectedWep) {
                     iconX = baseX + selectedX;
                     iconY = baseY + selectedY;
                 } else {
@@ -448,7 +514,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                    slotVals[slot][weap][WEAP_AMMO2_AMT],
                                    slotVals[slot][weap][WEAP_AMMO2_MAX],
                                    !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
-                    slotVals[slot][weap][WEAP_AMMO2_MAX] = 0; // Because the weapon array is not cleared
 
                     // Draw the bar1 based on whether the bar2 will be drawn.
                     // Bar2 draws on top of bar1, or to the left of bar1, in all circumstances.
@@ -465,7 +530,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
                                         !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
-                        slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 } else {
                     if(slotVals[slot][weap][WEAP_AMMO1_MAX] > 0) {
@@ -481,7 +545,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                                         slotVals[slot][weap][WEAP_AMMO1_AMT],
                                         slotVals[slot][weap][WEAP_AMMO1_MAX],
                                         !cvDir+1, false, ALIGN_LEFT, ALIGN_TOP);
-                        slotVals[slot][weap][WEAP_AMMO1_MAX] = 0; // Because the weapon array is not cleared
                     }
                 }
             }
@@ -547,236 +610,73 @@ function int busterMap(int idx)
 
 // Weapon Wheel =====================================================================================================================================
 
-
-
-// Big Brother script ===========================
-// This one is far less complicated than the inventory manager because
-// weapons always have the same scroll order regardless of collection order
-// We don't need to be as heavy-handed
-
-#define UIX_WEAPS_LIMIT MAX_WEAPONS_GLOBAL_LIMIT + MAX_BUSTER_LIMIT
-int UIX_WEAPS = 0;
-
-#define AP_GROUP 0
-#define AP_WEP 1
-#define AP_ICON 2
-#define AP_TAG 3
-#define AP_AMMO1 4
-#define AP_BARCYAN1 5
-#define AP_BARBLUE1 6
-#define AP_AMMO2 7
-#define AP_BARCYAN2 8
-#define AP_BARBLUE2 9
-#define AP_AMMOFACTOR1 10
-#define AP_AMMOFACTOR2 11
-int wepProps[12];
-int WepGroupCounts[10];
-int GROUP_MAX = 0;
-int wepPropCacheIdx = -1;
-
-function int getWeaponProperty(int idx, int prop)
+script "uixweap_init" OPEN CLIENTSIDE
 {
-    if(wepPropCacheIdx != idx) {
-        wepPropCacheIdx = idx;
-        int dtIdx;
-        if(idx < MAX_WEAPONS_GLOBAL) { // weapons
-            dtIdx = idx;
-            int group = getWeaponSlot(dtIdx)-1;
-            if(group < 0) group = 10;
-            wepProps[AP_GROUP] = group;
-            wepProps[AP_WEP] = getWeaponActor(dtIdx);
-            wepProps[AP_ICON] = getWeaponIcon(dtIdx);
-            wepProps[AP_TAG] = getWeaponTag(dtIdx);
-            wepProps[AP_AMMO1] = getWeaponAmmoType(dtIdx);
-            if(wepProps[AP_AMMO1] != -1)
-                if(StrLen(wepProps[AP_AMMO1]) == 0)
-                    wepProps[AP_AMMO1] = -1;
-            if(wepProps[AP_AMMO1] != -1) {
-                wepProps[AP_BARCYAN1] = WeaponBarColor(dtIdx, 1);
-                wepProps[AP_BARBLUE1] = WeaponBarColor(dtIdx, 2);
-            } else {
-                wepProps[AP_BARCYAN1] = -1;
-                wepProps[AP_BARBLUE1] = -1;
-            }
-
-            wepProps[AP_AMMO2] = getWeaponAmmo2Type(dtIdx);
-            if(wepProps[AP_AMMO2] != -1)
-                if(StrLen(wepProps[AP_AMMO2]) == 0)
-                    wepProps[AP_AMMO2] = -1;
-            if(wepProps[AP_AMMO2] != -1) {
-                wepProps[AP_BARCYAN2] = WeaponBarColor(dtIdx, 3);
-                wepProps[AP_BARBLUE2] = WeaponBarColor(dtIdx, 4);
-            } else {
-                wepProps[AP_BARCYAN2] = -1;
-                wepProps[AP_BARBLUE2] = -1;
-            }
-
-        } else { // busters
-            dtIdx = idx-MAX_WEAPONS_GLOBAL;
-            wepProps[AP_GROUP] = 0;
-            wepProps[AP_WEP] = getBusterActor(dtIdx);
-            wepProps[AP_ICON] = getBusterIcon(dtIdx);
-            wepProps[AP_TAG] = getBusterTag(dtIdx);
-            wepProps[AP_AMMO1] = -1;
-            wepProps[AP_BARCYAN1] = -1;
-            wepProps[AP_BARBLUE1] = -1;
-            wepProps[AP_AMMO2] = -1;
-            wepProps[AP_BARCYAN2] = -1;
-            wepProps[AP_BARBLUE2] = -1;
-        }
-    }
-
-    if(prop == AP_AMMOFACTOR1 || prop == AP_AMMOFACTOR2) {
-        setAmmoCounts();
-    }
-
-    return wepProps[prop];
-}
-
-int lastAmmoIdx = -1;
-int ammoTypeCodes[2][2] = {
-    { AP_AMMO1, AP_AMMO2 },
-    { AP_AMMOFACTOR1, AP_AMMOFACTOR2 }
-};
-function void setAmmoCounts(void)
-{
-    if(lastAmmoIdx == wepPropCacheIdx)
-        return;
-    lastAmmoIdx = wepPropCacheIdx;
-    if(!(ClassifyActor(0) & ACTOR_PLAYER))
-        return;
-    for(int i = 0; i < 2; i++) {
-        str am = wepProps[ammoTypeCodes[0][i]];
-        if(am == -1)
-            continue;
-        wepProps[ammoTypeCodes[1][i]] = CheckInventory(am) * 1.0 / GetAmmoCapacity(am);
-    }
-}
-
-script "uixweap_bigbrother_open" OPEN CLIENTSIDE
-{
-    while(Timer() < 3) delay(1);
+    delay(3);
     while(MAX_WEAPONS_GLOBAL == 0 || MAX_BUSTERUPGRADES == 0) delay(1);
 
-    UIX_WEAPS = MAX_WEAPONS_GLOBAL + MAX_BUSTERUPGRADES;
-
-    int i;
-    for(i = 0; i < UIX_WEAPS; i++) {
-        int group = getWeaponProperty(i, AP_GROUP);
-
-        if(i < MAX_WEAPONS_GLOBAL) { // has ammo
-            int b = findBusterUpgradeByActor(getWeaponActor(i));
-            if(b > -1)
-                setAmmoBuster(b);
+    for(int i = 0; i < MAX_WEAPONS_GLOBAL; i++) {
+        int s = getWeaponSlot(i);
+        if(s == 0) {
+            MAX_SLOTS = 10;
+            break;
         }
-
-        WepGroupCounts[group]++;
-        if(WepGroupCounts[group] == 1) {
-            GROUP_MAX++;
-        }
+        if(s > MAX_SLOTS)
+            MAX_SLOTS = s;
     }
+    // Log(s:"After polling ", i:i, s:" weapons, ", i:MAX_SLOTS, s:" slots were detected.");
 }
 
-int ammoBusters[MAX_BUSTER_LIMIT];
-function void setAmmoBuster(int idx) { ammoBusters[idx] = true; }
-function int isAmmoBuster(int idx) { return ammoBusters[idx]; }
+// wheel menus are built on linear arrays
+// the weapon menu was not
+#define WHEEL_NAME "weaponwheel"
+int wheelManifest[MAX_BUSTER_LIMIT+MAX_WEAPONS_GLOBAL_LIMIT][2];
+// 0: slot
+// 1: index
+//
 
-int wheelActive = false;
 script "uixweap_wheel_start" (void) NET CLIENTSIDE
 {
-    if(GROUP_MAX == 0)
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
         terminate;
-    if(wheelActive)
+    if(wheelName != -1)
         terminate;
-    wheelActive = true;
-    CallACS3("uix_wheelActivate", "uixweap_wheel_settings", -1, "uixweap_wheel_select");
+
+    updateSlotData();
+    newWheel(WHEEL_NAME);
+    weaponWheel_Rebuild();
+    wheelSelection = slotVals[selectedSLot][selectedWep][WEAP_WHEELREF];
+    CallACS2("uix_wheelActivate", "uixweap_wheel_settings", "uixweap_wheel_select");
+}
+
+script "uixweap_wheel_settings" (void)
+{
+    updateSlotData();
+    SetResultValue(true);
 }
 
 script "uixweap_wheel_end" (void) NET CLIENTSIDE
 {
-    wheelActive = false;
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
+        terminate;
+
     CallACS0("uix_wheelDeactivate");
-}
-
-// Settings scripts
-int wheel_selectedWep = -1;
-int wheel_heldIdxMapping[UIX_WEAPS_LIMIT];
-int wheel_groups[10];
-int wheel_max;
-int wheel_lastUpdate;
-function void wheel_populate(void)
-{
-    if(wheel_lastUpdate == Timer())
-        return;
-    wepPropCacheIdx = -1;
-    lastAmmoIdx = -1;
-    wheel_lastUpdate = Timer();
-
-    int i;
-    wheel_max = 0;
-
-    for(i = 0; i < 10; i++)
-        wheel_groups[i] = 0;
-
-    for(i = 0; i < UIX_WEAPS; i++) {
-        int act = getWeaponProperty(i, AP_WEP);
-        int bus = i-MAX_WEAPONS_GLOBAL;
-
-        if(bus > -1)
-            if(isAmmoBuster(bus))
-                continue;
-
-        if(CheckInventory(act)) {
-            wheel_groups[getWeaponProperty(i, AP_GROUP)]++;
-            if(CheckWeapon(act))
-                wheel_selectedWep = wheel_max;
-
-            wheel_heldIdxMapping[wheel_max++] = i;
-        }
-    }
-}
-
-script "uixweap_wheel_settings" (int mode, int idx, int a, int b) { SetResultValue(wheel_settings(mode, idx, a, b)); }
-function int wheel_settings(int mode, int idx, int a, int b)
-{
-    wheel_populate();
-    if(mode >= UIW_ELEMENT_START) { // idx is element id in this case
-        return get(wheel_heldIdxMapping[mode-UIW_ELEMENT_START], idx, a, b);
-    }
-    switch(mode) {
-        case UIW_CURSELECT:     return wheel_selectedWep;
-        case UIW_GROUPCOUNT:    return GROUP_MAX;
-        case UIW_ITEMCOUNT:     return wheel_max;
-        case UIW_ITEMGROUP:     return getWeaponProperty(wheel_heldIdxMapping[idx], AP_GROUP);
-        case UIW_ITEMGROUPMAX:  return wheel_groups[idx]; // IDX is group in this case
-        case UIW_ELEMENT_COUNT:
-            if(b == 1) {
-                if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN2) != -1) {
-                    return 7;
-                }
-                if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN1) != -1) {
-                    return 4;
-                }
-                return 1;
-            }
-
-            if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN2) != -1) {
-                return 8;
-            }
-            if(getWeaponProperty(wheel_heldIdxMapping[idx], AP_BARCYAN1) != -1) {
-                return 5;
-            }
-            return 2;
-    }
-    // if the default clause ever gets invoked in this script, we have problems.
-    return -1;
 }
 
 script "uixweap_wheel_select" (int idx)
 {
     GiveInventory("UIX_WeaponSelected_PU", 1);
-    SetWeapon(getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP));
-    ConsoleCommand(StrParam(s:"use ", s:getWeaponProperty(wheel_heldIdxMapping[idx], AP_WEP)));
+    int slot = wheelManifest[idx][0];
+    int wep = wheelManifest[idx][1];
+    str actor = getWeaponActor(slotVals[slot][wep][WEAP_IDX]);
+    NamedSendNetworkString("uixweap_wheel_select_server", actor);
+}
+
+script "uixweap_wheel_select_server" (int weap) NET
+{
+    SetWeapon(weap);
 }
 
 #define UIX_IW_LABELPOS -9
@@ -792,464 +692,217 @@ script "uixweap_wheel_select" (int idx)
 #define RAW 0
 #define SCR 1
 
-int el_p[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX];
-int el_t[UIX_IW_SELECTMODE][UIX_IW_ELEMENTCOUNT][UIX_IL_MAX];
+#define UIX_WW_BARY 6*UIX_IW_ICONY
+#define UIX_WW_BAR2Y 9*UIX_IW_ICONY
 
-function int get(int idx, int el, int p, int sel)
+function void WeaponWheel_Rebuild(void)
 {
-    if(el_t[sel][el][p] == SCR) return CallACS4(el_p[sel][el][p], idx, sel, el, p);
-    return el_p[sel][el][p];
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
+
+    emptyWheel();
+    WHEEL_GROUPS = MAX_SLOTS;
+
+    for(int sidx = 0; sidx < MAX_SLOTS+1; sidx++)
+    {
+        for(int i = 0; i < slotCounts[sidx]; i++)
+        {
+            WeaponWheel_AddItem(sidx, i);
+        }
+    }
 }
 
-script "uix_weapwheel_pop" OPEN CLIENTSIDE
+function void WeaponWheel_AddItem(int slot, int idx)
 {
-    int s = 0;
-    int e = 0;
+    // Log(s:"Adding...");
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
 
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
-    el_p[s][e][UIX_IL_COLOR    ] = 0;
-    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
-    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+    int item = slotVals[slot][idx][WEAP_IDX];
+    int type = slotVals[slot][idx][WEAP_TYPE];
+    int group = slot - 1;
+    if(group < 0) group = MAX_SLOTS-1;
+    if(type == BUSTER) {
+        str icon = getBusterIcon(item);
+        str actor = getBusterActor(item);
+        str tag = getBusterTag(item);
+    } else {
+        icon = getWeaponIcon(item);
+        actor = getWeaponActor(item);
+        tag = getWeaponTag(item);
 
-    el_t[s][e][UIX_IL_FONT     ] = SCR;
+        int amt1 = slotVals[slot][idx][WEAP_AMMO1_AMT];
+        int max1 = slotVals[slot][idx][WEAP_AMMO1_MAX];
+        int cyan1 = slotVals[slot][idx][WEAP_CYAN1];
+        int blue1 = slotVals[slot][idx][WEAP_BLUE1];
+        int amt2 = slotVals[slot][idx][WEAP_AMMO2_AMT];
+        int max2 = slotVals[slot][idx][WEAP_AMMO2_MAX];
+        int cyan2 = slotVals[slot][idx][WEAP_CYAN2];
+        int blue2 = slotVals[slot][idx][WEAP_BLUE2];
+        int black = fontPalette[8];
+    }
 
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = "UXICB0";
-    el_p[s][e][UIX_IL_COLOR    ] = 0;
-    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
+    int newItem = addWheelItem(actor, group);
 
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+    int wheelBarY = UIX_WW_BARY;
 
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+    // // Add the wheel elements. Back first.
 
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+    // ----- Deselected -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,0.5,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Background
+    addWheelElement("A","UXICB0",0,WHEEL_MODE_UNSELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Bars
+    if(max2 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        wheelBarY = UIX_WW_BAR2Y;
+    }
+    if(max1 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+    }
+    // ----------------------
 
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
+    // ----- Selected -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_SELECTED,UIX_IW_ICONX,UIX_IW_ICONY,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Bars
+    wheelBarY = UIX_WW_BARY;
+    if(max2 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        wheelBarY = UIX_WW_BAR2Y;
+    }
+    if(max1 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+    }
+    // --------------------
 
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+    // ----- Centered -----
+    // Icon
+    addWheelElement("A",icon,0,WHEEL_MODE_MIDDLE,UIX_IW_ICONX,UIX_IW_ICONY+UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Tag
+    addWheelElement(StrParam(l:tag),"SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,-2*UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Bars
+    wheelBarY = UIX_IW_ICONY+UIX_IW_LABELPOS;
+    if(max2 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        wheelBarY = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
+    }
+    if(max1 > 0) {
+        addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+    }
+    // --------------------
 
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 0.5;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.1;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    s++;
-    e = 0;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
-    el_p[s][e][UIX_IL_COLOR    ] = 0;
-    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 1.5;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
-
-    el_t[s][e][UIX_IL_FONT     ] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 6*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 9*UIX_IW_ICONY;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    s++;
-    e = 0;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = "uixweap_wheel_geticon";
-    el_p[s][e][UIX_IL_COLOR    ] = 0;
-    el_p[s][e][UIX_IL_OFFSX    ] = UIX_IW_ICONX;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 1.5;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
-
-    el_t[s][e][UIX_IL_FONT     ] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "uixweap_wheel_getlabel";
-    el_p[s][e][UIX_IL_FONT     ] = "SMALLFNT";
-    el_p[s][e][UIX_IL_COLOR    ] = 0;
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = -2*UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 1.0;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 0;
-
-    el_t[s][e][UIX_IL_CONTENT  ] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo1blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo1factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "A";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2cyan";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "B";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = "uixweap_wheel_getammo2blue";
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = "uixweap_wheel_getammo2factor";
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
-
-    el_t[s][e][UIX_IL_COLOR    ] = SCR;
-    el_t[s][e][UIX_IL_BARFACTOR] = SCR;
-
-    e++;
-    el_p[s][e][UIX_IL_CONTENT  ] = "C";
-    el_p[s][e][UIX_IL_FONT     ] = weaponBars[0][0];
-    el_p[s][e][UIX_IL_COLOR    ] = fontPalette[0];
-    el_p[s][e][UIX_IL_OFFSX    ] = 0;
-    el_p[s][e][UIX_IL_OFFSY    ] = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
-    el_p[s][e][UIX_IL_OFFSXOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSYOP  ] = IL_OP_ADD;
-    el_p[s][e][UIX_IL_OFFSXTYPE] = 0;
-    el_p[s][e][UIX_IL_OFFSYTYPE] = 0;
-    el_p[s][e][UIX_IL_SCALE    ] = 0.15;
-    el_p[s][e][UIX_IL_ALPHA    ] = 1.0;
-    el_p[s][e][UIX_IL_HALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_VALIGN   ] = ALIGN_CENTER;
-    el_p[s][e][UIX_IL_BARFACTOR] = 1.0;
-    el_p[s][e][UIX_IL_BARWIDTH ] = 160;
+    wheelManifest[newItem][0] = slot;
+    wheelManifest[newItem][1] = idx;
+    slotVals[slot][idx][WEAP_WHEELREF] = newItem;
 }
 
-script "uixweap_wheel_geticon" (int idx) { SetResultValue(getWeaponProperty(idx, AP_ICON)); }
-script "uixweap_wheel_getlabel" (int idx) { SetResultValue(StrParam(l:getWeaponProperty(idx, AP_TAG))); }
+function void WeaponWheel_UpdateBars(int slot, int idx)
+{
+    if(wheelName == -1)
+        return;
+    if(StrCmp(wheelName, WHEEL_NAME) != 0)
+        return;
 
-script "uixweap_wheel_getammo1factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR1)); }
-script "uixweap_wheel_getammo1cyan" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARCYAN1)]); }
-script "uixweap_wheel_getammo1blue" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARBLUE1)]); }
+    if(slotVals[slot][idx][WEAP_TYPE] == BUSTER) {
+        return;
+    }
 
-script "uixweap_wheel_getammo2factor" (int idx) { SetResultValue(getWeaponProperty(idx, AP_AMMOFACTOR2)); }
-script "uixweap_wheel_getammo2cyan" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARCYAN2)]); }
-script "uixweap_wheel_getammo2blue" (int idx) { SetResultValue(fontPalette[getWeaponProperty(idx, AP_BARBLUE2)]); }
+    int item = slotVals[slot][idx][WEAP_WHEELREF];
+    int amt1 = slotVals[slot][idx][WEAP_AMMO1_AMT];
+    int max1 = slotVals[slot][idx][WEAP_AMMO1_MAX];
+    int amt2 = slotVals[slot][idx][WEAP_AMMO2_AMT];
+    int max2 = slotVals[slot][idx][WEAP_AMMO2_MAX];
+    int black = fontPalette[8];
+
+    // Log(s:"Updating ", s:getWeaponActor(slotVals[slot][idx][WEAP_IDX]));
+
+    // Icon
+    // Background
+    int element = 2;
+
+    if(max2 > 0) {
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        element++;
+    }
+    if(max1 > 0) {
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        element++;
+    }
+
+    // Icon
+    element++;
+
+    // Bars
+    if(max2 > 0) {
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        element++;
+    }
+    if(max1 > 0) {
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        element++;
+    }
+    // --------------------
+
+    // ----- Centered -----
+    // Icon
+    element++;
+    // Tag
+    element++;
+    // Bars
+    if(max2 > 0) {
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        setWheelElementBarAmt(item, element, amt2);
+        setWheelElementBarMax(item, element, max2);
+        element++;
+        element++;
+    }
+    if(max1 > 0) {
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        setWheelElementBarAmt(item, element, amt1);
+        setWheelElementBarMax(item, element, max1);
+        element++;
+        element++;
+    }
+}

@@ -9,7 +9,7 @@
 #libdefine WHEEL_MODE_SELECTED 2
 #libdefine WHEEL_MODE_MIDDLE 3
 
-#define WHEEL_ITEMS_LIMIT 5000
+#define WHEEL_ITEMS_LIMIT 10000
 int WHEEL_ITEMS = 0;
 int wheel_items_properties_int[WHEEL_ITEMS_LIMIT][4];
 str wheel_items_properties_str[WHEEL_ITEMS_LIMIT][1];
