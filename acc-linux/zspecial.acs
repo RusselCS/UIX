@@ -467,6 +467,9 @@ special
 	-183:SetControlPointInfo(3),
 	-184:GetSkinProperty(2, 4),
 	-185:IsPlayerContestingControlPoint(2),
+	-186:GetWadInfo(2),
+	-187:SetMapUsedStatus(2),
+	-188:CheckScript(2),
 
 	// -1xx are reserved for Zandronum
 	-200:CheckClass(1),
@@ -483,7 +486,8 @@ special
 	-211:StartSlideshow(1),
 	-212:GetSectorHealth(2),
 	-213:GetLineHealth(1),
-	
+	-215:GetNetID(2, 3),
+	-216:SetActivatorByNetID(1, 2),
 	
 	// Eternity's
 	-300:GetLineX(3),

@@ -841,6 +841,8 @@
 #define TPROP_TeamItem			15
 #define TPROP_WinnerTheme		16
 #define TPROP_LoserTheme		17
+#define TPROP_WinnerThemeOrder	18
+#define TPROP_LoserThemeOrder	19
 
 // Skulltag Invasion --------------------------------------------------------
 #define IS_WAITINGFORPLAYERS	0
@@ -1202,6 +1204,8 @@
                 
 #define LUMP_INFO_SIZE 0
 #define LUMP_INFO_NAME 1
+#define LUMP_INFO_NAMESPACE 2
+#define LUMP_INFO_WAD 3
 
 // [TP] For GetTimeProperty
 #define TM_SECOND 0
