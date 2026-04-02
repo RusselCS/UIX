@@ -1,0 +1,84 @@
+#library "EXWHEEL"
+
+#include "zcommon.acs"
+#include "UIXUTIL.acs"
+
+#include "UXWHLDEF.acs"
+#include "SHRTFUNC.acs"
+#import "WHEELDT.acs"
+
+#define WHEEL_NAME "examplewheel"
+
+script "example_startwheel" (void) NET CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
+        terminate;
+    if(wheelName != -1)
+        terminate;
+
+    // When defining a wheel you wanna give it a number of groups and a unique name.
+    // The name is good for checking you're modifying the right wheel with complicated data-structure based ones.
+    // but this practice also prevents people from stepping on each other's toes.
+    newWheel(WHEEL_NAME);
+    wheelSelection = 0;
+    WHEEL_GROUPS = 3;
+
+    // Now we can start adding items.
+    // when "addWheelItem" is invoked, you'll want to give it a name and then a group number.
+    // group numbers are indexed from 0 at the top and go clockwise.
+    int newItem = addWheelItem("First", 0);
+
+    // Next, we want to define elements to display for the item in the wheel. A wheel will not display anything for an item if there are no elements.
+    // An "element" is simply a HudMessage that's abstracted in a specific way. All the properties are listed in WHEELDT.acs.
+    // First, we'll display the text "First" when the item is unselected.
+    addWheelElement("First","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Let's add an icon in the same space. The talk bubble is fun.
+    addWheelElement("A","TALKB0",0,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Now let's add one for when the item is selected. I don't want the talk bubble to show here, so let's just add the text.
+    // It's been given a different scale and text color here.
+    addWheelElement("First","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // And we want that to show up in the center too. So add another element to cover that.
+    addWheelElement("First","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    // Finally, a caption for the center...
+    addWheelElement("There's an icon hidden on select","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+    newItem = addWheelItem("Second", 1);
+    addWheelElement("Second","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This label hides","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Second","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Second","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("For each member here","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+    newItem = addWheelItem("Third", 2);
+    addWheelElement("Third","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Third","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This label shows","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Third","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This is fun","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+    newItem = addWheelItem("Forth", 2);
+    addWheelElement("Forth","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("2-in-1 group!","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.25,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("2-in-1 group!","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth is fun","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+
+    CallACS2("uix_wheelActivate", -1, "example_selectitem");
+}
+
+script "example_stopwheel" (void) NET CLIENTSIDE
+{
+    int cln = ConsolePlayerNumber();
+    if(cln != PlayerNumber())
+        terminate;
+
+    CallACS0("uix_wheelDeactivate");
+}
+
+script "example_selectitem" (int item)
+{
+    destroyWheel();
+    Log(s:"Item ", i:item, s:" was selected!");
+}

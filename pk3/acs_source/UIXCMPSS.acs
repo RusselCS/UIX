@@ -396,40 +396,6 @@ function int clamp(int n, int mn, int mx)
 }
 
 // Core icon setters! =================================================================================================
-// Acid Drippers - As a joke/demo.
-// This widget probably doesn't help much on MM2DW3 anyway, so it's proooobably fine.
-// Might piss off Bik tho
-int acidicon_tid = 0;
-script "UIX_ACID_ICONNER" OPEN CLIENTSIDE
-{
-    if(StrICmp(StrParam(n:PRINTNAME_LEVEL), "MM2DW3") != 0)
-        terminate;
-
-    acidicon_tid = UniqueTID(10000);
-
-    while(true) {
-        delay(1);
-        CallACS3("uix_drawcompassicon", "UIX_ACID_PROPERTIES", acidicon_tid, false);
-    }
-}
-
-script "UIX_ACID_ICONNER_TID" (void) CLIENTSIDE
-{
-    until(acidicon_tid != 0) {
-        if(Timer() > 35) terminate;
-        delay(1);
-    }
-    Thing_ChangeTID(0, acidicon_tid);
-}
-
-script "UIX_ACID_PROPERTIES" (void)
-{
-    CallACS2("uix_setcompassproperty", UIC_ICON, "ACIDD0");
-    CallACS2("uix_setcompassproperty", UIC_OFFSX, 0);
-    CallACS2("uix_setcompassproperty", UIC_OFFSY, 8);
-    CallACS2("uix_setcompassproperty", UIC_SCALE, CallACS0("uix_compass_scaler"));
-}
-
 // Exit Unit -------------------------------------------------------------
 script "UIX_EXIT_ICONNER" OPEN CLIENTSIDE
 {

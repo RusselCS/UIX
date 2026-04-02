@@ -8,6 +8,7 @@ actor UixCompassMultitarget_CI : CustomInventory
     }
 }
 
+// Used for the example in EXCOMPSS.acs.
 actor AcidDripperUIX : AcidDripper replaces AcidDripper
 {
     states

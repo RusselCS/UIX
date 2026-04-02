@@ -1,0 +1,58 @@
+#library "EXCOMPSS"
+
+#include "zcommon.acs"
+#include "UIXUTIL.acs"
+
+// Acid Drippers - As a joke/demo.
+// This widget probably doesn't help much on MM2DW3 anyway, so it's proooobably fine.
+// Might piss off Bik tho
+
+// The order of operations is not completely linear here, so be warned of that before moving forward.
+// So first, we need to reserve a TID to set the acid drips to.
+// This script handles picking the TID and also the drawing loop, each step here has additional details we'll get to 
+// in order of appearance.
+int acidicon_tid = 0;
+script "UIX_ACID_ICONNER" OPEN CLIENTSIDE
+{
+    // If UIX is not loaded, don't bother.
+    if(!isUIX())
+        terminate;
+    // If the map is not MM2DW3, don't bother.
+    if(StrICmp(StrParam(n:PRINTNAME_LEVEL), "MM2DW3") != 0)
+        terminate;
+
+    // Acid drop TID choice is made here.
+    // Technically a safer play would be reserve a tid using the "core_uniquetid" script since that
+    // Intentionally aims for TIDs that aren't reserved, but, 10000+ should be fine for a demo like this.
+    acidicon_tid = UniqueTID(10000);
+
+    // This is a loop that handles adding the acid drops to the compass.
+    while(true) {
+        delay(1);
+        ACS_NamedExecuteWithResult("uix_drawcompassicon", "UIX_ACID_PROPERTIES", acidicon_tid, false);
+    }
+}
+
+// This script waits until the acid drip TID is chosen
+// And then gives it to the caller.
+// The actor that calls this is located in decorate/UIX_COMPASS.dec. Actor AcidDripperUIX.
+script "UIX_ACID_ICONNER_TID" (void) CLIENTSIDE
+{
+    until(acidicon_tid != 0) {
+        if(Timer() > 35) terminate;
+        delay(1);
+    }
+    Thing_ChangeTID(0, acidicon_tid);
+}
+
+// This script is invoked by the compass drawing script to establish the final properties given to the icon being drawn on the compass.
+// Since I'm using a normal field sprite for this example, the icon needs to be offset somewhat.
+// A full list of properties is located in UIXUTIL.acs
+//
+script "UIX_ACID_PROPERTIES" (void)
+{
+    ACS_NamedExecuteWithResult("uix_setcompassproperty", UIC_ICON, "ACIDD0");
+    ACS_NamedExecuteWithResult("uix_setcompassproperty", UIC_OFFSX, 0);
+    ACS_NamedExecuteWithResult("uix_setcompassproperty", UIC_OFFSY, 8);
+    ACS_NamedExecuteWithResult("uix_setcompassproperty", UIC_SCALE, ACS_NamedExecuteWithResult("uix_compass_scaler"));
+}

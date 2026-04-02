@@ -1,0 +1,27 @@
+int uix_loaded = -1;
+
+function bool isUIX(void)
+{
+    if(uix_loaded > -1)
+        return uix_loaded;
+
+    int u = UniqueTID();
+    uix_loaded = Spawn("UIX_FLAG",0,0,0,u,0);
+    Thing_Remove(u);
+    return uix_loaded;
+}
+
+// Compass constants
+#define UIC_INIT 0
+#define UIC_ICON 1
+#define UIC_FONT 1
+#define UIC_POSX 2
+#define UIC_POSY 3
+#define UIC_POSZ 4
+#define UIC_SCALE 5
+#define UIC_ALPHA 6
+#define UIC_OFFSX 7
+#define UIC_OFFSY 8
+#define UIC_COLOR 9
+#define UIC_MESSAGE 10
+#define UIC_DIST 11
