@@ -112,7 +112,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
             }
         } else {
             if(settingsScript != -1) {
-                if(!CallACS2 (settingsScript, selected, curTime)) {
+                if(!CallACS2 (settingsScript, selected, Timer()-myTime)) {
                     fadeTime = FADEOUT_TIME;
                 }
             }
@@ -333,12 +333,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
     destroyWheel();
 
     if(selectScript!=-1)
-        ACS_NamedExecuteWithResult(selectScript, selected);
-}
-
-script "uix_wheelDeactivate" (void) CLIENTSIDE
-{
-    wheelActive = false;
+        ACS_NamedExecuteWithResult(selectScript, selected, Timer()-myTime);
 }
 
 function int applyExpression(int n, int op, int x, int type, int scale)

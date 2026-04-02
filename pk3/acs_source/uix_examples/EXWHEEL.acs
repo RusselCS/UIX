@@ -7,8 +7,10 @@
 #include "SHRTFUNC.acs"
 #import "WHEELDT.acs"
 
-#define WHEEL_NAME "examplewheel"
-
+// Script invoked by the user. May be advised to link this to an alias using KEYCONF:
+// alias +exwheel "pukename \"example_startwheel\""
+// alias -exwheel "pukename \"example_stopwheel\""
+//
 script "example_startwheel" (void) NET CLIENTSIDE
 {
     int cln = ConsolePlayerNumber();
@@ -20,9 +22,8 @@ script "example_startwheel" (void) NET CLIENTSIDE
     // When defining a wheel you wanna give it a number of groups and a unique name.
     // The name is good for checking you're modifying the right wheel with complicated data-structure based ones.
     // but this practice also prevents people from stepping on each other's toes.
-    newWheel(WHEEL_NAME);
-    wheelSelection = 0;
-    WHEEL_GROUPS = 3;
+    // second parameter is number of groups, third is the default index to select.
+    newWheel("examplewheel", 3, 0);
 
     // Now we can start adding items.
     // when "addWheelItem" is invoked, you'll want to give it a name and then a group number.
@@ -31,6 +32,8 @@ script "example_startwheel" (void) NET CLIENTSIDE
 
     // Next, we want to define elements to display for the item in the wheel. A wheel will not display anything for an item if there are no elements.
     // An "element" is simply a HudMessage that's abstracted in a specific way. All the properties are listed in WHEELDT.acs.
+    // All elements created by addWheelElement are attached to the most recently created item. The position of each element is relative to the calculated
+    // position based on whether it's in the center or whether it's on the perifery.
     // First, we'll display the text "First" when the item is unselected.
     addWheelElement("First","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Let's add an icon in the same space. The talk bubble is fun.
@@ -65,20 +68,34 @@ script "example_startwheel" (void) NET CLIENTSIDE
     addWheelElement("Forth","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     addWheelElement("Forth is fun","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
 
-    CallACS2("uix_wheelActivate", -1, "example_selectitem");
+    // After all the elements are added, launch the wheel using the startWheel function.
+    // The first parameter is the looping script called before every tick. Set -1 if you don't want a script.
+    // Second parameter is the "select" script. This runs after everything else in the wheel resolves. Set to -1 if you don't want a script.
+    startWheel(-1, "example_selectItem");
 }
 
+// Script invoked by the user.
 script "example_stopwheel" (void) NET CLIENTSIDE
 {
     int cln = ConsolePlayerNumber();
     if(cln != PlayerNumber())
         terminate;
 
-    CallACS0("uix_wheelDeactivate");
+    stopWheel();
 }
 
-script "example_selectitem" (int item)
+// The loop script takes in the item and the amount of time the wheel menu has been open for.
+// The main script expects a return value of true when this script is invoked. Returning false forces the menu closed.
+// This script is for creators to be able to shim additional logic into the wheel menu post-launch, but this example has no extra logic.
+//
+script "example_wheelsettings" (int item, int time)
 {
-    destroyWheel();
-    Log(s:"Item ", i:item, s:" was selected!");
+    // Log(s:"Item ", i:item, s:" is being hovered. Menu open for ", i:time, s:" ticks.");
+    SetResultValue(true);
+}
+
+// Select script takes in the item and the amount of time the wheel menu was open for.
+script "example_selectitem" (int item, int time)
+{
+    Log(s:"Item ", i:item, s:" was selected after menu was open for ", i:time, s:" ticks.");
 }

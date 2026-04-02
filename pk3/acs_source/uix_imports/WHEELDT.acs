@@ -1,6 +1,8 @@
 // Shared object file for wheel scripts to populate.
 #library "WHEELDT"
 
+#include "zcommon.acs"
+
 #define _true 1
 #define _false 0
 
@@ -75,15 +77,27 @@ int wheelTime = -1;
 int wheelActive = _false;
 int wheelSelection = -1;
 
-function int newWheel(str name)
+function int newWheel(str name, int groupCount, int selection)
 {
     if(wheelTime > -1) {
         destroyWheel();
     }
     wheelTime = Timer();
     wheelName = name;
+    WHEEL_GROUPS = groupCount;
+    wheelSelection = selection;
 
     return wheelTime;
+}
+
+function void startWheel(str loopScript, str endScript)
+{
+    ACS_NamedExecuteWithResult("uix_wheelActivate", loopScript, endScript);
+}
+
+function void stopWheel(void)
+{
+    wheelActive = _false;
 }
 
 function int addWheelItem(str name, int group)

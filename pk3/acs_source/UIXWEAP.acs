@@ -644,10 +644,9 @@ script "uixweap_wheel_start" (void) NET CLIENTSIDE
         terminate;
 
     updateSlotData();
-    newWheel(WHEEL_NAME);
+    newWheel(WHEEL_NAME, MAX_SLOTS, slotVals[selectedSLot][selectedWep][WEAP_WHEELREF]);
     weaponWheel_Rebuild();
-    wheelSelection = slotVals[selectedSLot][selectedWep][WEAP_WHEELREF];
-    CallACS2("uix_wheelActivate", "uixweap_wheel_settings", "uixweap_wheel_select");
+    startWheel("uixweap_wheel_settings", "uixweap_wheel_select");
 }
 
 script "uixweap_wheel_settings" (void)
@@ -662,7 +661,7 @@ script "uixweap_wheel_end" (void) NET CLIENTSIDE
     if(cln != PlayerNumber())
         terminate;
 
-    CallACS0("uix_wheelDeactivate");
+    stopWheel();
 }
 
 script "uixweap_wheel_select" (int idx)

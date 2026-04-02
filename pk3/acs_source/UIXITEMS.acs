@@ -344,10 +344,9 @@ script "uixitem_activate" (void) NET CLIENTSIDE
     if(wheelName != -1)
         terminate;
 
-    newWheel(WHEEL_NAME);
-    wheelSelection = mySelection;
+    newWheel(WHEEL_NAME, IWGRP_MAX, mySelection);
     itemWheel_Rebuild();
-    CallACS2("uix_wheelActivate", -1, "uixitem_selectitem");
+    startWheel(-1, "uixitem_selectitem");
 }
 
 script "uixitem_deactivate" (void) NET CLIENTSIDE
@@ -356,7 +355,7 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
     if(cln != PlayerNumber())
         terminate;
 
-    CallACS0("uix_wheelDeactivate");
+    stopWheel();
 
     int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
 

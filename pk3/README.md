@@ -8,6 +8,8 @@ by Russel
 - Weapon inventory bar.
 - SR50 tailwind.
 - Enhanced pickup respawn indicators.
+- Inventory radial menu
+- Weapon radial menu
 
 Optional: If you have a mugshot wad for pingbutton installed, mugshots appear in the following contexts:
 - Above large frag messages.
@@ -19,7 +21,7 @@ Optional: If you have a mugshot wad for pingbutton installed, mugshots appear in
 
 ## Modder notes:
 - Currently only works with v6b.
-- Due to the way weapons are implemented in v6b, this mod manually has to support mods to work with the weapon bar.
+- Due to the way weapons are implemented in v6b, this mod has to manually support mods to work with the weapon bar and wheel menus.
 - Some weapons also do not have NormalBar or SecondBar definitions, opting only to use ScriptBars.
   - This mod defines "ArsenalBar" actors for these so WeapBar knows what colors to draw.
 - The following mods are implemented:
@@ -61,6 +63,7 @@ script "UIX_CORE" OPEN CLIENTSIDE
     if(IsNetworkGame()) {
         ACS_NamedExecuteWithResult("core_ammos");
         ACS_NamedExecuteWithResult("core_busters");
+        ACS_NamedExecuteWithResult("core_items");
     }
 }
 ```
@@ -165,8 +168,22 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
   - Compressed graphics.
   - Stopped maintaining v6a support.
 
-## v3a changelog: "the marathon continues"
+## v3a changelog: "forgor..."
+- [i am looking at this as i am writing the v3b changelog. i forgot to write one for v3a. sorry.]
 
+## v3b changelog:
+- Item Respawn Timers:
+  - Fixed a bug where 40-second item respawn timers were not displaying (Thanks to Theophile for catching this)
+  - Tweaked the 30-second respawn timer graphics for small pickups to look less like an aperture and better match their larger counterparts.
+- Wheel menus:
+  - Can now be browsed while using weapons.
+  - Weapon wheel now displays double bars in an order consistent with horizontal UI modes.
+- Under The Hood:
+  - Switched all widgets with variable colors to use fonts. This may improve performance, but in the backend it reduces a lot of redundant code, elimating swathes of redundant text and graphics.
+  - Wheel menu data sharing code was redone, reducing compute cost of using them to around 1/3 on average.
+- Misc/Paperwork:
+  - Added a utility library to help mods out a bit, under acs_source/uix_imports/UIXUTIL.acs.
+  - Removed the acid drips icon example from the main file and placed it in an example file under acs_source/uix_examples/EXCOMPSS.acs.
 
 # Build Instructions
 
