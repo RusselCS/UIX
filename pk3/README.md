@@ -172,12 +172,16 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
 - [i am looking at this as i am writing the v3b changelog. i forgot to write one for v3a. sorry.]
 
 ## v3b changelog:
+- Wheel menus:
+  - Added an option for the item wheel to always use its item on menu close.
+  - Tightened up the item use time when a user's settings allow them to "tap" the wheel menu button to use their selected item.
+  - Weapons can now be used while browsing wheel menus.
+  - Weapon wheel now displays double bars in an order consistent with horizontal UI modes.
+  - Updated UIXSTG.acs to add item wheel compatibility for AUWeps and Armory of Evil.
+  - Wheel menus now have their own transparency slider instead of relying on the engine-level "dimamount" setting for normal menus. (Default 0.8 to match the engine default)
 - Item Respawn Timers:
   - Fixed a bug where 40-second item respawn timers were not displaying (Thanks to Theophile for catching this)
   - Tweaked the 30-second respawn timer graphics for small pickups to look less like an aperture and better match their larger counterparts.
-- Wheel menus:
-  - Can now be browsed while using weapons.
-  - Weapon wheel now displays double bars in an order consistent with horizontal UI modes.
 - Under The Hood:
   - Switched all widgets with variable colors to use fonts. This may improve performance, but in the backend it reduces a lot of redundant code, elimating swathes of redundant text and graphics.
   - Wheel menu data sharing code was redone, reducing compute cost of using them to around 1/3 on average.

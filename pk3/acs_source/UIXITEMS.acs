@@ -298,13 +298,30 @@ script "uix_items_inventory_disconnect" (int who) DISCONNECT { if(who == Console
 
 // takes in the index of the selected item from myInventory.
 //
-script "uixitem_selectitem" (int selected) //NET CLIENTSIDE
+script "uixitem_selectitem" (int selected, int time) //NET CLIENTSIDE
 {
     if(selected >= myInvCount)
         terminate;
     if(selected < 0)
         terminate;
 
+    int cln = ConsolePlayerNumber();
+    int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
+    if(!tap) {
+        selectItem(selected);
+        terminate;
+    }
+
+    if(tap < 2 && time >= GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER")) {
+        selectItem(selected);
+        terminate;
+    }
+
+    NamedSendNetworkString("uixitem_useitem_server", getItemProperty(IT_ACTOR, myInventory[selected]));
+}
+
+function void selectItem(int selected)
+{
     int i;
 
     GiveInventory("UIX_ItemSelected_PU", 1);
@@ -356,19 +373,6 @@ script "uixitem_deactivate" (void) NET CLIENTSIDE
         terminate;
 
     stopWheel();
-
-    int tap = GetUserCvar(cln, "UIX_CL_ITEMWHEELTAP");
-
-    if(!tap)
-        terminate;
-
-    if(Timer()-wheelTime >= GetUserCvar(cln, "UIX_CL_ITEMWHEELBUFFER")) {
-        if(tap < 2)
-            terminate;
-        delay(1); // this delay is needed because of the reshuffle script being executed...
-    }
-
-    NamedSendNetworkString("uixitem_useitem_server", getItemProperty(IT_ACTOR, myInventory[mySelection]));
 }
 
 script "uixitem_useitem_server" (int item) NET

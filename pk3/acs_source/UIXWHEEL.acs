@@ -93,14 +93,6 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
         if(myTime != wheelTime)
             break;
 
-        curTime = Timer()-wheelTime-USE_BUFFER;
-
-        // If the timer is below the buffer, go ahead and skip this cycle.
-        if(curTime < 0) {
-            delay(1);
-            continue;
-        }
-
         if(name != wheelName)
             wheelActive = false;
 
@@ -110,7 +102,17 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
             } else {
                 fadeTime = FADEOUT_TIME;
             }
-        } else {
+        }
+
+        curTime = Timer()-wheelTime-USE_BUFFER;
+
+        // If the timer is below the buffer, go ahead and skip this cycle.
+        if(curTime < 0) {
+            delay(1);
+            continue;
+        }
+
+        if(!fadeTime) {
             if(settingsScript != -1) {
                 if(!CallACS2 (settingsScript, selected, Timer()-myTime)) {
                     fadeTime = FADEOUT_TIME;

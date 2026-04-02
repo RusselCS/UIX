@@ -71,7 +71,7 @@ script "example_startwheel" (void) NET CLIENTSIDE
     // After all the elements are added, launch the wheel using the startWheel function.
     // The first parameter is the looping script called before every tick. Set -1 if you don't want a script.
     // Second parameter is the "select" script. This runs after everything else in the wheel resolves. Set to -1 if you don't want a script.
-    startWheel(-1, "example_selectItem");
+    startWheel("example_wheelsettings", "example_selectItem");
 }
 
 // Script invoked by the user.

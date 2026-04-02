@@ -32,6 +32,7 @@ str modTables[MAX_MODS][2] = {
     //{"BulletVulcanWep", "UIX_EncoreWeps"},
     {"BluemanBlasterWep", "UIX_BluemanBlaster"},
     {"HyperPropellantWep", "UIX_Experimental_Weapons"},
+    {"IceSlasherWep_AU", "UIX_AU"},
     {"", ""},
 };
 
@@ -48,7 +49,7 @@ script "UIX_DataStaging" OPEN CLIENTSIDE
             str wep = modTables[i][1];
             if(StrLen(act) == 0)
                 terminate;
-            
+
             if(ActorExists(act)) {
                 if(StrLen(wep) != 0) CallACS0(wep);
             }
@@ -73,12 +74,15 @@ script "UIX_UKI" (void)
     CallACS0("uki_ammos");
     CallACS0("unreal_ammos");
     CallACS0("unreal_initialammos");
+    CallACS0("uki_balloonadapter");
+    CallACS0("unreal_items");
 }
 
 script "UIX_ArmoryOfEvil" (void)
 {
     CallACS0("AoE_WeaponInfo");
     CallACS0("AoE_BusterInfo");
+    CallACS0("AoE_ItemInfo");
 }
 
 script "UIX_DOSReborn" (void)
@@ -158,4 +162,16 @@ script "UIX_Experimental_Weapons" (void)
 {
     CallACS0("experimental_busters");
     CallACS0("experimental_defineweps");
+}
+
+script "UIX_AU" (void)
+{
+    // [Russ] AUWeps supports weaponbar innately, but not item wheel.
+    CallACS0("au_assistdefine");
+    // CallACS0("au_ammo_rm1");
+    // CallACS0("au_ammo_rm2");
+    // CallACS0("au_ammo_rm3");
+    // CallACS0("au_ammo_rm4");
+    // CallACS0("au_ammo_rm5");
+    // CallACS0("au_ammo_rm6");
 }
