@@ -173,6 +173,7 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
 
 ## v3b changelog:
 - Wheel menus:
+  - Wheel menu division graphics tweaked to reduce compute cost.
   - Added an option for the item wheel to always use its item on menu close.
   - Tightened up the item use time when a user's settings allow them to "tap" the wheel menu button to use their selected item.
   - Weapons can now be used while browsing wheel menus.
