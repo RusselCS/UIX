@@ -57,7 +57,7 @@ str uixWheelBGs[11] = {
 #define FADEOUT_TIME 0.1
 
 // [Russ] Keeping aggressive comments on this because I reckon it's gonna be a pain in the tail to maintain otherwise
-script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
+script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE BUSY
 {
     if(wheelActive) terminate;
     wheelActive = true;
@@ -88,6 +88,28 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
     int curTime = -1;
 
     int myTime = wheelTime;
+
+    if(GetCVar("vid_renderer") == 1) {
+        int fov = 120;
+        int camVscale = 6.432;
+    } else {
+        fov = 89;
+        camVscale = 5.34;
+    }
+
+    int u = UniqueTID();
+    SpawnForced("UIX_Camera", GetActorX(0), GetActorY(0), GetActorZ(0)+GetActorProperty(0, AProp_ViewHeight), u, 0);
+    SetActorAngle(u, sPosX);
+    SetActorPitch(u, sPosY);
+    SetCameraToTexture(u, "WHEELBG2", fov);
+    int a = ActivatorTID();
+    int u2 = UniqueTID();
+    Thing_ChangeTID(0, u2);
+    SetActivator(u);
+    SetPointer(AAPTR_TARGET,u2);
+    SetActivator(u2);
+    Thing_ChangeTID(u, 0);
+    Thing_ChangeTID(u2, a);
 
     while(true) {
         if(myTime != wheelTime)
@@ -317,6 +339,7 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE
         // Background ---------------------------
 
         displayIconFade(LAYER_DEFAULT, "BLACKP", 0, 0, 100.0, 100.0, menuAlpha, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
+        displayIconFade(HUDMSG_LAYER_UNDERHUD, "WHEELBG2", 0, 0, 5.36, camVscale, 1.0, ALIGN_CENTER, ALIGN_CENTER, fadeTime);
 
         // --------------------------------------
 

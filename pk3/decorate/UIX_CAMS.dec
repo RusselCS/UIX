@@ -1,2 +1,17 @@
 
+actor UIX_Camera : BasicWatcher
+{
+    var int user_x;
+    var int user_y;
+    var int user_z;
+    States
+    {
+    Spawn:
+        TNT1 A 0
+        TNT1 A 0 ACS_NamedExecuteWithResult("UIXSR_RelOffsets")
+        TNT1 A 1 A_Warp(AAPTR_TARGET,user_x,user_y,user_z,angle,WARPF_COPYINTERPOLATION|WARPF_ABSOLUTEOFFSET|WARPF_ABSOLUTEANGLE)
+        wait
+    }
+}
+
 actor InCombat_PU : Powerup { powerup.duration -3 }

@@ -5,3 +5,8 @@ texture	UIXSTVC1  	range	UIXSTVC3  	tics 5
 
 // ActionCam stuff
 texture UXCAM0      range   UXCAM2      tics 3
+
+// Weapon Wheel
+cameratexture WHEELBG 1680 720
+// cameratexture WHEELBG2 840 360
+cameratexture WHEELBG2 420 180
