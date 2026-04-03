@@ -239,18 +239,22 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE BUS
             }
         }
 
-        int elSelected, elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign, elBarWidth, elBarAmt, elBarMax;
+        int elements, elContent, elFont, elScale, elAlpha, elColor, elX, elY, elHAlign, elVAlign, elBarWidth, elBarAmt, elBarMax;
         int mode, oX, oY;
 
-        for(i = 0; i < itemCount; i++) {
-            elSelected = i==selected;
+        int selectedDone = false;
+
+        for(i = selected; i < itemCount; i++) {
+            if(selectedDone)
+                if(i==selected)
+                    continue;
 
             elements = getWheelItemElementCount(i);
 
             for(ii = 0; ii < elements; ii++) {
                 mode = getWheelElementMode(i, ii);
 
-                if(elSelected) {
+                if(i==selected) {
                     if(mode == WHEEL_MODE_UNSELECTED)
                         continue;
                 } else {
@@ -304,6 +308,11 @@ script "uix_wheelActivate" (int settingsScript, int selectScript) CLIENTSIDE BUS
                 } else {
                     displayMessageColorFade(LAYER_DEFAULT, elContent, elX, elY, elScale, elScale, elAlpha, elHAlign, elVAlign, elColor, fadeTime);
                 }
+            }
+
+            if(!selectedDone) {
+                selectedDone = true;
+                i = 0;
             }
         }
 
