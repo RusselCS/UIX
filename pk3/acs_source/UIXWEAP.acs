@@ -267,6 +267,10 @@ function void updateSlotData(void)
     selectedWep = -1;
     int resetWheel = false;
 
+    for(i = 0; i < MAX_SLOTS_LIMIT; i++) {
+        slotCounts[i] = 0;
+    }
+
     for(i = MAX_BUSTERUPGRADES-1; i >= 0; i--)
     {
         check = getBusterActor(i);
@@ -560,8 +564,6 @@ script "UIX_WeapBar" (int cam, int cpn, int cv)
                 displayMessage(layer, UIXWEAP_OverflowNums[slotCounts[slot]-i], baseX + overflowX, baseY + overflowY, overflowScale, overflowScale, cvAlpha, OverflowHAlign, 0);
             }
         }
-
-        slotCounts[slot] = 0;
     }
 }
 
@@ -667,10 +669,7 @@ script "uixweap_wheel_end" (void) NET CLIENTSIDE
 script "uixweap_wheel_select" (int idx)
 {
     GiveInventory("UIX_WeaponSelected_PU", 1);
-    int slot = wheelManifest[idx][0];
-    int wep = wheelManifest[idx][1];
-    str actor = getWeaponActor(slotVals[slot][wep][WEAP_IDX]);
-    NamedSendNetworkString("uixweap_wheel_select_server", actor);
+    NamedSendNetworkString("uixweap_wheel_select_server", getWheelItemName(idx));
 }
 
 script "uixweap_wheel_select_server" (int weap) NET
@@ -760,13 +759,13 @@ function void WeaponWheel_AddItem(int slot, int idx)
     if(max2 > 0) {
         addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
         addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
         wheelBarY = UIX_WW_BAR2Y;
     }
     if(max1 > 0) {
         addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
         addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,0.5,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_UNSELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.1,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     }
     // ----------------------
 
@@ -778,13 +777,13 @@ function void WeaponWheel_AddItem(int slot, int idx)
     if(max2 > 0) {
         addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
         addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
         wheelBarY = UIX_WW_BAR2Y;
     }
     if(max1 > 0) {
         addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
         addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_SELECTED,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     }
     // --------------------
 
@@ -792,19 +791,19 @@ function void WeaponWheel_AddItem(int slot, int idx)
     // Icon
     addWheelElement("A",icon,0,WHEEL_MODE_MIDDLE,UIX_IW_ICONX,UIX_IW_ICONY+UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Tag
-    addWheelElement(StrParam(l:tag),"SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,-2*UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement(StrParam(l:tag),"SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,-2*UIX_IW_LABELPOS,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Bars
     wheelBarY = UIX_IW_ICONY+UIX_IW_LABELPOS;
     if(max2 > 0) {
         addWheelElement("A","WBAMOHOR",cyan2,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
         addWheelElement("B","WBAMOHOR",blue2,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt2,max2);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
         wheelBarY = 4*UIX_IW_ICONY+UIX_IW_LABELPOS;
     }
     if(max1 > 0) {
         addWheelElement("A","WBAMOHOR",cyan1,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
         addWheelElement("B","WBAMOHOR",blue1,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,amt1,max1);
-        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,160,1,1);
+        addWheelElement("C","WBAMOHOR",black,WHEEL_MODE_MIDDLE,0,wheelBarY,IL_OP_ADD,IL_OP_ADD,0,0,0.15,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     }
     // --------------------
 

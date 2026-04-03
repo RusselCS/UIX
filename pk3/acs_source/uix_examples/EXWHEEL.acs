@@ -35,38 +35,38 @@ script "example_startwheel" (void) NET CLIENTSIDE
     // All elements created by addWheelElement are attached to the most recently created item. The position of each element is relative to the calculated
     // position based on whether it's in the center or whether it's on the perifery.
     // First, we'll display the text "First" when the item is unselected.
-    addWheelElement("First","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("First","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Let's add an icon in the same space. The talk bubble is fun.
     addWheelElement("A","TALKB0",0,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Now let's add one for when the item is selected. I don't want the talk bubble to show here, so let's just add the text.
     // It's been given a different scale and text color here.
-    addWheelElement("First","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("First","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // And we want that to show up in the center too. So add another element to cover that.
-    addWheelElement("First","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("First","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
     // Finally, a caption for the center...
-    addWheelElement("There's an icon hidden on select","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("There's an icon hidden on select","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
 
     newItem = addWheelItem("Second", 1);
-    addWheelElement("Second","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("This label hides","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Second","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Second","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("For each member here","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Second","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This label hides","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Second","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Second","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("For each member here","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
 
     newItem = addWheelItem("Third", 2);
-    addWheelElement("Third","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Third","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("This label shows","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Third","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("This is fun","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Third","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Third","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This label shows","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Third","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("This is fun","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
 
     newItem = addWheelItem("Forth", 2);
-    addWheelElement("Forth","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("2-in-1 group!","SMALLFNT",CR_DARKGRAY,WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.25,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Forth","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("2-in-1 group!","SMALLFNT",CR_GOLD,WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Forth","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
-    addWheelElement("Forth is fun","SMALLFNT",CR_GOLD,WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("2-in-1 group!","SMALLFNT","DarkGray",WHEEL_MODE_UNSELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.25,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("2-in-1 group!","SMALLFNT","Gold",WHEEL_MODE_SELECTED,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,0,IL_OP_ADD,IL_OP_ADD,0,0,1.0,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
+    addWheelElement("Forth is fun","SMALLFNT","Gold",WHEEL_MODE_MIDDLE,0,16,IL_OP_ADD,IL_OP_ADD,0,0,0.5,1.0,ALIGN_CENTER,ALIGN_CENTER,0,0,0);
 
     // After all the elements are added, launch the wheel using the startWheel function.
     // The first parameter is the looping script called before every tick. Set -1 if you don't want a script.

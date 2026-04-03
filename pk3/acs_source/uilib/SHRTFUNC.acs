@@ -117,9 +117,9 @@ function void displayMessageColorFade(int layer, str msg, int offsX, int offsY, 
 {
 	calcMessageDisplayOffsets(offsX, offsY, scaleX, scaleY, halign, valign);
 	if(fadeTime > 0)
-		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
+		HudMessage(s:msg; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|HUDMSG_FADEOUT|layer, 0, color, calcX, calcY, MSG_TIME, fadeTime, alpha);
 	else
-		HudMessage(s:msg; HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
+		HudMessage(s:msg; HUDMSG_COLORSTRING|HUDMSG_PLAIN|HUDMSG_ALPHA|HUDMSG_NOWRAP|layer, 0, color, calcX, calcY, MSG_TIME, alpha);
 }
 
 #define BAR_DISPLAY_NONE 0

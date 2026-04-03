@@ -11,7 +11,7 @@
 #libdefine WHEEL_MODE_SELECTED 2
 #libdefine WHEEL_MODE_MIDDLE 3
 
-#define WHEEL_ITEMS_LIMIT 10000
+#define WHEEL_ITEMS_LIMIT 5500
 int WHEEL_ITEMS = 0;
 int wheel_items_properties_int[WHEEL_ITEMS_LIMIT][4];
 str wheel_items_properties_str[WHEEL_ITEMS_LIMIT][1];
@@ -27,7 +27,7 @@ function void setWheelItemElementCount(int item, int val) { wheel_items_properti
 function void setWheelItemName(int item, str val) { wheel_items_properties_str[item][0] = val; }
 function int incWheelItemElementCount(int item) { return wheel_items_properties_int[item][2]++; }
 
-#define WHEEL_ELEMENTS_LIMIT 100
+#define WHEEL_ELEMENTS_LIMIT 30
 str wheel_elements_properties_str[WHEEL_ITEMS_LIMIT][WHEEL_ELEMENTS_LIMIT][3];
 int wheel_elements_properties_int[WHEEL_ITEMS_LIMIT][WHEEL_ELEMENTS_LIMIT][14];
 function str getWheelElementContent(int item, int el) { return wheel_elements_properties_str[item][el][0]; }
@@ -65,7 +65,7 @@ function void setWheelElementBarWidth(int item, int el, int val) { wheel_element
 function void setWheelElementBarAmt(int item, int el, int val) { wheel_elements_properties_int[item][el][12] = val; }
 function void setWheelElementBarMax(int item, int el, int val) { wheel_elements_properties_int[item][el][13] = val; }
 
-#define WHEEL_GROUPS_LIMIT 50
+#define WHEEL_GROUPS_LIMIT 12
 int WHEEL_GROUPS = 0;
 int wheel_group_max[WHEEL_GROUPS_LIMIT];
 function int getWheelGroupMax(int grp) { return wheel_group_max[grp]; }

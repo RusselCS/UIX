@@ -190,6 +190,18 @@ NOTE: VileWeps and encore-weps-v2ah5.pk3 do not have their own integrations. Ver
   - Added a utility library to help mods out a bit, under acs_source/uix_imports/UIXUTIL.acs.
   - Removed the acid drips icon example from the main file and placed it in an example file under acs_source/uix_examples/EXCOMPSS.acs.
 
+## v3b changelog: "I HAD TO RELEASE A FUCKING HOTFIX!!!!"
+- Acknowledgements:
+  - Thanks MegaVile for finding the bulk of these issues.
+- Wheel menus:
+  - On 3.3, no longer crash when garbage collecting a huge number of elements.
+  - Fixed a bug where people who have mouse smoothing disabled caused their menu to wiggle while using.
+  - Fixed a bug where if you have weapon bar disabled, all your weapons were added to the wheel again for every tick the menu was open.
+  - Fixed a bug where the weapon wheel could not select buster weapons.
+  - Fixed a bug where
+- Under The Hood:
+  - DisplayMessageColorFade now uses strings for colors. All code (including EXWHEEL.acs) were updated to compensate.
+
 # Build Instructions
 
 This project ships with my Doom Archive Manager, which can compile everything in the pk3 folder into a functional pwad in the form of a pk3.
